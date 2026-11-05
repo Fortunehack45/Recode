@@ -1,0 +1,129 @@
+name: Build Recode Binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g. v0.1.0)'
+        required: false
+        default: 'v0.1.0'
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build React UI
+        run: npm run buildreact
+
+      - name: Compile Build
+        run: npm run compile-build
+
+      - name: Package Windows Binary
+        run: npm run gulp vscode-win32-x64-min
+
+      - name: Archive Windows Build
+        run: |
+          Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath Recode-win32-x64.zip
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-win32-x64
+          path: Recode-win32-x64.zip
+
+  build-linux:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxkbfile-dev libsecret-1-dev fakeroot rpm
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build React UI
+        run: npm run buildreact
+
+      - name: Compile Build
+        run: npm run compile-build
+
+      - name: Package Linux Binary
+        run: npm run gulp vscode-linux-x64-min
+
+      - name: Archive Linux Build
+        run: |
+          tar -czf Recode-linux-x64.tar.gz -C .. VSCode-linux-x64
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-linux-x64
+          path: Recode-linux-x64.tar.gz
+
+  build-macos:
+    name: Build macOS Universal / Arm64
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build React UI
+        run: npm run buildreact
+
+      - name: Compile Build
+        run: npm run compile-build
+
+      - name: Package macOS Binary
+        run: npm run gulp vscode-darwin-arm64-min
+
+      - name: Archive macOS Build
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent ../VSCode-darwin-arm64 Recode-darwin-arm64.zip
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-darwin-arm64
+          path: Recode-darwin-arm64.zip

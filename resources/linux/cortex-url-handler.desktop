@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Recode URL Handler
+Exec=/usr/share/recode/bin/recode --open-url %U
+Icon=code
+Type=Application
+NoDisplay=true
+MimeType=x-scheme-handler/recode;
