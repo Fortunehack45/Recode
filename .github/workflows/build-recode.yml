@@ -145,3 +145,30 @@ jobs:
         with:
           name: Recode-darwin-arm64
           path: Recode-darwin-arm64.zip
+
+  publish-release:
+    name: Publish Release Assets
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: always() && (needs.build-windows.result == 'success' || needs.build-linux.result == 'success' || needs.build-macos.result == 'success')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create or Update GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ ! "$TAG" =~ ^v ]]; then
+            TAG="v1.0.0"
+          fi
+          echo "Target Release Tag: $TAG"
+          gh release view "$TAG" -R ${{ github.repository }} || gh release create "$TAG" --title "Recode $TAG" --notes "Recode $TAG Release" -R ${{ github.repository }}
+
+          for f in $(find . -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.exe" \)); do
+            echo "Uploading $f to release $TAG..."
+            gh release upload "$TAG" "$f" --clobber -R ${{ github.repository }} || true
+          done
