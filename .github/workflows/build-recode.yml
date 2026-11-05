@@ -11,10 +11,19 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build-windows:
     name: Build Windows x64
-    runs-on: windows-latest
+    runs-on: windows-2022
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VSCODE_SKIP_NODE_VERSION_CHECK: '1'
+      NODE_OPTIONS: '--max-old-space-size=8192'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -24,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: '22.22.1'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -32,9 +41,6 @@ jobs:
 
       - name: Build React UI
         run: npm run buildreact
-
-      - name: Compile Build
-        run: npm run compile-build
 
       - name: Package Windows Binary
         run: npm run gulp vscode-win32-x64-min
@@ -51,7 +57,12 @@ jobs:
 
   build-linux:
     name: Build Linux x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VSCODE_SKIP_NODE_VERSION_CHECK: '1'
+      NODE_OPTIONS: '--max-old-space-size=8192'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -61,7 +72,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: '22.22.1'
           cache: 'npm'
 
       - name: Install System Dependencies
@@ -74,9 +85,6 @@ jobs:
 
       - name: Build React UI
         run: npm run buildreact
-
-      - name: Compile Build
-        run: npm run compile-build
 
       - name: Package Linux Binary
         run: npm run gulp vscode-linux-x64-min
@@ -93,7 +101,12 @@ jobs:
 
   build-macos:
     name: Build macOS Universal / Arm64
-    runs-on: macos-latest
+    runs-on: macos-14
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VSCODE_SKIP_NODE_VERSION_CHECK: '1'
+      NODE_OPTIONS: '--max-old-space-size=8192'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -103,7 +116,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: '22.22.1'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -111,9 +124,6 @@ jobs:
 
       - name: Build React UI
         run: npm run buildreact
-
-      - name: Compile Build
-        run: npm run compile-build
 
       - name: Package macOS Binary
         run: npm run gulp vscode-darwin-arm64-min

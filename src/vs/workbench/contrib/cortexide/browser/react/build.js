@@ -179,7 +179,16 @@ if (isWatch) {
 	execSync('npx scope-tailwind ./src -o src2/ -s void-scope -c styles.css -p "void-"', { stdio: 'inherit' });
 
 	// Run tsup once
-	execSync('npx tsup', { stdio: 'inherit' });
+	execSync('npx tsup', { stdio: 'inherit', cwd: __dirname });
+
+	// Copy output to destination
+	const outSrc = path.join(__dirname, 'out');
+	const outDest = path.resolve(__dirname, '../../../../../../../out/vs/workbench/contrib/cortexide/browser/react/out');
+	if (fs.existsSync(outSrc)) {
+		fs.mkdirSync(outDest, { recursive: true });
+		fs.cpSync(outSrc, outDest, { recursive: true });
+		console.log(Copied React build to );
+	}
 
 	// allow-any-unicode-next-line
 	console.log('✅ Build complete!');
