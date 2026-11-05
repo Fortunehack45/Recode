@@ -1,13 +1,13 @@
-# CortexIDE Engineering Standards
+# Recode Engineering Standards
 
-This file is auto-injected into every CortexIDE agent session for this workspace.
+This file is auto-injected into every Recode agent session for this workspace.
 Rules defined here take precedence over the agent's default preferences.
 
 ## Code Quality
 
 - **TypeScript strict mode** is mandatory. Never use `any` or `unknown` without explicit narrowing.
 - All `catch` blocks must re-throw, fire an error event, or surface a user notification. Silent swallowing is a bug.
-- No hardcoded hex colors in React components — use `var(--cortex-*, fallback)` CSS custom properties.
+- No hardcoded hex colors in React components — use CSS custom properties with fallbacks.
 
 ## Architecture Layers
 
@@ -21,8 +21,8 @@ Never import `browser/` from `common/`, or `electron-main/` from `browser/`.
 ## Security Rules
 
 - All child processes must be spawned via `spawn(command, argsArray)` — never via string interpolation.
-- Never log, telemetry, or transmit API keys. Route all credentials through `ICortexideSettingsService`.
-- Run `secretDetectionService.scan()` on all user content before it reaches an LLM provider.
+- Never log, telemetry, or transmit API keys. Route all credentials through settings services.
+- Run secret detection on all user content before it reaches an LLM provider.
 
 ## Testing
 

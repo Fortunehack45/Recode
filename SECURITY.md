@@ -1,14 +1,12 @@
-<!-- BEGIN MICROSOFT SECURITY.MD V1.0.0 BLOCK -->
+# Security Policy
 
-## Security
+## Reporting Security Issues
 
-Microsoft takes the security of our software products and services seriously, which
-includes all source code repositories in our GitHub organizations.
+The Recode team takes the security of our application and users seriously.
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+If you believe you have discovered a security vulnerability in Recode, please report it via private vulnerability disclosure:
 
-For security reporting information, locations, contact information, and policies,
-please review the latest guidance for Microsoft repositories at
-[https://aka.ms/SECURITY.md](https://aka.ms/SECURITY.md).
+- **GitHub Advisory**: [Submit a Security Advisory](https://github.com/Fortunehack45/Recode/security/advisories/new)
+- **Email**: Send details to `security@recode.dev`
 
-<!-- END MICROSOFT SECURITY.MD BLOCK -->
+Please do not disclose security issues publicly until they have been reviewed and addressed.

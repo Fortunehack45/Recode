@@ -78,7 +78,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev libxkbfile-dev libsecret-1-dev fakeroot rpm
+          sudo apt-get install -y build-essential libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev fakeroot rpm
 
       - name: Install Dependencies
         run: npm install --legacy-peer-deps

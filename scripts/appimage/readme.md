@@ -11,9 +11,9 @@ stable-linux.yml in your CI workflow,
 which runs a GitHub Action that builds the AppImage you ship.
 
 
-# CortexIDE AppImage Creation Script
+# Recode AppImage Creation Script
 
-This script automates the process of creating an AppImage for the CortexIDE editor using Docker. It works on macOS and Linux platforms.
+This script automates the process of creating an AppImage for the Recode editor using Docker. It works on macOS and Linux platforms.
 ## Requirements
 
 *   **Docker:** The script relies on Docker to build the AppImage inside a container.
@@ -87,7 +87,7 @@ These dependencies are installed within the Docker container (Ubuntu 20.04 base)
     Copy the following files to the directory where the app binary is being bundled (created during the build process):
 
     *   `create_appimage.sh`
-    *   `void.desktop` (already rebranded inside to CortexIDE labels)
+    *   `void.desktop` (already rebranded inside to Recode labels)
     *   `void.png` or `cortexide.png`
 
 4.  **Run the Script:**
@@ -98,7 +98,7 @@ These dependencies are installed within the Docker container (Ubuntu 20.04 base)
 
 5.  **Result:**
 
-    After the script completes, it will generate an AppImage named `CortexIDE-x86_64.AppImage` (or similar, depending on your architecture) in the current directory.
+    After the script completes, it will generate an AppImage named `Recode-x86_64.AppImage` (or similar, depending on your architecture) in the current directory.
 
 ## Script Overview
 
@@ -109,9 +109,9 @@ These dependencies are installed within the Docker container (Ubuntu 20.04 base)
 *   **Dockerfile Creation:** Creates a temporary `Dockerfile.build` for the Ubuntu-based environment.
 *   **Docker Image Build:** Builds a Docker image and runs the build process.
 *   **AppImage Creation:**
-    *   Creates the `CortexIDE.AppDir` structure.
+    *   Creates the `Recode.AppDir` structure.
     *   Copies binaries, resources, and the `.desktop` entry.
-    *   Copies `void.desktop` (CortexIDE branded) and icon file.
+    *   Copies `void.desktop` (Recode branded) and icon file.
     *   Strips unnecessary symbols from the binary.
     *   Runs `appimagetool` to generate the AppImage.
 *   **Cleanup:** Removes the temporary `Dockerfile.build`.

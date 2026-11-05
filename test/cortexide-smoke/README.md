@@ -1,15 +1,15 @@
-# CortexIDE smoke harness
+# Recode smoke harness
 
-Lightweight launch + smoke verification for the CortexIDE dev build, driven over the
+Lightweight launch + smoke verification for the Recode dev build, driven over the
 Chrome DevTools Protocol (CDP). Used to confirm the editor actually boots and its core
-+ CortexIDE-specific UI render — see `../../CORTEXIDE-TEST-STATUS.md` for results.
++ Recode-specific UI render — see `../../CORTEXIDE-TEST-STATUS.md` for results.
 
 ## Files
 - `launch-dev.sh` — launches the built dev app (`.build/electron/...`) with
   `--remote-debugging-port`, stripping the inherited `ELECTRON_RUN_AS_NODE` that
   otherwise makes Electron run as plain Node. Uses throwaway user-data/extensions dirs.
 - `cdp-smoke.mjs` — connects with Playwright `connectOverCDP`, finds the workbench page
-  (`workbench-dev.html` in dev builds), and asserts core + CortexIDE surfaces exist.
+  (`workbench-dev.html` in dev builds), and asserts core + Recode surfaces exist.
 - `phase0-qa-verify.mjs` — CDP regression for merged Phase 0 fixes (PR #69): provider
   validation, local tool format, attach-file commands, menubar stacking, theme scoping.
 - `phase1-safety-verify.mjs` — CDP regression for Phase 1 safety: loads real transpiled
@@ -56,7 +56,7 @@ Trigger CDP jobs manually via **Actions → Phase 0 QA → Run workflow**:
 - **macOS** job runs module + CSS checks (native menu bar — no live click).
 
 ## Why CDP and not Playwright `_electron.launch()`
-VS Code / CortexIDE manages its own (re)launching, so Playwright's stdout-handshake
+VS Code / Recode manages its own (re)launching, so Playwright's stdout-handshake
 Electron launcher fails with "Process failed to launch!". Launching the app ourselves
 with a debug port and attaching over CDP is the supported path (mirrors upstream VS Code
 `test/automation`). Note: once a debugger is attached to a page, `/json/list` may drop
