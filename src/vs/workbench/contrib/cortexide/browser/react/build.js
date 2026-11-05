@@ -176,7 +176,7 @@ if (isWatch) {
 	console.log('📦 Building...');
 
 	// Transform TSX/JSX class names and compile Tailwind CSS (requires postcss@^8 in root node_modules)
-	execSync('npx scope-tailwind ./src -o src2/ -s void-scope -c styles.css -p "void-"', { stdio: 'inherit' });
+	execSync('npx scope-tailwind ./src -o src2/ -s void-scope -c styles.css -p "void-"', { stdio: 'inherit', cwd: __dirname });
 
 	// Run tsup once
 	execSync('npx tsup', { stdio: 'inherit', cwd: __dirname });
@@ -187,7 +187,7 @@ if (isWatch) {
 	if (fs.existsSync(outSrc)) {
 		fs.mkdirSync(outDest, { recursive: true });
 		fs.cpSync(outSrc, outDest, { recursive: true });
-		console.log(Copied React build to );
+		console.log('Copied React build to ' + outDest);
 	}
 
 	// allow-any-unicode-next-line
