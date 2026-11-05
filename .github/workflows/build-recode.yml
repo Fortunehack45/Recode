@@ -101,7 +101,7 @@ jobs:
 
   build-macos:
     name: Build macOS Universal / Arm64
-    runs-on: macos-14
+    runs-on: macos-latest
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
