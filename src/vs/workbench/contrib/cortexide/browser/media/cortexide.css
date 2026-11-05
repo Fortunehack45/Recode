@@ -18,39 +18,37 @@
 .void-scope,
 .cortex-onboarding-root,
 .monaco-workbench .part.auxiliarybar > .content {
-	/* -- Core surfaces (dark theme - light overrides below) ----------------- */
-	/* Stepped from near-black to visible dark grey so depth reads clearly.    */
-	--cortex-surface-0:     #0a0a0d;   /* deepest background (onboarding overlay) */
-	--cortex-surface-1:     #111116;   /* sidebar / panel base */
-	--cortex-surface-1-alt: #14141a;   /* sidebar alternate row */
-	--cortex-surface-2:     #18181f;   /* input, card backgrounds */
-	--cortex-surface-2-alt: #1e1e27;   /* hover state of surface-2 */
-	--cortex-surface-3:     #242430;   /* elevated cards, dropdowns */
-	--cortex-surface-4:     #2c2c3c;   /* highest elevation (menus) */
-	--cortex-overlay:       rgba(5, 5, 10, 0.88);
+	/* -- Core surfaces dynamically bound to active IDE workbench theme -- */
+	--cortex-surface-0:     var(--vscode-sideBar-background, #0a0a0d);
+	--cortex-surface-1:     var(--vscode-sideBar-background, #111116);
+	--cortex-surface-1-alt: var(--vscode-sideBarSectionHeader-background, color-mix(in srgb, var(--vscode-sideBar-background, #14141a) 90%, var(--vscode-foreground, white)));
+	--cortex-surface-2:     var(--vscode-input-background, color-mix(in srgb, var(--vscode-sideBar-background, #18181f) 80%, black));
+	--cortex-surface-2-alt: var(--vscode-list-hoverBackground, color-mix(in srgb, var(--vscode-sideBar-background, #1e1e27) 85%, white));
+	--cortex-surface-3:     var(--vscode-editorWidget-background, color-mix(in srgb, var(--vscode-sideBar-background, #242430) 75%, black));
+	--cortex-surface-4:     var(--vscode-menu-background, var(--vscode-sideBar-background, #2c2c3c));
+	--cortex-overlay:       color-mix(in srgb, var(--vscode-sideBar-background, black) 85%, transparent);
 
-	/* -- Text --------------------------------------------------------------- */
-	--cortex-text-strong:   #f0f0f5;   /* headings, active labels    4.9:1 on surface-1 */
-	--cortex-text-base:     #d4d4e8;   /* body text                  4.5:1 on surface-1 */
-	--cortex-text-muted:    #9898b8;   /* secondary labels, hints    3.2:1 on surface-1 */
-	--cortex-text-subtle:   #6a6a88;   /* placeholders, timestamps  (decorative) */
+	/* -- Text dynamically bound to active IDE workbench theme -- */
+	--cortex-text-strong:   var(--vscode-sideBarTitle-foreground, var(--vscode-foreground, #f0f0f5));
+	--cortex-text-base:     var(--vscode-sideBar-foreground, var(--vscode-foreground, #d4d4e8));
+	--cortex-text-muted:    var(--vscode-descriptionForeground, color-mix(in srgb, var(--vscode-sideBar-foreground, var(--vscode-foreground, #9898b8)) 70%, transparent));
+	--cortex-text-subtle:   color-mix(in srgb, var(--vscode-sideBar-foreground, var(--vscode-foreground, #6a6a88)) 45%, transparent);
 
-	/* -- Brand / accents ---------------------------------------------------- */
-	--cortex-brand:         #8b6fff;   /* primary purple accent */
-	--cortex-brand-dim:     #6d52d4;   /* pressed / active brand */
-	--cortex-brand-soft:    color-mix(in srgb, var(--cortex-brand) 22%, transparent);
-	--cortex-brand-glow:    0 0 12px color-mix(in srgb, var(--cortex-brand) 40%, transparent);
+	/* -- Brand / accents bound to IDE focusBorder & button backgrounds -- */
+	--cortex-brand:         var(--vscode-focusBorder, var(--vscode-button-background, #3b82f6));
+	--cortex-brand-dim:     var(--vscode-button-hoverBackground, var(--cortex-brand));
+	--cortex-brand-soft:    color-mix(in srgb, var(--cortex-brand) 18%, transparent);
+	--cortex-brand-glow:    0 0 10px color-mix(in srgb, var(--cortex-brand) 30%, transparent);
 	--cortex-accent:        var(--cortex-brand);
-	--cortex-success:       #3dbf8e;
-	--cortex-warning:       #f5c842;
-	--cortex-danger:        #ff5c7a;
+	--cortex-success:       var(--vscode-terminal-ansiGreen, #3dbf8e);
+	--cortex-warning:       var(--vscode-editorWarning-foreground, #f5c842);
+	--cortex-danger:        var(--vscode-editorError-foreground, #ff5c7a);
 
-	/* -- Borders ------------------------------------------------------------ */
-	/* Visible against the surfaces above - not just near-black               */
-	--cortex-border-weak:   #22222e;   /* subtle dividers */
-	--cortex-border-base:   #2e2e40;   /* standard border */
-	--cortex-border-strong: #3a3a52;   /* elevated / focused border */
-	--cortex-ring-color:    var(--cortex-brand);
+	/* -- Borders bound to IDE sideBar & widget borders -- */
+	--cortex-border-weak:   var(--vscode-sideBar-border, color-mix(in srgb, var(--vscode-sideBar-foreground, var(--vscode-foreground, white)) 10%, transparent));
+	--cortex-border-base:   var(--vscode-widget-border, var(--vscode-sideBar-border, color-mix(in srgb, var(--vscode-sideBar-foreground, var(--vscode-foreground, white)) 16%, transparent)));
+	--cortex-border-strong: var(--vscode-focusBorder, color-mix(in srgb, var(--vscode-sideBar-foreground, var(--vscode-foreground, white)) 30%, transparent));
+	--cortex-ring-color:    var(--vscode-focusBorder, var(--cortex-brand));
 
 	/* -- Typography --------------------------------------------------------- */
 	--cortex-font-title:    14px;

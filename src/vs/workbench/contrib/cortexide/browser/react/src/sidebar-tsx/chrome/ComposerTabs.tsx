@@ -30,7 +30,7 @@ export const ComposerTabs = ({ showHistory, onToggleHistory }: ComposerTabsProps
 
 	return (
 		<div
-			className="flex items-center gap-1 px-2 py-1 border-b border-void-border-3/70 bg-void-bg-2/80 shrink-0 min-h-[36px]"
+			className="flex items-center gap-1 px-2 py-1 border-b border-[var(--vscode-sideBar-border,var(--void-border-3))] bg-[var(--vscode-sideBar-background)] shrink-0 min-h-[36px]"
 			role="tablist"
 			aria-label="Chat threads"
 		>
@@ -50,14 +50,14 @@ export const ComposerTabs = ({ showHistory, onToggleHistory }: ComposerTabsProps
 								group flex items-center gap-1 max-w-[140px] shrink-0 pl-2.5 pr-1 py-1 rounded-md text-xs cursor-pointer
 								border transition-colors duration-100
 								${active
-									? 'bg-void-bg-1 border-void-border-2 text-void-fg-1 shadow-sm font-medium'
-									: 'bg-transparent border-transparent text-void-fg-3 hover:text-void-fg-2 hover:bg-void-bg-1/50'}
+									? 'bg-[var(--vscode-input-background,var(--void-bg-1))] border-[var(--vscode-focusBorder,var(--void-border-2))] text-[var(--vscode-foreground)] shadow-sm font-medium'
+									: 'bg-transparent border-transparent text-void-fg-3 hover:text-void-fg-1 hover:bg-void-bg-1/50'}
 							`}
 							onClick={() => chatThreadsService.switchToTab(threadId)}
 							title={label}
 						>
 							{(running === 'LLM' || running === 'tool' || running === 'preparing') && (
-								<LoaderCircle className="size-3 shrink-0 animate-spin text-[var(--cortex-brand,#3b82f6)]" aria-hidden />
+								<LoaderCircle className="size-3 shrink-0 animate-spin text-[var(--vscode-focusBorder,#3b82f6)]" aria-hidden />
 							)}
 							<span className="truncate">{label}</span>
 							{tabs.length > 1 && (
@@ -91,7 +91,7 @@ export const ComposerTabs = ({ showHistory, onToggleHistory }: ComposerTabsProps
 				{onToggleHistory && (
 					<button
 						type="button"
-						className={`shrink-0 p-1.5 rounded-md void-focus-ring ${showHistory ? 'bg-void-bg-1 text-void-fg-1' : 'text-void-fg-3 hover:text-void-fg-1 hover:bg-void-bg-1'}`}
+						className={`shrink-0 p-1.5 rounded-md void-focus-ring ${showHistory ? 'bg-[var(--vscode-input-background)] text-void-fg-1' : 'text-void-fg-3 hover:text-void-fg-1 hover:bg-void-bg-1'}`}
 						aria-label="Toggle chat history"
 						aria-pressed={showHistory}
 						title="Chat history"
