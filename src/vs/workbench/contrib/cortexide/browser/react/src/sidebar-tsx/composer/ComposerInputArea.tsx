@@ -128,8 +128,8 @@ export const ComposerInputArea = ({
 		<VoidInputBox2
 			enableAtToMention
 			appearance="chatDark"
-			className="min-h-[60px] px-3 py-3 rounded-2xl"
-			placeholder="Plan, @ for context"
+			className="min-h-[56px] max-h-[220px] px-3 py-2.5 rounded-xl text-sm"
+			placeholder="Ask anything, @ for context, / for commands..."
 			onChangeText={onChangeText}
 			onKeyDown={onKeyDown}
 			onFocus={onInputFocus}

@@ -19,7 +19,6 @@ import { prepareChatSubmitAttachments } from './composer/prepareChatSubmit.js';
 import { useVisionAttachmentHandlers } from './composer/useVisionAttachmentHandlers.js';
 import { LandingPage } from './landing/LandingPage.js';
 import { ComposerTabs } from './chrome/ComposerTabs.js';
-import { ThreadHeader } from './chrome/ThreadHeader.js';
 import { CORTEXIDE_OPEN_SETTINGS_ACTION_ID } from '../../../cortexideSettingsPane.js';
 import { isFeatureNameDisabled } from '../../../../../../../workbench/contrib/cortexide/common/cortexideSettingsTypes.js';
 import { StagingSelectionItem } from '../../../../common/chatThreadServiceTypes.js';
@@ -187,8 +186,6 @@ export const SidebarChat = () => {
 	const threadId = currentThread.id
 	const currCheckpointIdx = chatThreadsState.allThreads[threadId]?.state?.currCheckpointIdx ?? undefined  // if not exist, treat like checkpoint is last message (infinity)
 
-
-
 	// resolve mount info
 	// Accessing .current is safe - refs don't trigger re-renders when changed
 	const mountedInfo = chatThreadsState.allThreads[threadId]?.state.mountedInfo
@@ -202,12 +199,10 @@ export const SidebarChat = () => {
 
 	}, [threadId, textAreaRef, scrollContainerRef, isResolved, mountedInfo, scrollToBottomCallback])
 
-
-
-
 	const onChangeText = useCallback((newStr: string) => {
 		setInstructionsAreEmpty(!newStr)
 	}, [setInstructionsAreEmpty])
+
 	const onKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
 			if (!isDisabled && !isRunning) {
@@ -272,10 +267,6 @@ export const SidebarChat = () => {
 		contextPct,
 	};
 
-	const landingPageInput = (
-		<ComposerInputSection variant="landing" {...composerInputProps} />
-	);
-
 	const threadPageInput = (
 		<ComposerInputSection
 			variant="thread"
@@ -284,49 +275,11 @@ export const SidebarChat = () => {
 		/>
 	);
 
-	const isLandingPage = previousMessages.length === 0
-
-	const landingPageContent = <LandingPage
-		sidebarRef={sidebarRef}
-		inputSection={landingPageInput}
-		showPreviousThreads={Object.keys(chatThreadsState.allThreads).length > 1}
-		suggestionsLabel={t('chat.suggestions')}
-		previousThreadsLabel={t('chat.previousThreads')}
-		onSubmitPrompt={onSubmit}
-	/>
-
-
-	// const threadPageContent = <div>
-	// 	{/* Thread content */}
-	// 	<div className='flex flex-col overflow-hidden'>
-	// 		<div className={`overflow-hidden ${previousMessages.length === 0 ? 'h-0 max-h-0 pb-2' : ''}`}>
-	// 			<ErrorBoundary>
-	// 				{messagesHTML}
-	// 			</ErrorBoundary>
-	// 		</div>
-	// 		<ErrorBoundary>
-	// 			{inputForm}
-	// 		</ErrorBoundary>
-	// 	</div>
-	// </div>
-	const threadPageContent = <div
-		ref={sidebarRef}
-		className='w-full h-full flex flex-col overflow-hidden'
-	>
-
-		<ErrorBoundary>
-			{messagesHTML}
-		</ErrorBoundary>
-		<ErrorBoundary>
-			{threadPageInput}
-		</ErrorBoundary>
-	</div>
-
+	const isLandingPage = previousMessages.length === 0;
 
 	return (
 		<div key={threadId} className="w-full h-full flex flex-col overflow-hidden">
-			<ComposerTabs />
-			<ThreadHeader
+			<ComposerTabs
 				showHistory={showHistory}
 				onToggleHistory={() => setShowHistory(v => !v)}
 			/>
@@ -337,9 +290,29 @@ export const SidebarChat = () => {
 					</div>
 				</ErrorBoundary>
 			)}
-			<div className="flex-1 min-h-0 overflow-hidden">
-				{isLandingPage ? landingPageContent : threadPageContent}
+			<div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+				<div ref={sidebarRef} className='w-full h-full flex flex-col overflow-hidden'>
+					<div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+						<ErrorBoundary>
+							{isLandingPage ? (
+								<LandingPage
+									onSubmitPrompt={(prompt) => {
+										if (textAreaFnsRef.current) {
+											textAreaFnsRef.current.setValue(prompt);
+											textAreaRef.current?.focus();
+										}
+									}}
+								/>
+							) : (
+								messagesHTML
+							)}
+						</ErrorBoundary>
+					</div>
+					<ErrorBoundary>
+						{threadPageInput}
+					</ErrorBoundary>
+				</div>
 			</div>
 		</div>
-	)
+	);
 }

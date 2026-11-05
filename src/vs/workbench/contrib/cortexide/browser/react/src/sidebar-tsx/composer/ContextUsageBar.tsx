@@ -18,6 +18,11 @@ export const ContextUsageBar = ({
 	contextPct,
 	className = '',
 }: ContextUsageBarProps) => {
+	// Only render when context tokens are actually present
+	if (!contextTotal || contextTotal <= 0) {
+		return null;
+	}
+
 	const labelId = useId();
 	const pctNum = Math.max(0, Math.min(100, Math.round(contextPct * 100)));
 	const color = contextPct >= 1

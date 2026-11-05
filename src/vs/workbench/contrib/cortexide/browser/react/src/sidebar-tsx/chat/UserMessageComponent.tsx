@@ -184,7 +184,7 @@ export const UserMessageComponent = ({ chatMessage, messageIdx, isCheckpointGhos
 				appearance="chatDark"
 				ref={setTextAreaRef}
 				className='min-h-[60px] px-3 py-3 rounded-2xl'
-				placeholder="Plan, @ for context, / for commands"
+				placeholder="Edit message, @ for context, / for commands..."
 				onChangeText={(text) => setIsDisabled(!text)}
 				onFocus={() => {
 					setIsFocused(true)
