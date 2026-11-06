@@ -1,15 +1,26 @@
 [CmdletBinding()]
 param(
-    [string]$Version = "1.29.0",
+    [string]$Version = "auto",
     [string]$TargetDir = "target/release",
     [string]$OutputDir = "dist"
 )
 
 $ErrorActionPreference = 'Stop'
 
-# Ensure Version is a valid numerical semantic version for Windows PE / Inno Setup
-if ($Version -notmatch '^[0-9]+\.[0-9]+') {
-    Write-Warning "Received non-numeric version '$Version', defaulting to 1.29.0"
+# Resolve paths
+$repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
+
+# Automatically extract version from crates/zed/Cargo.toml if not passed as a valid number
+if (-not $Version -or $Version -eq "auto" -or $Version -notmatch '^[0-9]+\.[0-9]+') {
+    $tomlPath = Join-Path $repoRoot "crates/zed/Cargo.toml"
+    if (Test-Path $tomlPath) {
+        $content = Get-Content $tomlPath -Raw
+        if ($content -match '(?m)^version\s*=\s*"([^"]+)"') {
+            $Version = $matches[1]
+        }
+    }
+}
+if (-not $Version -or $Version -notmatch '^[0-9]+\.[0-9]+') {
     $Version = "1.29.0"
 }
 
@@ -26,8 +37,6 @@ if (-not $iscc -or -not (Test-Path $iscc)) {
     exit 0
 }
 
-# Resolve paths
-$repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
 $staging = Join-Path $repoRoot "target/installer-staging"
 $outFullPath = if ([System.IO.Path]::IsPathRooted($OutputDir)) { $OutputDir } else { Join-Path $repoRoot $OutputDir }
 
