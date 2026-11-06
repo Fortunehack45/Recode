@@ -1,4 +1,4 @@
-# Zed Extensions
+# Recode Extensions
 
 This directory contains extensions for Zed that are largely maintained by the Zed team. They currently live in the Zed repository for ease of maintenance.
 

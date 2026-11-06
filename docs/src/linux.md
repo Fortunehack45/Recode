@@ -1,9 +1,9 @@
 ---
-title: Zed on Linux
+title: Recode on Linux
 description: "The installation script on the download page is the fastest way to install Zed:"
 ---
 
-# Zed on Linux
+# Recode on Linux
 
 ## Standard Installation
 
@@ -132,13 +132,13 @@ If Zed was installed using a package manager, please consult the documentation f
 
 Linux works on a large variety of systems configured in many different ways. We primarily test Zed on a vanilla Ubuntu setup, as it is the most common distribution our users use. That said, we do expect it to work on a wide variety of machines.
 
-### Zed fails to start
+### Recode fails to start
 
 If you see an error like "/lib64/libc.so.6: version 'GLIBC_2.29' not found" it means that your distribution's version of glibc is too old. You can either upgrade your system, or [install Zed from source](./development/linux.md).
 
 ### Graphics issues
 
-#### Zed fails to open windows
+#### Recode fails to open windows
 
 Zed requires a GPU to run effectively. Under the hood, we use [Vulkan](https://www.vulkan.org/) to communicate with your GPU. If you are seeing problems with performance, or Zed fails to load, it is possible that Vulkan is the culprit.
 
@@ -253,9 +253,9 @@ These features are provided by XDG desktop portals, specifically:
 
 Some window managers, such as `Hyprland`, don't provide a file picker by default. See [this list](https://wiki.archlinux.org/title/XDG_Desktop_Portal#List_of_backends_and_interfaces) as a starting point for alternatives.
 
-### Zed isn't remembering my API keys
+### Recode isn't remembering my API keys
 
-### Zed isn't remembering my login
+### Recode isn't remembering my login
 
 This feature also requires XDG desktop portals, specifically:
 

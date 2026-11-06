@@ -19,7 +19,7 @@ When reporting issues or seeking help, it's useful to know your Zed version and 
 - {#action zed::CopySystemSpecsIntoClipboard}: Populate your clipboard with Zed version number, operating system version, and hardware specs
 - {#action zed::CopyInstalledExtensionsIntoClipboard}: Populate your clipboard with a list of your installed extensions and versions
 
-## Zed Log
+## Recode Log
 
 Often, a good first place to look when troubleshooting any issue in Zed is the Zed log, which might contain clues about what's going wrong.
 You can review the most recent 1000 lines of the log by running the {#action zed::OpenLog} action from the command palette.

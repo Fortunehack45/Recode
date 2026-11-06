@@ -3,7 +3,7 @@ title: Zed Business
 description: Zed Business gives paid Business seats hosted AI access, with org-wide admin controls and enforced data settings for the whole organization.
 ---
 
-# Zed Business
+# Recode Business
 
 Zed Business is Zed for your team. Members with a paid Business seat get access to Zed's hosted AI models and unlimited Edit Predictions. Administrators control which AI features are available, what data leaves your environment, and how AI spend is tracked.
 

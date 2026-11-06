@@ -1,4 +1,4 @@
-# Zed Server
+# Recode Server
 
 This crate is what we run at https://collab.zed.dev.
 

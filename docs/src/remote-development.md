@@ -172,7 +172,7 @@ These ports also default to the `localhost` interface on the remote host. If you
 }
 ```
 
-## Zed settings
+## Recode settings
 
 When opening a remote project there are three relevant settings locations:
 

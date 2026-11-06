@@ -7,7 +7,7 @@ description: Full Vim emulation in Zed with motions, text objects, visual mode, 
 
 Zed includes a Vim emulation layer. This page covers enabling and disabling vim mode, key bindings, Zed-specific features, and configuration options.
 
-## Zed's vim mode design
+## Recode's vim mode design
 
 Vim mode replicates the behavior of motions and commands where it makes sense and uses Zed-specific functionality where Zed's approach is better. The goal is a familiar experience that works out of the box without requiring configuration.
 
@@ -41,7 +41,7 @@ If you missed this, you can toggle vim mode on or off anytime by opening the com
 > }
 > ```
 
-## Zed-specific features
+## Recode-specific features
 
 Zed is built on a modern foundation that (among other things) uses Tree-sitter and language servers to understand the content of the file you're editing and supports multiple cursors out of the box.
 

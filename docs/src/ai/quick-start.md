@@ -7,7 +7,7 @@ description: Choose the right Zed AI setup path for agents, models, subscription
 
 Use this page to choose the right AI setup path in Zed. If you already know the company, subscription, model provider, agent, or CLI you want to use, start with [AI by Company](./by-company.md).
 
-## Use the Zed Agent {#zed-agent}
+## Use the Recode Agent {#zed-agent}
 
 Use [Zed Agent](./zed-agent.md) when you want Zed's native agent to read, edit, search, and run code in your project.
 

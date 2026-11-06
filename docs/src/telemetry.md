@@ -64,7 +64,7 @@ When using Zed's hosted services, we collect metadata for rate limiting and bill
 
 For details on AI request paths and opt-in data sharing, see [AI Privacy](./ai/privacy-and-security.md) and [Feedback and Training Data](./ai/ai-improvement.md).
 
-## Zed Business
+## Recode Business
 
 Administrators on Zed Business can enforce a no-sharing policy org-wide; members can't opt into [Edit Prediction training data sharing](./ai/ai-improvement.md#edit-predictions) or [AI feedback ratings](./ai/ai-improvement.md#ai-feedback-with-ratings). See [Data Sharing](./business/admin-controls.md#data-sharing) in Admin Controls.
 

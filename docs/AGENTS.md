@@ -266,7 +266,7 @@ Inherit all conventions from `docs/.rules`. Key points:
 | panel           | tool window, sidebar (be specific: "Project Panel," "Terminal Panel") |
 | language server | LSP (spell out first use, then LSP is fine)                           |
 
-## Zed-Specific Conventions
+## Recode-Specific Conventions
 
 ### Recognized Rules Files
 

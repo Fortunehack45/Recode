@@ -21,17 +21,17 @@ Zed works without AI features or a subscription. No [authentication](../authenti
 | Roles & permissions                                      | —    | —         | —         | ✓         |
 | Consolidated billing                                     | —    | —         | —         | ✓         |
 
-### Zed Free {#free}
+### Recode Free {#free}
 
 Zed is free to use. You can configure AI agents with your own API keys via [Use API Access](../ai/use-api-access.md). Zed's hosted models and [Edit Predictions](../ai/edit-prediction.md) require a Pro subscription. You can still use edit predictions from [other providers](../ai/edit-prediction.md#other-providers), like GitHub Copilot or a local model.
 
-### Zed Pro {#pro}
+### Recode Pro {#pro}
 
 Zed Pro includes access to all hosted AI models and Edit Predictions. The plan includes $5 of monthly token credit; usage beyond that is billed at the rates listed on [Zed-Hosted Models](./zed-hosted-models.md). A [trial of Zed Pro](#trials) includes $5 of GPT-6 Luna usage and unlimited Edit Predictions for 14 days from when you start the trial.
 
 For details on billing and payment, see [Individual Billing](./billing.md).
 
-### Zed Business {#business}
+### Recode Business {#business}
 
 Zed Business gives members with a paid Business seat access to all of Zed's hosted AI models, unlimited Edit Predictions, plus org-wide controls for administrators: which AI features are available, what data leaves your organization, and how AI spend is tracked. Paid seats and AI usage are consolidated into a single invoice.
 
@@ -49,7 +49,7 @@ Monthly included credit resets on your monthly billing date. To view your curren
 
 ## Spend Limits {#usage-spend-limits}
 
-### Zed Pro {#pro-spend-limits}
+### Recode Pro {#pro-spend-limits}
 
 On your Billing page you'll find an input for `Monthly Spend Limit`. For Zed Pro, the dollar amount here specifies your pre-tax _monthly_ limit for spend on tokens, _not counting_ the $5/month included with your Pro subscription.
 
@@ -57,7 +57,7 @@ The default value for Pro users is $10, for a total monthly spend with Zed of $2
 
 Once the spend limit is hit, we'll stop any further usage until your token spend limit resets.
 
-### Zed Business {#business-spend-limits}
+### Recode Business {#business-spend-limits}
 
 On Zed Business, administrators set a pre-tax org-wide spend limit from the Data & Privacy page in the organization dashboard. Seats and AI usage are consolidated into [Organization billing](./billing.md#organization). Once the org-wide spend limit is reached, we'll stop hosted model usage for members until the limit resets or an administrator raises it.
 

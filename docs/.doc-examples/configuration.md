@@ -19,7 +19,7 @@ description: Configure Zed with the Settings Editor, JSON files, and project-spe
 
 ---
 
-# Configuring Zed
+# Configuring Recode
 
 This guide explains how Zed's settings system works, including the Settings Editor, JSON configuration files, and project-specific settings.
 

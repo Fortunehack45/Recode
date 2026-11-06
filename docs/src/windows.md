@@ -1,11 +1,11 @@
 ---
-title: Zed on Windows
+title: Recode on Windows
 description: "Get the latest stable builds via the download page. If you want to download our preview build, you can find it on its [releases p..."
 ---
 
-# Zed on Windows
+# Recode on Windows
 
-## Installing Zed
+## Installing Recode
 
 Get the latest stable builds via [the download page](https://zed.dev/download). If you want to download our preview build, you can find it on its [releases page](https://zed.dev/releases/preview). After the first manual installation, Zed will periodically check for install updates.
 
@@ -34,7 +34,7 @@ For detailed instructions on setting up and using remote development features, i
 
 ## Troubleshooting
 
-### Zed fails to start or shows a blank window
+### Recode fails to start or shows a blank window
 
 - Check that your hardware and operating system version are compatible with Zed. See our [installation guide](./installation.md) for more information.
 - Update your GPU drivers from your GPU vendor (Intel/AMD/NVIDIA/Qualcomm).
@@ -51,7 +51,7 @@ When prompted for credentials, use the graphical askpass dialog. If it doesn’t
 
 ### Graphics issues
 
-#### Zed fails to open / degraded performance
+#### Recode fails to open / degraded performance
 
 Zed requires a DirectX 11 compatible GPU to run. If Zed fails to open, your GPU may not meet the minimum requirements.
 

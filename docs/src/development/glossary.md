@@ -3,7 +3,7 @@ title: "Zed Development: Glossary"
 description: "Guide to zed development: glossary for Zed development."
 ---
 
-# Zed Development: Glossary
+# Recode Development: Glossary
 
 This page defines terms and structures used throughout the Zed codebase.
 
@@ -73,7 +73,7 @@ h_flex()
 - `Focus`: The place where keystrokes are handled first
 - `Focus tree`: Path from the place that has the current focus to the UI Root. Example <img> TODO
 
-## Zed UI
+## Recode UI
 
 - `Window`: A struct representing a Zed window in your desktop environment (see image below). You can have multiple windows open. This is mostly passed around for rendering.
 - `Modal`: A UI element that floats on top of the rest of the UI

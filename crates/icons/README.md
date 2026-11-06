@@ -1,4 +1,4 @@
-# Zed Icons
+# Recode Icons
 
 ## Guidelines
 

@@ -5,7 +5,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, AskUserQuestion, WebFetch
 user-invocable: true
 ---
 
-# Zed Brand Writer
+# Recode Brand Writer
 
 Write in Zed's brand voice: thoughtful, technically grounded, and quietly confident. Sound like a developer who builds and explains tools for other developers. Write like the content on zed.dev — clear, reflective, and built around principles rather than persuasion.
 

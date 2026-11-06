@@ -3,7 +3,7 @@ title: Developing Zed
 description: "Guide to building and developing Zed from source."
 ---
 
-# Developing Zed
+# Developing Recode
 
 See the platform-specific instructions for building Zed from source:
 

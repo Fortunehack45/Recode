@@ -20,7 +20,7 @@ This page embeds data from Orb, our invoicing and metering partner.
 
 Zed is billed on a monthly basis based on the date you initially subscribe. You'll receive _at least_ one invoice from Zed each month you're subscribed to Zed Pro, and may receive more than one invoice if you use [hosted models](./zed-hosted-models.md) beyond your included monthly token credit.
 
-### Zed Pro threshold billing {#threshold-billing}
+### Recode Pro threshold billing {#threshold-billing}
 
 For individual Zed Pro subscriptions, Zed uses threshold billing to ensure timely payment collection. Threshold billing controls when already-allowed token usage is invoiced during the month; your [monthly spend limit](./plans-and-pricing.md#usage-spend-limits) still controls when hosted model usage stops.
 

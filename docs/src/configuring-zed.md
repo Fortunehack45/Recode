@@ -3,7 +3,7 @@ title: Configuring Zed - Settings and Preferences
 description: Configure Zed with the Settings Editor, JSON files, and project-specific overrides. Covers all settings options.
 ---
 
-# Configuring Zed
+# Configuring Recode
 
 This guide explains how Zed's settings system works, including the Settings Editor, JSON configuration files, and project-specific settings.
 

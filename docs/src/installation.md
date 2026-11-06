@@ -1,11 +1,11 @@
 ---
-title: Install Zed - macOS, Linux, Windows
+title: Install Recode - macOS, Linux, Windows
 description: Download and install Zed on macOS, Linux, or Windows. Includes Homebrew, direct download, and package manager options.
 ---
 
-# Installing Zed
+# Installing Recode
 
-## Download Zed
+## Download Recode
 
 ### macOS
 

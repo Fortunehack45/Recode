@@ -77,7 +77,7 @@
 - [Zed-Hosted Models](./account/zed-hosted-models.md)
 - [Billing](./account/billing.md)
 
-# Zed Business
+# Recode Business
 
 - [Overview](./business/overview.md)
 - [Organizations](./business/organizations.md)
@@ -221,7 +221,7 @@
 - [All Actions](./all-actions.md)
 - [CLI Reference](./reference/cli.md)
 
-# Developing Zed
+# Developing Recode
 
 - [Developing Zed](./development.md)
   - [macOS](./development/macos.md)

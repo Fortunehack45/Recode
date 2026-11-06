@@ -1,4 +1,4 @@
-# Zed Schema Generator
+# Recode Schema Generator
 
 Prints various Zed schemas to stdout.
 

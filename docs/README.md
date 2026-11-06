@@ -1,4 +1,4 @@
-# Zed Docs
+# Recode Docs
 
 Welcome to Zed's documentation.
 

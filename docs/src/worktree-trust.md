@@ -3,7 +3,7 @@ title: Zed and trusted worktrees
 description: "Configure which folders Zed trusts for running code and extensions."
 ---
 
-# Zed and trusted worktrees
+# Recode and trusted worktrees
 
 A worktree in Zed is either a directory or a single file that Zed opens as a standalone "project".
 Zed opens a worktree each time you run `zed some/path`, drag a file or directory into Zed, or open your user settings file.

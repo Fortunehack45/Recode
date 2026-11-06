@@ -24,7 +24,7 @@ AI features in Zed include:
 For the broader request path and provider data boundaries, see
 [AI Privacy](./privacy-and-security.md).
 
-## Zed-Hosted Model Commitments {#data-retention-and-training}
+## Recode-Hosted Model Commitments {#data-retention-and-training}
 
 Zed-hosted model zero-data-retention and no-training commitments, including the
 exception for provider-designated models with safety retention (such as

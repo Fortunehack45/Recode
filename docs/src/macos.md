@@ -1,13 +1,13 @@
 ---
-title: Zed on macOS
+title: Recode on macOS
 description: "Zed is developed primarily on macOS, making it a first-class platform with full feature support."
 ---
 
-# Zed on macOS
+# Recode on macOS
 
 Zed is developed primarily on macOS, making it a first-class platform with full feature support.
 
-## Installing Zed
+## Installing Recode
 
 Download Zed from the [download page](https://zed.dev/download). The download is a `.dmg` file—open it and drag Zed to your Applications folder.
 
@@ -80,7 +80,7 @@ rm /usr/local/bin/zed
 
 ## Troubleshooting
 
-### Zed won't open or shows "damaged" warning
+### Recode won't open or shows "damaged" warning
 
 If macOS reports that Zed is damaged or can't be opened, it's likely a Gatekeeper issue. Try:
 

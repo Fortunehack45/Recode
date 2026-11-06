@@ -245,7 +245,7 @@ For more information on this, please see [win32 docs](https://learn.microsoft.co
 
 ### Graphics issues
 
-#### Zed fails to launch
+#### Recode fails to launch
 
 Zed currently uses Vulkan as its graphics API on Windows. If Zed fails to launch, Vulkan is a common cause.
 

@@ -1,4 +1,4 @@
-# Zed Documentation Conventions
+# Recode Documentation Conventions
 
 This document covers structural conventions for Zed documentation: what to document, how to organize it, and when to create new pages.
 

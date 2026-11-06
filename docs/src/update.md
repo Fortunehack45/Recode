@@ -3,7 +3,7 @@ title: Update Zed
 description: "Zed is designed to keep itself up to date automatically. You can always update this behavior in your settings."
 ---
 
-# Update Zed
+# Update Recode
 
 Zed is designed to keep itself up to date automatically. You can always update this behavior in your settings.
 

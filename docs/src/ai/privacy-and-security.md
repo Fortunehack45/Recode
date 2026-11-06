@@ -34,7 +34,7 @@ training data collection.
 | [Agent tools](./tools.md), [MCP](./mcp.md), and integrations | Zed, configured MCP servers, and external systems | Tools can read, edit, search, run commands, fetch URLs, or call external systems depending on profile, MCP server, and tool permission settings.                                                                               | [Agent Profiles](./agent-profiles.md), [Tool Permissions](./tool-permissions.md), [MCP](./mcp.md) |
 | Project trust and instructions                               | Zed and the trusted worktree                      | Project-local instructions and skills are loaded from trusted worktrees. External Agents and Terminal Threads may read their own instruction files.                                                                            | [Worktree Trust](../worktree-trust.md), [Skills](./skills.md), [Instructions](./instructions.md)  |
 
-## Zed-Hosted Model Commitments {#data-retention-and-training}
+## Recode-Hosted Model Commitments {#data-retention-and-training}
 
 For Zed-hosted models, Zed has commitments from model providers that prohibit
 training on your prompts or code context and require zero data retention for

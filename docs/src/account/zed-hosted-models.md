@@ -3,7 +3,7 @@ title: Zed-Hosted Models - Zed
 description: AI models available via Zed Pro including Claude Fable 5.1, Claude Opus 5.5, GPT-6.1 Sol, and Gemini 4 Argon. Pricing, context windows, and tool call support.
 ---
 
-# Zed-Hosted Models
+# Recode-Hosted Models
 
 Zed's plans offer hosted versions of major LLMs with higher rate limits than direct API access. Model availability is updated regularly. To use your own API keys instead, see [LLM Providers](../ai/llm-providers.md). For general setup, see [AI Quick Start](../ai/quick-start.md).
 
