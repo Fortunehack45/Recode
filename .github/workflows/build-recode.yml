@@ -1,0 +1,161 @@
+name: Build and Release Recode
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-2022
+    env:
+      RUST_BACKTRACE: '1'
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Recode Binary
+        shell: pwsh
+        run: |
+          cargo build --release --package recode --package cli
+
+      - name: Package Windows Binary
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path Recode-win32-x64 -Force
+          Copy-Item target/release/recode.exe Recode-win32-x64/Recode.exe -Force
+          if (Test-Path target/release/cli.exe) {
+            Copy-Item target/release/cli.exe Recode-win32-x64/recode-cli.exe -Force
+          }
+          Copy-Item crates/zed/resources/windows/app-icon.ico Recode-win32-x64/app-icon.ico -Force
+          Compress-Archive -Path Recode-win32-x64\* -DestinationPath Recode-windows-x64.zip -Force
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-windows-x64
+          path: Recode-windows-x64.zip
+
+  build-linux:
+    name: Build Linux x64
+    runs-on: ubuntu-24.04
+    env:
+      RUST_BACKTRACE: '1'
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libx11-xcb-dev libssl-dev libfontconfig1-dev libfreetype6-dev libxcb-xfixes0-dev libxcb-shape0-dev libxkbcommon-dev libvulkan-dev cmake pkg-config
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Recode Binary
+        run: |
+          cargo build --release --package recode --package cli
+
+      - name: Package Linux Binary
+        run: |
+          mkdir -p Recode-linux-x64
+          cp target/release/recode Recode-linux-x64/recode
+          if [ -f target/release/cli ]; then cp target/release/cli Recode-linux-x64/recode-cli; fi
+          tar -czf Recode-linux-x64.tar.gz -C Recode-linux-x64 .
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-linux-x64
+          path: Recode-linux-x64.tar.gz
+
+  build-macos:
+    name: Build macOS Arm64
+    runs-on: macos-latest
+    env:
+      RUST_BACKTRACE: '1'
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build Recode Binary
+        run: |
+          cargo build --release --package recode --package cli
+
+      - name: Package macOS Binary
+        run: |
+          mkdir -p Recode-macos-arm64
+          cp target/release/recode Recode-macos-arm64/recode
+          if [ -f target/release/cli ]; then cp target/release/cli Recode-macos-arm64/recode-cli; fi
+          ditto -c -k --sequesterRsrc Recode-macos-arm64 Recode-macos-arm64.zip
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Recode-macos-arm64
+          path: Recode-macos-arm64.zip
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: always() && (needs.build-windows.result == 'success' || needs.build-linux.result == 'success' || needs.build-macos.result == 'success')
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: Recode-windows-x64
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: Recode-linux-x64
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: Recode-macos-arm64
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            Recode-windows-x64.zip
+            Recode-linux-x64.tar.gz
+            Recode-macos-arm64.zip
+          tag_name: ${{ github.ref_name }}
+          name: Recode ${{ github.ref_name }}
+          draft: false
+          prerelease: false
