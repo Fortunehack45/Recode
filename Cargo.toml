@@ -1149,11 +1149,14 @@ ui_input = { codegen-units = 1 }
 zed_actions = { codegen-units = 1 }
 
 [profile.release]
-debug = "limited"
+opt-level = 3
+debug = false
+strip = true
 lto = "thin"
 codegen-units = 1
 
 [profile.release.package]
+recode = { codegen-units = 16 }
 zed = { codegen-units = 16 }
 
 [profile.release-fast]

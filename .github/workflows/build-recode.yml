@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows x64
+    name: Build Windows x64 (Installer & Portable)
     runs-on: windows-2022
     env:
       RUST_BACKTRACE: '1'
@@ -28,27 +28,38 @@ jobs:
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build Recode Binary
+      - name: Build Recode Binaries
         shell: pwsh
         run: |
-          cargo build --release --package recode --package cli
+          cargo build --release --package recode --package cli --package auto_update_helper
 
-      - name: Package Windows Binary
+      - name: Package Windows 1-Click Installer (Inno Setup)
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path Recode-win32-x64 -Force
-          Copy-Item target/release/recode.exe Recode-win32-x64/Recode.exe -Force
+          $ver = if ("${{ github.ref_name }}" -match "^v?(.+)$") { $matches[1] } else { "1.29.0" }
+          .\script\build-installer-windows.ps1 -Version $ver -TargetDir "target/release" -OutputDir "dist"
+
+      - name: Package Windows Portable Archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist/portable -Force | Out-Null
+          Copy-Item target/release/recode.exe dist/portable/Recode.exe -Force
           if (Test-Path target/release/cli.exe) {
-            Copy-Item target/release/cli.exe Recode-win32-x64/recode-cli.exe -Force
+            Copy-Item target/release/cli.exe dist/portable/recode-cli.exe -Force
           }
-          Copy-Item crates/zed/resources/windows/app-icon.ico Recode-win32-x64/app-icon.ico -Force
-          Compress-Archive -Path Recode-win32-x64\* -DestinationPath Recode-windows-x64.zip -Force
+          if (Test-Path target/release/auto-update-helper.exe) {
+            Copy-Item target/release/auto-update-helper.exe dist/portable/auto_update_helper.exe -Force
+          }
+          Copy-Item crates/zed/resources/windows/app-icon.ico dist/portable/app-icon.ico -Force
+          Compress-Archive -Path dist/portable\* -DestinationPath dist/Recode-windows-x64-portable.zip -Force
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Recode-windows-x64
-          path: Recode-windows-x64.zip
+          path: |
+            dist/RecodeSetup-x64.exe
+            dist/Recode-windows-x64-portable.zip
 
   build-linux:
     name: Build Linux x64
@@ -71,7 +82,7 @@ jobs:
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build Recode Binary
+      - name: Build Recode Binaries
         run: |
           cargo build --release --package recode --package cli
 
@@ -104,7 +115,7 @@ jobs:
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Build Recode Binary
+      - name: Build Recode Binaries
         run: |
           cargo build --release --package recode --package cli
 
@@ -122,39 +133,58 @@ jobs:
           path: Recode-macos-arm64.zip
 
   publish-release:
-    name: Publish GitHub Release
+    name: Publish GitHub Release & In-App Auto-Update Manifest
     needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
     if: always() && (needs.build-windows.result == 'success' || needs.build-linux.result == 'success' || needs.build-macos.result == 'success')
     permissions:
       contents: write
     steps:
-      - name: Download Windows Artifact
+      - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: Recode-windows-x64
+          path: release-assets
 
-      - name: Download Linux Artifact
+      - name: Download Linux Artifacts
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: Recode-linux-x64
+          path: release-assets
 
-      - name: Download macOS Artifact
+      - name: Download macOS Artifacts
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
           name: Recode-macos-arm64
+          path: release-assets
+
+      - name: Generate Auto-Update Manifest (latest.json)
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [ -z "$TAG" ] || [ "$TAG" = "main" ]; then
+            TAG="v1.29.0"
+          fi
+          VERSION="${TAG#v}"
+          cat <<EOF > release-assets/latest.json
+          {
+            "version": "${VERSION}",
+            "tag": "${TAG}",
+            "url": "https://github.com/Fortunehack45/Recode/releases/download/${TAG}/RecodeSetup-x64.exe",
+            "portable_url": "https://github.com/Fortunehack45/Recode/releases/download/${TAG}/Recode-windows-x64-portable.zip",
+            "published_at": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+          cat release-assets/latest.json
 
       - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            Recode-windows-x64.zip
-            Recode-linux-x64.tar.gz
-            Recode-macos-arm64.zip
+            release-assets/*
           tag_name: ${{ github.ref_name }}
           name: Recode ${{ github.ref_name }}
           draft: false

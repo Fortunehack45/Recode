@@ -717,9 +717,13 @@ impl AutoUpdater {
             },
         )?;
 
-        let mut response = http_client
-            .get(url.as_str(), Default::default(), true)
-            .await?;
+        let mut response = match http_client.get(url.as_str(), Default::default(), true).await {
+            Ok(resp) if resp.status().is_success() => resp,
+            _ => {
+                let fallback = "https://raw.githubusercontent.com/Fortunehack45/Recode/main/releases/latest.json";
+                http_client.get(fallback, Default::default(), true).await?
+            }
+        };
         let mut body = Vec::new();
         response.body_mut().read_to_end(&mut body).await?;
 

@@ -271,9 +271,9 @@ function BuildInstaller {
             $appIconName = "app-icon"
             $appName = "Recode"
             $appDisplayName = "Recode"
-            $appSetupName = "Recode-$Architecture"
+            $appSetupName = "RecodeSetup-x64"
             # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Stable-Instance-Mutex"
+            $appMutex = "Recode-Instance-Mutex"
             $appExeName = "Recode"
             $regValueName = "Recode"
             $appUserId = "Recode.Editor"
@@ -285,7 +285,7 @@ function BuildInstaller {
             $appIconName = "app-icon-preview"
             $appName = "Recode Preview"
             $appDisplayName = "Recode Preview"
-            $appSetupName = "Recode-$Architecture"
+            $appSetupName = "RecodeSetup-x64"
             # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
             $appMutex = "Zed-Preview-Instance-Mutex"
             $appExeName = "Recode"
@@ -299,7 +299,7 @@ function BuildInstaller {
             $appIconName = "app-icon-nightly"
             $appName = "Recode Nightly"
             $appDisplayName = "Recode Nightly"
-            $appSetupName = "Recode-$Architecture"
+            $appSetupName = "RecodeSetup-x64"
             # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
             $appMutex = "Zed-Nightly-Instance-Mutex"
             $appExeName = "Recode"
@@ -313,7 +313,7 @@ function BuildInstaller {
             $appIconName = "app-icon-dev"
             $appName = "Recode Dev"
             $appDisplayName = "Recode Dev"
-            $appSetupName = "Recode-$Architecture"
+            $appSetupName = "RecodeSetup-x64"
             # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
             $appMutex = "Zed-Dev-Instance-Mutex"
             $appExeName = "Recode"
