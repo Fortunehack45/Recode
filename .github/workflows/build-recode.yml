@@ -29,6 +29,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build Recode Binaries
+        id: build
         shell: pwsh
         run: |
           cargo build --release --package recode --package cli --package auto_update_helper
@@ -40,6 +41,7 @@ jobs:
           .\script\build-installer-windows.ps1 -Version $ver -TargetDir "target/release" -OutputDir "dist"
 
       - name: Package Windows Portable Archive
+        if: always() && steps.build.outcome == 'success'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path dist/portable -Force | Out-Null
@@ -55,11 +57,13 @@ jobs:
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
+        if: always() && steps.build.outcome == 'success'
         with:
           name: Recode-windows-x64
           path: |
             dist/RecodeSetup-x64.exe
             dist/Recode-windows-x64-portable.zip
+          if-no-files-found: warn
 
   build-linux:
     name: Build Linux x64
@@ -87,10 +91,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build Recode Binaries
+        id: build
         run: |
           cargo build --release --package recode --package cli
 
       - name: Package Linux Binary
+        if: always() && steps.build.outcome == 'success'
         run: |
           mkdir -p Recode-linux-x64
           cp target/release/recode Recode-linux-x64/recode
@@ -99,6 +105,7 @@ jobs:
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
+        if: always() && steps.build.outcome == 'success'
         with:
           name: Recode-linux-x64
           path: Recode-linux-x64.tar.gz
@@ -120,10 +127,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build Recode Binaries
+        id: build
         run: |
           cargo build --release --package recode --package cli
 
       - name: Package macOS Binary
+        if: always() && steps.build.outcome == 'success'
         run: |
           mkdir -p Recode-macos-arm64
           cp target/release/recode Recode-macos-arm64/recode
@@ -132,6 +141,7 @@ jobs:
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
+        if: always() && steps.build.outcome == 'success'
         with:
           name: Recode-macos-arm64
           path: Recode-macos-arm64.zip
