@@ -30,6 +30,21 @@ jobs:
         with:
           cache-on-failure: true
 
+      - name: Pre-fetch WebRTC Prebuilt
+        shell: pwsh
+        run: |
+          $targetDir = "$PWD/.webrtc"
+          $url = "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-win-x64-release.zip"
+          if (-not (Test-Path "$targetDir/webrtc.ninja")) {
+            New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+            Write-Host "Downloading WebRTC prebuilt with retry..."
+            curl.exe -fL --retry 5 --retry-delay 5 -o "$targetDir/webrtc.zip" $url
+            tar -xf "$targetDir/webrtc.zip" -C $targetDir
+            Remove-Item "$targetDir/webrtc.zip" -Force
+          }
+          echo "LK_CUSTOM_WEBRTC=$targetDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Configured LK_CUSTOM_WEBRTC=$targetDir"
+
       - name: Build Recode Binaries
         id: build
         shell: pwsh
@@ -94,6 +109,20 @@ jobs:
         with:
           cache-on-failure: true
 
+      - name: Pre-fetch WebRTC Prebuilt
+        run: |
+          TARGET_DIR="$PWD/.webrtc"
+          URL="https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-linux-x64-release.zip"
+          if [ ! -f "$TARGET_DIR/webrtc.ninja" ]; then
+            mkdir -p "$TARGET_DIR"
+            echo "Downloading WebRTC prebuilt with retry..."
+            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "$URL"
+            unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
+            rm -f "$TARGET_DIR/webrtc.zip"
+          fi
+          echo "LK_CUSTOM_WEBRTC=$TARGET_DIR" >> "$GITHUB_ENV"
+          echo "Configured LK_CUSTOM_WEBRTC=$TARGET_DIR"
+
       - name: Build Recode Binaries
         id: build
         run: |
@@ -131,6 +160,20 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
+
+      - name: Pre-fetch WebRTC Prebuilt
+        run: |
+          TARGET_DIR="$PWD/.webrtc"
+          URL="https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-mac-arm64-release.zip"
+          if [ ! -f "$TARGET_DIR/webrtc.ninja" ]; then
+            mkdir -p "$TARGET_DIR"
+            echo "Downloading WebRTC prebuilt with retry..."
+            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "$URL"
+            unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
+            rm -f "$TARGET_DIR/webrtc.zip"
+          fi
+          echo "LK_CUSTOM_WEBRTC=$TARGET_DIR" >> "$GITHUB_ENV"
+          echo "Configured LK_CUSTOM_WEBRTC=$TARGET_DIR"
 
       - name: Build Recode Binaries
         id: build
