@@ -7,7 +7,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-Write-Host "=== Packaging Recode Windows 1-Click Installer ===" -ForegroundColor Cyan
+# Ensure Version is a valid numerical semantic version for Windows PE / Inno Setup
+if ($Version -notmatch '^[0-9]+\.[0-9]+') {
+    Write-Warning "Received non-numeric version '$Version', defaulting to 1.29.0"
+    $Version = "1.29.0"
+}
+
+Write-Host "=== Packaging Recode Windows 1-Click Installer (v$Version) ===" -ForegroundColor Cyan
 
 # Locate Inno Setup compiler ISCC
 $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"

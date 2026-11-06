@@ -39,7 +39,7 @@ jobs:
       - name: Package Windows 1-Click Installer (Inno Setup)
         shell: pwsh
         run: |
-          $ver = if ("${{ github.ref_name }}" -match "^v?(.+)$") { $matches[1] } else { "1.29.0" }
+          $ver = if ("${{ github.ref_name }}" -match "^v?([0-9]+\.[0-9]+\.[0-9]+.*)$") { $matches[1] } else { "1.29.0" }
           .\script\build-installer-windows.ps1 -Version $ver -TargetDir "target/release" -OutputDir "dist"
 
       - name: Package Windows Portable Archive
