@@ -74,7 +74,11 @@ jobs:
       - name: Install Linux Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libasound2-dev libx11-xcb-dev libssl-dev libfontconfig1-dev libfreetype6-dev libxcb-xfixes0-dev libxcb-shape0-dev libxkbcommon-dev libvulkan-dev cmake pkg-config
+          sudo apt-get install -y \
+            gcc g++ libasound2-dev libfontconfig-dev libgit2-dev libglib2.0-dev \
+            libssl-dev libva-dev libvulkan1 libwayland-dev libx11-xcb-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libzstd-dev cmake clang lld llvm pkg-config \
+            libsqlite3-dev libxcb-xfixes0-dev libxcb-shape0-dev
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -181,11 +185,11 @@ jobs:
 
       - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           files: |
             release-assets/*
-          tag_name: ${{ github.ref_name }}
-          name: Recode ${{ github.ref_name }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.29.0' }}
+          name: Recode ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.29.0' }}
           draft: false
           prerelease: false
