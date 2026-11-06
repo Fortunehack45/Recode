@@ -27,6 +27,8 @@ jobs:
 
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Build Recode Binaries
         id: build
@@ -89,6 +91,8 @@ jobs:
 
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Build Recode Binaries
         id: build
@@ -125,6 +129,8 @@ jobs:
 
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
       - name: Build Recode Binaries
         id: build
