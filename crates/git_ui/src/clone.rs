@@ -26,6 +26,14 @@ pub fn clone_and_open(
             let mut paths = destination_prompt.await.ok()?.ok()??;
             let mut destination_dir = paths.pop()?;
 
+            let repo_url: SharedString = if repo_url.contains("://") || repo_url.starts_with("git@") {
+                repo_url
+            } else if repo_url.contains('/') && !repo_url.contains(' ') {
+                format!("https://github.com/{}.git", repo_url.trim_end_matches(".git")).into()
+            } else {
+                repo_url
+            };
+
             let repo_name = repo_url
                 .split('/')
                 .next_back()

@@ -2622,7 +2622,7 @@ impl ThreadView {
                 ThreadError::ZedPaymentRequired => (
                     "payment_required",
                     None,
-                    "You reached your free usage limit. Upgrade to Zed Pro for more prompts."
+                    "You reached your free usage limit. Upgrade to Recode Pro for more prompts."
                         .into(),
                 ),
                 ThreadError::Refusal => {
@@ -8187,7 +8187,7 @@ impl ThreadView {
                 (self.is_subagent() && self.is_thread_feedback_enabled(cx)).then(|| {
                     let feedback = self.thread_feedback.feedback;
                     let tooltip_meta =
-                        "Rating the thread sends all of your current conversation to the Zed team.";
+                        "Rating the thread sends all of your current conversation to the Recode team.";
 
                     h_flex()
                         .child(
@@ -12774,7 +12774,7 @@ impl ThreadView {
             ThreadError::RateLimitExceeded { provider } => self.render_error_callout(
                 "Rate Limit Reached",
                 format!(
-                    "{provider}'s rate limit was reached. Zed will retry automatically. \
+                    "{provider}'s rate limit was reached. Recode will retry automatically. \
                     You can also wait a moment and try again."
                 )
                 .into(),
@@ -12785,7 +12785,7 @@ impl ThreadView {
             ThreadError::ServerOverloaded { provider } => self.render_error_callout(
                 "Provider Unavailable",
                 format!(
-                    "{provider}'s servers are temporarily unavailable. Zed will retry \
+                    "{provider}'s servers are temporarily unavailable. Recode will retry \
                     automatically. If the problem persists, check the provider's status page."
                 )
                 .into(),
@@ -12805,7 +12805,7 @@ impl ThreadView {
             ThreadError::StreamError { provider } => self.render_error_callout(
                 "Connection Interrupted",
                 format!(
-                    "The connection to {provider}'s API was interrupted. Zed will retry \
+                    "The connection to {provider}'s API was interrupted. Recode will retry \
                     automatically. If the problem persists, check your network connection."
                 )
                 .into(),
@@ -12854,7 +12854,7 @@ impl ThreadView {
                 "API Error",
                 format!(
                     "{provider}'s API returned an unexpected error. \
-                    If the problem persists, try switching models or restarting Zed."
+                    If the problem persists, try switching models or restarting Recode."
                 )
                 .into(),
                 true,
@@ -12905,7 +12905,7 @@ impl ThreadView {
 
     fn render_zed_payment_required_error(&self, cx: &mut Context<Self>) -> Callout {
         const ERROR_MESSAGE: &str =
-            "You reached your free usage limit. Upgrade to Zed Pro for more prompts.";
+            "You reached your free usage limit. Upgrade to Recode Pro for more prompts.";
 
         Callout::new()
             .severity(Severity::Error)

@@ -296,7 +296,7 @@ fn render_api_key_providers_item(
                         )
                         .child(
                             Label::new(format!(
-                                "Or set the {env_var_name} env var and restart Zed for it to take effect."
+                                "Or set the {env_var_name} env var and restart Recode for it to take effect."
                             ))
                             .size(LabelSize::XSmall)
                             .color(Color::Muted),
@@ -1342,10 +1342,10 @@ mod tests {
                     .w_full()
                     .debug_selector(|| "provider-row".into())
                     .child(render_inline_body(
-                        "Zed".into(),
+                        "Recode".into(),
                         Some("Subscribed to Business".into()),
                         Some(InlineDescription::Text(
-                            "You have access to Zed's hosted models through your organization."
+                            "You have access to Recode's hosted models through your organization."
                                 .into(),
                         )),
                         cloud::test_support::young_account_configuration(),
@@ -1378,7 +1378,7 @@ mod tests {
                 .expect("provider description should be rendered");
             let configuration_bounds = visual_context
                 .debug_bounds("zed-ai-configuration")
-                .expect("Zed AI configuration should be rendered");
+                .expect("Recode AI configuration should be rendered");
 
             assert!(
                 configuration_bounds.right() <= provider_row_bounds.right(),

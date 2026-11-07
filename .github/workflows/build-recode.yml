@@ -250,16 +250,7 @@ jobs:
             TAG="v${VERSION}"
           else
             BASE_VERSION=$(grep -m1 '^version' crates/zed/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            LATEST_TAG=$(git tag -l "v*" 2>/dev/null | sort -V | tail -n1)
-            if [ -n "$LATEST_TAG" ] && [[ "$LATEST_TAG" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-              major="${BASH_REMATCH[1]}"
-              minor="${BASH_REMATCH[2]}"
-              patch="${BASH_REMATCH[3]}"
-              patch=$((patch + 1))
-              VERSION="${major}.${minor}.${patch}"
-            else
-              VERSION="${BASE_VERSION:-1.29.1}"
-            fi
+            VERSION="${BASE_VERSION:-1.29.6}"
             TAG="v${VERSION}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"

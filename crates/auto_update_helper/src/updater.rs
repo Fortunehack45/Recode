@@ -172,6 +172,7 @@ pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
         // Create backup directory
         Job::mkdir(p("old")),
         Job::mkdir(p("old\\bin")),
+        Job::mkdir(p("bin")),
 
         // Move old files safely (using move_if_exists so missing legacy files never abort)
         Job::move_if_exists(p("Recode.exe"), p("old\\Recode.exe")),
