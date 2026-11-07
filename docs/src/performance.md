@@ -122,7 +122,7 @@ Download the importer
 
 ## To Save a Trace:
 
-- Run the action: `zed open performance profiler`
+- Run the action: `recode open performance profiler`
 - Hit the save button. This opens a save dialog or if that fails to open the trace gets saved in your working directory.
 - Convert the profile so it can be imported in tracy using the importer: `./tracy-import-miniprofiler <path to performance_profile.miniprof.json> output.tracy`
 - Go to <https://tracy.nereid.pl/> hit the 'power button' in the top left and then open saved trace.

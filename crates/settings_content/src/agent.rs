@@ -394,7 +394,7 @@ pub struct AgentSettingsContent {
     ///
     /// Default: true
     pub show_merge_conflict_indicator: Option<bool>,
-    /// Whether to automatically generate a title for Zed Agent threads using the
+    /// Whether to automatically generate a title for Recode Agent threads using the
     /// summary model. When disabled, titles are only created when manually
     /// requested (e.g. via the thread's "Regenerate Thread Title" action).
     ///
@@ -406,7 +406,7 @@ pub struct AgentSettingsContent {
     /// The global `default` applies when no tool-specific rules match.
     /// For external agent servers (e.g. Claude Agent) that define their own
     /// permission modes, "deny" and "confirm" still take precedence — the
-    /// external agent's permission system is only used when Zed would allow
+    /// external agent's permission system is only used when Recode would allow
     /// the action. Per-tool regex patterns (`always_allow`, `always_deny`,
     /// `always_confirm`) match against the tool's text input (command, path,
     /// URL, etc.).

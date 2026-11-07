@@ -164,11 +164,11 @@ impl Job {
 }
 
 #[cfg(not(test))]
-pub(crate) static JOBS: LazyLock<[Job; 28]> = LazyLock::new(|| {
+pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
     fn p(value: &str) -> &Path {
         Path::new(value)
     }
-    [
+    vec![
         // Create backup directory
         Job::mkdir(p("old")),
         Job::mkdir(p("old\\bin")),
@@ -214,11 +214,11 @@ pub(crate) static JOBS: LazyLock<[Job; 28]> = LazyLock::new(|| {
 });
 
 #[cfg(test)]
-pub(crate) static JOBS: LazyLock<[Job; 9]> = LazyLock::new(|| {
+pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
     fn p(value: &str) -> &Path {
         Path::new(value)
     }
-    [
+    vec![
         Job {
             apply: Box::new(|_| {
                 std::thread::sleep(Duration::from_millis(1000));
