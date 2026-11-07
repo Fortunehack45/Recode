@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -93,6 +95,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Linux Dependencies
         run: |
@@ -156,6 +160,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -211,6 +217,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
@@ -241,9 +249,16 @@ jobs:
             VERSION="${TAG#v}"
             TAG="v${VERSION}"
           else
-            VERSION=$(grep -m1 '^version' crates/zed/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            if [ -z "$VERSION" ]; then
-              VERSION="1.29.0"
+            BASE_VERSION=$(grep -m1 '^version' crates/zed/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            LATEST_TAG=$(git tag -l "v*" 2>/dev/null | sort -V | tail -n1)
+            if [ -n "$LATEST_TAG" ] && [[ "$LATEST_TAG" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+              major="${BASH_REMATCH[1]}"
+              minor="${BASH_REMATCH[2]}"
+              patch="${BASH_REMATCH[3]}"
+              patch=$((patch + 1))
+              VERSION="${major}.${minor}.${patch}"
+            else
+              VERSION="${BASE_VERSION:-1.29.1}"
             fi
             TAG="v${VERSION}"
           fi

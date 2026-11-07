@@ -21,7 +21,7 @@ pub struct DiscoveredModel {
 
 /// Parses compatible models, optionally restricted to a live endpoint's model IDs.
 ///
-/// Deprecated models and zero-cost Zen models are excluded. An intentionally
+/// Deprecated models are excluded. An intentionally
 /// filtered empty catalog is valid; unusable metadata is an error.
 pub fn parse_model_catalog(
     catalog: &str,
@@ -57,13 +57,7 @@ pub fn parse_model_catalog(
                     return None;
                 }
             };
-            if metadata.status.as_deref() == Some("deprecated")
-                || (subscription == OpenCodeSubscription::Zen
-                    && metadata
-                        .cost
-                        .as_ref()
-                        .is_some_and(|cost| cost.input == Some(0.0) && cost.output == Some(0.0)))
-            {
+            if metadata.status.as_deref() == Some("deprecated") {
                 compatible_candidate_count -= 1;
                 return None;
             }

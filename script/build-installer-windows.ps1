@@ -10,7 +10,7 @@ $ErrorActionPreference = 'Stop'
 # Resolve paths
 $repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
 
-# Automatically extract version from crates/zed/Cargo.toml if not passed as a valid number
+# Automatically extract version from crates/zed/Cargo.toml or git tags if not passed as a valid number
 if (-not $Version -or $Version -eq "auto" -or $Version -notmatch '^[0-9]+\.[0-9]+') {
     $tomlPath = Join-Path $repoRoot "crates/zed/Cargo.toml"
     if (Test-Path $tomlPath) {
@@ -19,9 +19,21 @@ if (-not $Version -or $Version -eq "auto" -or $Version -notmatch '^[0-9]+\.[0-9]
             $Version = $matches[1]
         }
     }
+    try {
+        $latestTag = (git tag -l "v*" 2>$null | Sort-Object { [version]($_ -replace '^v','') } | Select-Object -Last 1)
+        if ($latestTag -and $latestTag -match '^v?([0-9]+)\.([0-9]+)\.([0-9]+)') {
+            $major = [int]$matches[1]
+            $minor = [int]$matches[2]
+            $patch = [int]$matches[3] + 1
+            $tagAutoVersion = "$major.$minor.$patch"
+            if ([version]$tagAutoVersion -gt [version]$Version) {
+                $Version = $tagAutoVersion
+            }
+        }
+    } catch {}
 }
 if (-not $Version -or $Version -notmatch '^[0-9]+\.[0-9]+') {
-    $Version = "1.29.0"
+    $Version = "1.29.1"
 }
 
 Write-Host "=== Packaging Recode Windows 1-Click Installer (v$Version) ===" -ForegroundColor Cyan

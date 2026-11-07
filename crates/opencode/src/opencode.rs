@@ -40,14 +40,14 @@ pub enum OpenCodeSubscription {
 impl OpenCodeSubscription {
     pub fn display_name(&self) -> &'static str {
         match self {
-            Self::Zen => "Zen",
+            Self::Zen => "Recode",
             Self::Go => "Go",
         }
     }
 
     pub fn id_prefix(&self) -> &'static str {
         match self {
-            Self::Zen => "zen",
+            Self::Zen => "recode",
             Self::Go => "go",
         }
     }

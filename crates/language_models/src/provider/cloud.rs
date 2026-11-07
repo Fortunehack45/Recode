@@ -588,7 +588,7 @@ impl RenderOnce for ZedAiConfiguration {
                 .gap_2()
                 .when(!self.compact, |this| this.child(Label::new(description)))
                 .child(
-                    Button::new("sign_in", "Sign In to use Zed AI")
+                    Button::new("sign_in", "Sign In to use Recode AI")
                         .start_icon(
                             Icon::new(IconName::Github)
                                 .size(IconSize::Small)

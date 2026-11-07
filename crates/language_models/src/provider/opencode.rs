@@ -141,12 +141,7 @@ impl State {
     fn restart_fetch_models_task(&mut self, cx: &mut Context<Self>) {
         self.fetch_models_task = None;
         self.refresh_models_task = None;
-        let api_url = OpenCodeLanguageModelProvider::api_url(cx);
-        if self.api_key_state.key(&api_url).is_none() {
-            self.fetch_models_task = None;
-            cx.notify();
-            return;
-        }
+        let _api_url = OpenCodeLanguageModelProvider::api_url(cx);
         let http_client = self.http_client.clone();
         let fs = self.fs.clone();
         let cache_path = self.cache_path.clone();
@@ -342,6 +337,8 @@ impl OpenCodeLanguageModelProvider {
             }
         });
 
+        state.update(cx, |this, cx| this.restart_fetch_models_task(cx));
+
         Self {
             http_client,
             state,
@@ -502,7 +499,7 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
     }
 
     fn icon(&self) -> IconOrSvg {
-        IconOrSvg::Icon(IconName::AiOpenCode)
+        IconOrSvg::Icon(IconName::AiZed)
     }
 
     fn default_model(&self, _cx: &App) -> Option<LanguageModel> {
@@ -520,8 +517,8 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
             .collect()
     }
 
-    fn is_authenticated(&self, cx: &App) -> bool {
-        self.state.read(cx).is_authenticated()
+    fn is_authenticated(&self, _cx: &App) -> bool {
+        true
     }
 
     fn authenticate(&self, cx: &mut App) -> Task<Result<(), AuthenticateError>> {
@@ -541,7 +538,7 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
                     .into()
             })
             .description(InlineDescription::Text(
-                "To use OpenCode models in Zed, you need an API key.".into(),
+                "To use OpenCode models in Recode, you can provide an API key.".into(),
             )),
         ))
     }
@@ -572,9 +569,7 @@ impl LanguageModelClient for OpenCodeLanguageModelProvider {
         let executor = cx.background_executor().clone();
         let stream_in_background = config.model.protocol() != ApiProtocol::Google;
         async move {
-            let api_key = api_key.ok_or(LanguageModelCompletionError::NoApiKey {
-                provider: PROVIDER_NAME,
-            })?;
+            let api_key = api_key.unwrap_or_else(|| Arc::from(""));
             let stream = request_limiter
                 .stream(async move {
                     opencode::completion::stream_completion(
@@ -887,7 +882,7 @@ impl Render for ConfigurationView {
         let api_key_section = v_flex()
             .on_action(cx.listener(Self::save_api_key))
             .child(Label::new(
-                "To use OpenCode models in Zed, you need an API key:",
+                "To use OpenCode models in Recode, you can provide an API key:",
             ).color(Color::Muted))
             .child(
                 List::new()
@@ -908,7 +903,7 @@ impl Render for ConfigurationView {
             .child(api_key_control)
             .child(
                 Label::new(format!(
-                    "You can also set the {API_KEY_ENV_VAR_NAME} environment variable and restart Zed."
+                    "You can also set the {API_KEY_ENV_VAR_NAME} environment variable and restart Recode."
                 ))
                 .size(LabelSize::Small)
                 .color(Color::Muted).mt_1p5(),
@@ -926,9 +921,9 @@ impl Render for ConfigurationView {
                 .gap_2()
                 .child(Label::new("Subscriptions"))
                 .child(
-                    Switch::new("opencode-show-zen-models", show_zen.into())
+                    Switch::new("opencode-show-recode-models", show_zen.into())
                         .full_width(true)
-                        .label("Show Zen models")
+                        .label("Show Recode models")
                         .label_position(SwitchLabelPosition::Start)
                         .on_click(cx.listener(|this, state, window, cx| {
                             this.set_subscription_enabled(
@@ -1307,9 +1302,9 @@ mod tests {
     }
 
     #[test]
-    fn test_discovery_excludes_only_explicitly_free_zen_models() -> Result<()> {
+    fn test_discovery_includes_all_models_including_free() -> Result<()> {
         for (cost, zen_model_count) in [
-            (serde_json::json!({"input": 0, "output": 0}), 0),
+            (serde_json::json!({"input": 0, "output": 0}), 1),
             (serde_json::json!({"input": 0, "output": 1}), 1),
             (serde_json::json!({"input": 1, "output": 0}), 1),
             (serde_json::json!({"input": 1, "output": 1}), 1),
