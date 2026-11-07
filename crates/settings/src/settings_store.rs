@@ -46,7 +46,11 @@ use settings_json::{infer_json_indent_size, update_value_in_json_text};
 pub const LSP_SETTINGS_SCHEMA_URL_PREFIX: &str = "zed://schemas/settings/lsp/";
 
 // GPUI resolves these aliases, but they are not part of the platform font inventory.
-const VIRTUAL_FONT_NAMES: [&str; 5] = [
+const VIRTUAL_FONT_NAMES: [&str; 9] = [
+    ".RecodeMono",
+    ".RecodeSans",
+    "Recode Mono",
+    "Recode Sans",
     ".SystemUIFont",
     ".ZedMono",
     ".ZedSans",

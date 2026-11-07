@@ -67,7 +67,7 @@ pub struct OpenCodeSettings {
     pub api_url: String,
     pub available_models: Vec<AvailableModel>,
     pub custom_headers: CustomHeaders,
-    pub show_zen_models: bool,
+    pub show_recode_models: bool,
     pub show_go_models: bool,
 }
 
@@ -466,7 +466,7 @@ impl OpenCodeLanguageModelProvider {
     fn subscription_enabled(subscription: OpenCodeSubscription, cx: &App) -> bool {
         let settings = Self::settings(cx);
         match subscription {
-            OpenCodeSubscription::Recode => settings.show_zen_models,
+            OpenCodeSubscription::Recode => settings.show_recode_models,
             OpenCodeSubscription::Go => settings.show_go_models,
         }
     }
@@ -848,7 +848,7 @@ impl ConfigurationView {
                 .get_or_insert_default();
 
             match subscription {
-                OpenCodeSubscription::Recode => opencode_settings.show_zen_models = Some(is_enabled),
+                OpenCodeSubscription::Recode => opencode_settings.show_recode_models = Some(is_enabled),
                 OpenCodeSubscription::Go => opencode_settings.show_go_models = Some(is_enabled),
             }
         });
@@ -924,14 +924,14 @@ impl Render for ConfigurationView {
             Label::new("Loading Credentials…").into_any_element()
         } else {
             let settings = OpenCodeLanguageModelProvider::settings(cx);
-            let show_zen = settings.show_zen_models;
+            let show_recode = settings.show_recode_models;
             let show_go = settings.show_go_models;
 
             let subscription_toggles = v_flex()
                 .gap_2()
                 .child(Label::new("Subscriptions"))
                 .child(
-                    Switch::new("opencode-show-recode-models", show_zen.into())
+                    Switch::new("opencode-show-recode-models", show_recode.into())
                         .full_width(true)
                         .label("Show Recode models")
                         .label_position(SwitchLabelPosition::Start)

@@ -1120,6 +1120,11 @@ mod tests {
     #[test]
     fn test_mermaid_font_family_resolves_zed_virtual_fonts() {
         assert_eq!(
+            super::mermaid_font_family(".RecodeSans"),
+            "IBM Plex Sans, sans-serif"
+        );
+        assert_eq!(super::mermaid_font_family(".RecodeMono"), "Lilex, sans-serif");
+        assert_eq!(
             super::mermaid_font_family(".ZedSans"),
             "IBM Plex Sans, sans-serif"
         );

@@ -156,7 +156,7 @@ impl settings::Settings for AllLanguageModelSettings {
                     opencode.custom_headers,
                     opencode::RESERVED_HEADER_NAMES,
                 ),
-                show_zen_models: opencode.show_zen_models.unwrap_or(true),
+                show_recode_models: opencode.show_recode_models.unwrap_or(true),
                 show_go_models: opencode.show_go_models.unwrap_or(true),
             },
             open_router: OpenRouterSettings {

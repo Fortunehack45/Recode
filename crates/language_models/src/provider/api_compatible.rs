@@ -53,7 +53,10 @@ impl<S: ApiCompatibleProviderSettings> ApiCompatibleProviderState<S> {
     }
 
     pub fn is_authenticated(&self) -> bool {
-        self.api_key_state.has_key()
+        let is_local = self.settings.api_url().contains("localhost")
+            || self.settings.api_url().contains("127.0.0.1")
+            || self.settings.api_url().contains("0.0.0.0");
+        is_local || self.api_key_state.has_key()
     }
 
     pub fn set_api_key(
