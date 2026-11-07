@@ -229,7 +229,7 @@ impl State {
 fn catalog_results(
     catalog: Result<&str, &anyhow::Error>,
 ) -> [(OpenCodeSubscription, Result<Vec<DiscoveredModel>>); 2] {
-    [OpenCodeSubscription::Zen, OpenCodeSubscription::Go].map(|subscription| {
+    [OpenCodeSubscription::Recode, OpenCodeSubscription::Go].map(|subscription| {
         let result = catalog
             .map_err(|error| anyhow!("{error:#}"))
             .and_then(|catalog| parse_discovered_models(catalog, subscription));
@@ -248,7 +248,7 @@ async fn load_cached_catalog(fs: &dyn Fs, path: &Path) -> Result<Option<(String,
         return Ok(None);
     };
     let catalog = fs.load(path).await?;
-    for subscription in [OpenCodeSubscription::Zen, OpenCodeSubscription::Go] {
+    for subscription in [OpenCodeSubscription::Recode, OpenCodeSubscription::Go] {
         parse_discovered_models(&catalog, subscription)?;
     }
     let is_fresh = SystemTime::now()
@@ -357,7 +357,7 @@ impl OpenCodeLanguageModelProvider {
         let settings = Self::settings(cx);
 
         let discovered_models = &self.state.read(cx).discovered_models;
-        for subscription in [OpenCodeSubscription::Zen, OpenCodeSubscription::Go] {
+        for subscription in [OpenCodeSubscription::Recode, OpenCodeSubscription::Go] {
             if Self::subscription_enabled(subscription, cx) {
                 if let Some(discovered) = discovered_models.get(&subscription) {
                     for model in discovered {
@@ -378,7 +378,7 @@ impl OpenCodeLanguageModelProvider {
             };
             let subscription = match model.subscription {
                 Some(settings::OpenCodeModelSubscription::Go) => OpenCodeSubscription::Go,
-                Some(settings::OpenCodeModelSubscription::Zen) | None => OpenCodeSubscription::Zen,
+                Some(settings::OpenCodeModelSubscription::Recode) | None => OpenCodeSubscription::Recode,
             };
             if !Self::subscription_enabled(subscription, cx) {
                 continue;
@@ -466,7 +466,7 @@ impl OpenCodeLanguageModelProvider {
     fn subscription_enabled(subscription: OpenCodeSubscription, cx: &App) -> bool {
         let settings = Self::settings(cx);
         match subscription {
-            OpenCodeSubscription::Zen => settings.show_zen_models,
+            OpenCodeSubscription::Recode => settings.show_zen_models,
             OpenCodeSubscription::Go => settings.show_go_models,
         }
     }
@@ -846,7 +846,7 @@ impl ConfigurationView {
                 .get_or_insert_default();
 
             match subscription {
-                OpenCodeSubscription::Zen => opencode_settings.show_zen_models = Some(is_enabled),
+                OpenCodeSubscription::Recode => opencode_settings.show_zen_models = Some(is_enabled),
                 OpenCodeSubscription::Go => opencode_settings.show_go_models = Some(is_enabled),
             }
         });
@@ -935,7 +935,7 @@ impl Render for ConfigurationView {
                         .label_position(SwitchLabelPosition::Start)
                         .on_click(cx.listener(|this, state, window, cx| {
                             this.set_subscription_enabled(
-                                OpenCodeSubscription::Zen,
+                                OpenCodeSubscription::Recode,
                                 matches!(state, ToggleState::Selected),
                                 window,
                                 cx,
@@ -1008,7 +1008,7 @@ mod tests {
                 "models": {
                     "zen-model": {
                         "id": "zen-model",
-                        "name": "Zen Model",
+                        "name": "Recode Model",
                         "tool_call": true,
                         "modalities": {"input":["text"],"output":["text"]},
                         "limit": {"context": 12345}
@@ -1093,7 +1093,7 @@ mod tests {
             };
             provider.state.read_with(cx, |state, _cx| {
                 assert_eq!(
-                    state.discovered_models[&OpenCodeSubscription::Zen][0]
+                    state.discovered_models[&OpenCodeSubscription::Recode][0]
                         .model
                         .id(),
                     expected,
@@ -1110,7 +1110,7 @@ mod tests {
             assert_eq!(*requests.lock(), initial_requests + 1);
             provider.state.read_with(cx, |state, _cx| {
                 assert_eq!(
-                    state.discovered_models[&OpenCodeSubscription::Zen][0]
+                    state.discovered_models[&OpenCodeSubscription::Recode][0]
                         .model
                         .id(),
                     "updated-model",
@@ -1184,7 +1184,7 @@ mod tests {
             .unwrap();
         provider.state.update(cx, |state, _cx| {
             state.discovered_models.insert(
-                OpenCodeSubscription::Zen,
+                OpenCodeSubscription::Recode,
                 vec![DiscoveredModel {
                     model: test_model("old-model", ApiProtocol::Anthropic),
                     supports_images: true,
@@ -1207,7 +1207,7 @@ mod tests {
     fn test_refresh_failure_preserves_last_success_per_subscription() {
         let mut discovered_models = HashMap::default();
         discovered_models.insert(
-            OpenCodeSubscription::Zen,
+            OpenCodeSubscription::Recode,
             vec![DiscoveredModel {
                 model: test_model("old-zen", ApiProtocol::Anthropic),
                 supports_images: true,
@@ -1233,20 +1233,20 @@ mod tests {
             &mut discovered_models,
             &mut errors,
             [
-                (OpenCodeSubscription::Zen, Err(anyhow!("refresh failed"))),
+                (OpenCodeSubscription::Recode, Err(anyhow!("refresh failed"))),
                 (OpenCodeSubscription::Go, Ok(vec![new_go_model])),
             ],
         );
 
         assert_eq!(
-            discovered_models[&OpenCodeSubscription::Zen][0].model.id(),
+            discovered_models[&OpenCodeSubscription::Recode][0].model.id(),
             "old-zen"
         );
         assert_eq!(
             discovered_models[&OpenCodeSubscription::Go][0].model.id(),
             "new-go"
         );
-        assert!(errors.contains_key(&OpenCodeSubscription::Zen));
+        assert!(errors.contains_key(&OpenCodeSubscription::Recode));
         assert!(!errors.contains_key(&OpenCodeSubscription::Go));
     }
 
@@ -1281,7 +1281,7 @@ mod tests {
                     supports_images: false,
                     supports_thinking: true,
                 },
-                OpenCodeSubscription::Zen,
+                OpenCodeSubscription::Recode,
             );
             assert_eq!(
                 model
@@ -1311,7 +1311,7 @@ mod tests {
 
     #[test]
     fn test_discovery_includes_all_models_including_free() -> Result<()> {
-        for (cost, zen_model_count) in [
+        for (cost, recode_model_count) in [
             (serde_json::json!({"input": 0, "output": 0}), 1),
             (serde_json::json!({"input": 0, "output": 1}), 1),
             (serde_json::json!({"input": 1, "output": 0}), 1),
@@ -1340,7 +1340,7 @@ mod tests {
             })
             .to_string();
             for (subscription, expected_count) in [
-                (OpenCodeSubscription::Zen, zen_model_count),
+                (OpenCodeSubscription::Recode, recode_model_count),
                 (OpenCodeSubscription::Go, 1),
             ] {
                 let models = parse_discovered_models(&catalog, subscription)?;
@@ -1352,14 +1352,14 @@ mod tests {
 
     #[test]
     fn test_discovery_filters_deprecated_status_per_subscription() -> Result<()> {
-        for (zen_status, go_status, zen_count, go_count) in [
+        for (recode_status, go_status, recode_count, go_count) in [
             (Some("deprecated"), None, 0, 1),
             (None, Some("deprecated"), 1, 0),
             (Some("active"), Some("preview"), 1, 1),
             (Some("deprecated"), Some("deprecated"), 0, 0),
         ] {
             let mut catalog = serde_json::json!({});
-            for (provider_key, status) in [("opencode", zen_status), ("opencode-go", go_status)] {
+            for (provider_key, status) in [("opencode", recode_status), ("opencode-go", go_status)] {
                 let mut model = serde_json::json!({
                     "id": "model",
                     "name": "Model",
@@ -1376,7 +1376,7 @@ mod tests {
                 });
             }
             for (subscription, expected_count) in [
-                (OpenCodeSubscription::Zen, zen_count),
+                (OpenCodeSubscription::Recode, recode_count),
                 (OpenCodeSubscription::Go, go_count),
             ] {
                 let models = parse_discovered_models(&catalog.to_string(), subscription)?;
@@ -1417,7 +1417,7 @@ mod tests {
                 "opencode-go": provider,
             })
             .to_string();
-            for subscription in [OpenCodeSubscription::Zen, OpenCodeSubscription::Go] {
+            for subscription in [OpenCodeSubscription::Recode, OpenCodeSubscription::Go] {
                 let models = parse_discovered_models(&catalog, subscription)?;
                 assert_eq!(models.len(), 1, "{subscription:?}: {model_provider}");
                 assert_eq!(
@@ -1485,7 +1485,7 @@ mod tests {
                     }
                 }
             }"#,
-            OpenCodeSubscription::Zen,
+            OpenCodeSubscription::Recode,
         );
 
         assert!(result.is_err());

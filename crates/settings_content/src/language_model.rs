@@ -280,8 +280,8 @@ pub enum OpenCodeApiProtocol {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema, MergeFrom)]
 #[serde(rename_all = "snake_case")]
 pub enum OpenCodeModelSubscription {
-    #[serde(alias = "recode")]
-    Zen,
+    #[serde(alias = "zen")]
+    Recode,
     Go,
 }
 

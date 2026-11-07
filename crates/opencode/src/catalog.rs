@@ -29,7 +29,7 @@ pub fn parse_model_catalog(
     available_models: Option<&[String]>,
 ) -> Result<Vec<DiscoveredModel>> {
     let provider_key = match subscription {
-        OpenCodeSubscription::Zen => "opencode",
+        OpenCodeSubscription::Recode => "opencode",
         OpenCodeSubscription::Go => "opencode-go",
     };
     let catalog = serde_json::from_str::<serde_json::Value>(catalog)?;

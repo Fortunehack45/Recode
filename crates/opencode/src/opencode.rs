@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 pub mod catalog;
 pub mod completion;
 
-pub const OPENCODE_API_URL: &str = "https://opencode.ai/zen";
+pub const OPENCODE_API_URL: &str = "https://opencode.ai/inference/openai/v1";
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
@@ -33,28 +33,29 @@ pub enum ApiProtocol {
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "snake_case")]
 pub enum OpenCodeSubscription {
-    Zen,
+    #[serde(alias = "zen")]
+    Recode,
     Go,
 }
 
 impl OpenCodeSubscription {
     pub fn display_name(&self) -> &'static str {
         match self {
-            Self::Zen => "Recode",
+            Self::Recode => "Recode",
             Self::Go => "Go",
         }
     }
 
     pub fn id_prefix(&self) -> &'static str {
         match self {
-            Self::Zen => "recode",
+            Self::Recode => "recode",
             Self::Go => "go",
         }
     }
 
     pub fn api_path_suffix(&self) -> &'static str {
         match self {
-            Self::Zen => "",
+            Self::Recode => "",
             Self::Go => "/go",
         }
     }

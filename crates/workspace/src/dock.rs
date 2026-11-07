@@ -39,7 +39,7 @@ pub trait Panel: Focusable + EventEmitter<PanelEvent> + Render + Sized {
     /// The `Focusable::focus_handle` root identifies the panel's subtree for containment checks
     /// and must be tracked by the panel's root element. This method returns the handle that should
     /// receive focus when the panel is activated, such as a filter, commit, or message editor; it
-    /// must be a focus-tree descendant of the root or containment checks such as Zen-mode auto-close
+    /// must be a focus-tree descendant of the root or containment checks such as Focus-mode auto-close
     /// and toggle-focus will misbehave.
     fn activation_focus_handle(&self, cx: &App) -> FocusHandle {
         self.focus_handle(cx)

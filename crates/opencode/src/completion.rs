@@ -99,10 +99,15 @@ pub async fn stream_completion(
                 model.interleaved_reasoning(),
             )?;
             prepare_deepseek_reasoning_content(&mut request, model.interleaved_reasoning());
+            let target_url = if api_url.ends_with("/v1") {
+                api_url.to_string()
+            } else {
+                format!("{api_url}/v1")
+            };
             let stream = open_ai::stream_completion(
                 client,
                 config.provider_name.0.as_ref(),
-                &format!("{api_url}/v1"),
+                &target_url,
                 config.api_key,
                 request,
                 config.custom_headers,
@@ -126,10 +131,15 @@ pub async fn stream_completion(
                 supports_none,
                 &config.provider_id,
             )?;
+            let target_url = if api_url.ends_with("/v1") {
+                api_url.to_string()
+            } else {
+                format!("{api_url}/v1")
+            };
             let stream = open_ai::responses::stream_response(
                 client,
                 config.provider_name.0.as_ref(),
-                &format!("{api_url}/v1"),
+                &target_url,
                 config.api_key,
                 request,
                 config.custom_headers,
@@ -202,25 +212,25 @@ mod tests {
             (
                 ApiProtocol::Anthropic,
                 "claude-fable-5-1",
-                "/zen/go/v1/messages",
+                "/inference/openai/v1/go/v1/messages",
                 "event: content_block_delta\ndata: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"text_delta\",\"text\":\"Hello\"}}\n\n",
             ),
             (
                 ApiProtocol::OpenAiChat,
                 "model",
-                "/zen/go/v1/chat/completions",
+                "/inference/openai/v1/go/chat/completions",
                 "data: {\"id\":\"chat-1\",\"object\":\"chat.completion.chunk\",\"created\":0,\"model\":\"model\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hello\"},\"finish_reason\":null}]}\n\ndata: [DONE]\n\n",
             ),
             (
                 ApiProtocol::OpenAiResponses,
                 "model",
-                "/zen/go/v1/responses",
+                "/inference/openai/v1/go/responses",
                 "event: response.output_text.delta\ndata: {\"type\":\"response.output_text.delta\",\"item_id\":\"msg-1\",\"output_index\":0,\"content_index\":0,\"delta\":\"Hello\"}\n\n",
             ),
             (
                 ApiProtocol::Google,
                 "model",
-                "/zen/go/v1/models/model:streamGenerateContent",
+                "/inference/openai/v1/go/v1/models/model:streamGenerateContent",
                 "data: {\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":\"Hello\"}]},\"finishReason\":\"STOP\"}]}\n\n",
             ),
         ] {
@@ -277,7 +287,7 @@ mod tests {
                     client.as_ref(),
                     CompletionConfig {
                         model: &model,
-                        api_url: "https://opencode.ai/zen/go/",
+                        api_url: "https://opencode.ai/inference/openai/v1/go",
                         api_key: "test-key",
                         provider_id: LanguageModelProviderId::new("opencode-go"),
                         provider_name: LanguageModelProviderName::new("OpenCode Go"),

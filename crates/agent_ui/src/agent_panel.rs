@@ -7345,7 +7345,7 @@ mod tests {
             );
             assert!(
                 panel.is_zoomed(window, cx),
-                "clicking tool call output should not close Zen Mode"
+                "clicking tool call output should not close Focus Mode"
             );
         });
 
@@ -7369,7 +7369,7 @@ mod tests {
             );
             assert!(
                 panel.is_zoomed(window, cx),
-                "focusing the thread title editor should not close Zen Mode"
+                "focusing the thread title editor should not close Focus Mode"
             );
         });
     }
@@ -7448,7 +7448,7 @@ mod tests {
             );
             assert!(
                 panel.read(cx).is_zoomed(window, cx),
-                "resubmitting an edited message should not close Zen Mode"
+                "resubmitting an edited message should not close Focus Mode"
             );
             assert!(
                 panel.read(cx).focus_handle(cx).contains_focused(window, cx),
