@@ -13,6 +13,7 @@ use settings::{RegisterSetting, Settings};
 )]
 pub enum BaseKeymap {
     #[default]
+    #[serde(alias = "Recode", alias = "recode")]
     Zed,
     VSCode,
     JetBrains,

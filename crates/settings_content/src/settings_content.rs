@@ -536,6 +536,7 @@ pub struct ExtensionsSettingsContent {
 )]
 pub enum BaseKeymapContent {
     #[default]
+    #[serde(alias = "Recode", alias = "recode")]
     Zed,
     VSCode,
     JetBrains,
