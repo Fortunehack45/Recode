@@ -298,7 +298,13 @@ impl LanguageModelRegistry {
     }
 
     pub fn provider(&self, id: &LanguageModelProviderId) -> Option<Arc<dyn LanguageModelProvider>> {
-        self.providers.get(id).cloned()
+        if let Some(provider) = self.providers.get(id) {
+            return Some(provider.clone());
+        }
+        if id.0.as_ref() == "recode.dev" {
+            return self.providers.get(&ZED_CLOUD_PROVIDER_ID).cloned();
+        }
+        None
     }
 
     /// The registered provider that serves `model`.

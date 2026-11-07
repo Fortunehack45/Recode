@@ -51,9 +51,9 @@ fn model_supports_thinking(model: &opencode::Model) -> bool {
 }
 
 const PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("opencode");
-const PROVIDER_NAME: LanguageModelProviderName = LanguageModelProviderName::new("Recode");
+const PROVIDER_NAME: LanguageModelProviderName = LanguageModelProviderName::new("OpenCode");
 
-const API_KEY_ENV_VAR_NAME: &str = "RECODE_API_KEY";
+const API_KEY_ENV_VAR_NAME: &str = "OPENCODE_API_KEY";
 static API_KEY_ENV_VAR: LazyLock<EnvVar> = env_var!(API_KEY_ENV_VAR_NAME);
 const OPENCODE_SESSION_HEADER_NAME: &str = "x-opencode-session";
 const MODEL_CATALOG_RESPONSE_LIMIT_BYTES: u64 = 8 * 1024 * 1024;
@@ -511,11 +511,11 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
     }
 
     fn authentication_error_message(&self) -> SharedString {
-        "The API key for Recode is invalid or has expired. Please enter your API key in Settings -> AI -> LLM Providers -> Recode (or use Ollama / OpenRouter for free models).".into()
+        "The API key for OpenCode is invalid or has expired. Update your key in Settings > AI > LLM Providers > OpenCode to continue.".into()
     }
 
     fn missing_credentials_error_message(&self) -> SharedString {
-        "No API key configured for Recode. Please add your API key in Settings -> AI -> LLM Providers -> Recode (or use Ollama / OpenRouter for free models).".into()
+        "No API key configured for OpenCode. Add your key in Settings > AI > LLM Providers > OpenCode to continue.".into()
     }
 
     fn provided_models(&self, cx: &App) -> Vec<LanguageModel> {
@@ -525,8 +525,8 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
             .collect()
     }
 
-    fn is_authenticated(&self, _cx: &App) -> bool {
-        true
+    fn is_authenticated(&self, cx: &App) -> bool {
+        self.state.read(cx).is_authenticated()
     }
 
     fn authenticate(&self, cx: &mut App) -> Task<Result<(), AuthenticateError>> {
@@ -546,7 +546,7 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
                     .into()
             })
             .description(InlineDescription::Text(
-                "To use Recode AI models, you can provide an API key.".into(),
+                "To use OpenCode models, you can provide an API key.".into(),
             )),
         ))
     }
@@ -577,7 +577,9 @@ impl LanguageModelClient for OpenCodeLanguageModelProvider {
         let executor = cx.background_executor().clone();
         let stream_in_background = config.model.protocol() != ApiProtocol::Google;
         async move {
-            let api_key = api_key.unwrap_or_else(|| Arc::from(""));
+            let api_key = api_key.ok_or(LanguageModelCompletionError::NoApiKey {
+                provider: PROVIDER_NAME,
+            })?;
             let stream = request_limiter
                 .stream(async move {
                     opencode::completion::stream_completion(

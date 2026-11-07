@@ -164,48 +164,48 @@ impl Job {
 }
 
 #[cfg(not(test))]
-pub(crate) static JOBS: LazyLock<[Job; 22]> = LazyLock::new(|| {
+pub(crate) static JOBS: LazyLock<[Job; 28]> = LazyLock::new(|| {
     fn p(value: &str) -> &Path {
         Path::new(value)
     }
     [
-        // Move old files
-        // Not deleting because installing new files can fail
+        // Create backup directory
         Job::mkdir(p("old")),
-        Job::move_file(p("Recode.exe"), p("old\\Zed.exe")),
         Job::mkdir(p("old\\bin")),
-        Job::move_file(p("bin\\Zed.exe"), p("old\\bin\\Zed.exe")),
-        Job::move_file(p("bin\\zed"), p("old\\bin\\zed")),
-        //
-        // TODO: remove after a few weeks once everyone is on the new version and this file never exists
+
+        // Move old files safely (using move_if_exists so missing legacy files never abort)
+        Job::move_if_exists(p("Recode.exe"), p("old\\Recode.exe")),
+        Job::move_if_exists(p("Zed.exe"), p("old\\Zed.exe")),
+        Job::move_if_exists(p("bin\\recode.exe"), p("old\\bin\\recode.exe")),
+        Job::move_if_exists(p("bin\\recode.cmd"), p("old\\bin\\recode.cmd")),
+        Job::move_if_exists(p("bin\\recode"), p("old\\bin\\recode")),
+        Job::move_if_exists(p("bin\\Zed.exe"), p("old\\bin\\Zed.exe")),
+        Job::move_if_exists(p("bin\\zed"), p("old\\bin\\zed")),
+
+        // Console / DLL backups
         Job::move_if_exists(p("OpenConsole.exe"), p("old\\OpenConsole.exe")),
         Job::mkdir(p("old\\x64")),
         Job::mkdir(p("old\\arm64")),
         Job::move_if_exists(p("x64\\OpenConsole.exe"), p("old\\x64\\OpenConsole.exe")),
-        Job::move_if_exists(
-            p("arm64\\OpenConsole.exe"),
-            p("old\\arm64\\OpenConsole.exe"),
-        ),
-        //
-        Job::move_file(p("conpty.dll"), p("old\\conpty.dll")),
-        // Copy new files
-        Job::move_file(p("install\\Zed.exe"), p("Recode.exe")),
-        Job::move_file(p("install\\bin\\Zed.exe"), p("bin\\Zed.exe")),
-        Job::move_file(p("install\\bin\\zed"), p("bin\\zed")),
-        //
+        Job::move_if_exists(p("arm64\\OpenConsole.exe"), p("old\\arm64\\OpenConsole.exe")),
+        Job::move_if_exists(p("conpty.dll"), p("old\\conpty.dll")),
+
+        // Copy new files from install
+        Job::move_if_exists(p("install\\Recode.exe"), p("Recode.exe")),
+        Job::move_if_exists(p("install\\Zed.exe"), p("Recode.exe")),
+        Job::move_if_exists(p("install\\bin\\recode.exe"), p("bin\\recode.exe")),
+        Job::move_if_exists(p("install\\bin\\recode.cmd"), p("bin\\recode.cmd")),
+        Job::move_if_exists(p("install\\bin\\recode"), p("bin\\recode")),
+        Job::move_if_exists(p("install\\bin\\Zed.exe"), p("bin\\recode.exe")),
+
+        // OpenConsole new files
         Job::mkdir_if_exists(p("x64"), p("install\\x64")),
         Job::mkdir_if_exists(p("arm64"), p("install\\arm64")),
-        Job::move_if_exists(
-            p("install\\x64\\OpenConsole.exe"),
-            p("x64\\OpenConsole.exe"),
-        ),
-        Job::move_if_exists(
-            p("install\\arm64\\OpenConsole.exe"),
-            p("arm64\\OpenConsole.exe"),
-        ),
-        //
-        Job::move_file(p("install\\conpty.dll"), p("conpty.dll")),
-        // Cleanup installer and updates folder
+        Job::move_if_exists(p("install\\x64\\OpenConsole.exe"), p("x64\\OpenConsole.exe")),
+        Job::move_if_exists(p("install\\arm64\\OpenConsole.exe"), p("arm64\\OpenConsole.exe")),
+        Job::move_if_exists(p("install\\conpty.dll"), p("conpty.dll")),
+
+        // Cleanup folders
         Job::rmdir_nofail(p("updates")),
         Job::rmdir_nofail(p("install")),
         // Cleanup old installation
@@ -280,6 +280,9 @@ fn release_file_handles(app_dir: &Path) -> Result<()> {
     // Files that commonly get locked by Explorer or other processes
     let files_to_release = [
         app_dir.join("Recode.exe"),
+        app_dir.join("bin\\recode.exe"),
+        app_dir.join("bin\\recode.cmd"),
+        app_dir.join("bin\\recode"),
         app_dir.join("bin\\Zed.exe"),
         app_dir.join("bin\\zed"),
         app_dir.join("conpty.dll"),
@@ -458,13 +461,13 @@ mod test {
     fn test_zed_launch_command_preserves_arguments() {
         let arguments = vec![
             OsString::from("--user-data-dir"),
-            OsString::from(r"C:\Zed Data"),
+            OsString::from(r"C:\Recode Data"),
         ];
         let command = zed_launch_command(Path::new(r"C:\Program Files\Recode"), &arguments);
 
         assert_eq!(
             command.get_program(),
-            Path::new(r"C:\Program Files\Recode\Zed.exe").as_os_str()
+            Path::new(r"C:\Program Files\Recode\Recode.exe").as_os_str()
         );
         assert_eq!(
             command.get_args().collect::<Vec<_>>(),

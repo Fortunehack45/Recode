@@ -73,6 +73,7 @@ if (Test-Path "$TargetDir/recode.exe") {
 # Copy cli binary
 if (Test-Path "$TargetDir/cli.exe") {
     Copy-Item "$TargetDir/cli.exe" "$staging/bin/recode.exe" -Force
+    Copy-Item "$TargetDir/cli.exe" "$staging/bin/zed.exe" -Force
 }
 
 # Copy auto update helper
