@@ -111,11 +111,14 @@ $definitions = @(
 
 Write-Host "Running Inno Setup compiler..."
 & $iscc $definitions $issFile
+if ($LASTEXITCODE -ne 0) {
+    throw "Inno Setup compiler exited with code $LASTEXITCODE"
+}
 
 $setupFile = Join-Path $outFullPath "RecodeSetup-x64.exe"
 if (Test-Path $setupFile) {
     $size = (Get-Item $setupFile).Length / 1MB
     Write-Host ("Successfully built RecodeSetup-x64.exe ({0:N1} MB) in {1}" -f $size, $outFullPath) -ForegroundColor Green
 } else {
-    Write-Warning "RecodeSetup-x64.exe was not created by Inno Setup."
+    throw "RecodeSetup-x64.exe was not created by Inno Setup."
 }

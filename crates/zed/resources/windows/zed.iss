@@ -55,9 +55,9 @@ Type: filesandordirs; Name: "{app}\arm64"
 
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "addcontextmenufiles"; Description: "{cm:AddContextMenuFiles,{#AppDisplayName}}"; GroupDescription: "{cm:Other}"
-Name: "addcontextmenufolders"; Description: "{cm:AddContextMenuFolders,{#AppDisplayName}}"; GroupDescription: "{cm:Other}"; Flags: checked; Check: not IsWindows11OrLater
+Name: "addcontextmenufolders"; Description: "{cm:AddContextMenuFolders,{#AppDisplayName}}"; GroupDescription: "{cm:Other}"; Check: not IsWindows11OrLater
 Name: "associatewithfiles"; Description: "{cm:AssociateWithFiles,{#AppDisplayName}}"; GroupDescription: "{cm:Other}"
 Name: "addtopath"; Description: "{cm:AddToPath}"; GroupDescription: "{cm:Other}"
 

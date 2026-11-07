@@ -209,6 +209,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -239,6 +242,9 @@ jobs:
             TAG="v${VERSION}"
           else
             VERSION=$(grep -m1 '^version' crates/zed/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            if [ -z "$VERSION" ]; then
+              VERSION="1.29.0"
+            fi
             TAG="v${VERSION}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
