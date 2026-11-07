@@ -100,8 +100,8 @@ BEGIN
             VALUE "FileVersion", "{pkg_version}\0"
             VALUE "ProductName", "{product_name}\0"
             VALUE "ProductVersion", "{product_version}\0"
-            VALUE "CompanyName", "Zed Industries, Inc.\0"
-            VALUE "LegalCopyright", "Copyright 2022 - 2025 Zed Industries, Inc.\0"
+            VALUE "CompanyName", "Recode\0"
+            VALUE "LegalCopyright", "Copyright 2026 Recode Contributors\0"
         END
     END
     BLOCK "VarFileInfo"

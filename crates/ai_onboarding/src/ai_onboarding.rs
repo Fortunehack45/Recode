@@ -165,7 +165,7 @@ impl ZedAiOnboarding {
             .w_full()
             .relative()
             .gap_1()
-            .child(Headline::new("Welcome to Zed AI"))
+            .child(Headline::new("Welcome to Recode AI"))
             .child(
                 Label::new("Sign in to try GPT Luna. Your 14 days begin when you start the trial.")
                     .color(Color::Muted)
@@ -195,7 +195,7 @@ impl ZedAiOnboarding {
                 .relative()
                 .min_w_0()
                 .gap_1()
-                .child(Headline::new("Welcome to Zed AI"))
+                .child(Headline::new("Welcome to Recode AI"))
                 .child(YoungAccountBanner)
                 .child(
                     v_flex()
@@ -232,7 +232,7 @@ impl ZedAiOnboarding {
                 .w_full()
                 .relative()
                 .gap_1()
-                .child(Headline::new("Welcome to Zed AI"))
+                .child(Headline::new("Welcome to Recode AI"))
                 .child(
                     v_flex()
                         .mt_2()
@@ -315,7 +315,7 @@ impl ZedAiOnboarding {
             .relative()
             .gap_1()
             .child(Self::certified_user_stamp(cx))
-            .child(Headline::new("Welcome to Zed Pro"))
+            .child(Headline::new("Welcome to Recode Pro"))
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
@@ -332,7 +332,7 @@ impl ZedAiOnboarding {
             .relative()
             .gap_1()
             .child(Self::business_stamp(cx))
-            .child(Headline::new("Welcome to Zed Business"))
+            .child(Headline::new("Welcome to Recode Business"))
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
@@ -349,7 +349,7 @@ impl ZedAiOnboarding {
             .relative()
             .gap_1()
             .child(Self::vip_stamp(cx))
-            .child(Headline::new("Welcome to Zed VIP"))
+            .child(Headline::new("Welcome to Recode VIP"))
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
@@ -366,7 +366,7 @@ impl ZedAiOnboarding {
             .relative()
             .gap_1()
             .child(Self::student_stamp(cx))
-            .child(Headline::new("Welcome to Zed Student"))
+            .child(Headline::new("Welcome to Recode Student"))
             .child(
                 Label::new("Here's what you get:")
                     .color(Color::Muted)
