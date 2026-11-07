@@ -298,7 +298,7 @@ impl ZedAiOnboarding {
             .relative()
             .gap_1()
             .child(Self::pro_trial_stamp(cx))
-            .child(Headline::new("Welcome to the Zed Pro Trial"))
+            .child(Headline::new("Welcome to the Recode Pro Trial"))
             .child(
                 Label::new("Included for 14 days from when your trial started:")
                     .color(Color::Muted)

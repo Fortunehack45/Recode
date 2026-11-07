@@ -99,6 +99,12 @@ pub fn parse_model_catalog(
                         .collect::<Vec<_>>()
                 })
                 .filter(|levels| !levels.is_empty());
+            let custom_api_url = metadata
+                .provider
+                .as_ref()
+                .and_then(|p| p.api.clone())
+                .or_else(|| provider.api.clone());
+
             Some(DiscoveredModel {
                 model: Model::new(
                     metadata.id,
@@ -107,7 +113,7 @@ pub fn parse_model_catalog(
                     metadata.limit.output,
                     protocol,
                     reasoning_effort_levels,
-                    None,
+                    custom_api_url,
                     metadata.interleaved == serde_json::Value::Bool(true)
                         || metadata.interleaved.is_object(),
                 ),
@@ -142,6 +148,7 @@ pub fn normalize_reasoning_effort(effort: &str) -> Option<ReasoningEffort> {
 #[derive(Deserialize)]
 struct CatalogProvider {
     npm: Option<String>,
+    api: Option<String>,
     models: HashMap<String, serde_json::Value>,
 }
 
@@ -187,6 +194,7 @@ struct ModelLimits {
 #[derive(Deserialize)]
 struct ModelTransport {
     npm: Option<String>,
+    api: Option<String>,
 }
 
 #[derive(Deserialize)]

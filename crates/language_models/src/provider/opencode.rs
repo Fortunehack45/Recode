@@ -51,9 +51,9 @@ fn model_supports_thinking(model: &opencode::Model) -> bool {
 }
 
 const PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("opencode");
-const PROVIDER_NAME: LanguageModelProviderName = LanguageModelProviderName::new("OpenCode");
+const PROVIDER_NAME: LanguageModelProviderName = LanguageModelProviderName::new("Recode");
 
-const API_KEY_ENV_VAR_NAME: &str = "OPENCODE_API_KEY";
+const API_KEY_ENV_VAR_NAME: &str = "RECODE_API_KEY";
 static API_KEY_ENV_VAR: LazyLock<EnvVar> = env_var!(API_KEY_ENV_VAR_NAME);
 const OPENCODE_SESSION_HEADER_NAME: &str = "x-opencode-session";
 const MODEL_CATALOG_RESPONSE_LIMIT_BYTES: u64 = 8 * 1024 * 1024;
@@ -510,6 +510,14 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
         None
     }
 
+    fn authentication_error_message(&self) -> SharedString {
+        "The API key for Recode is invalid or has expired. Please enter your API key in Settings -> AI -> LLM Providers -> Recode (or use Ollama / OpenRouter for free models).".into()
+    }
+
+    fn missing_credentials_error_message(&self) -> SharedString {
+        "No API key configured for Recode. Please add your API key in Settings -> AI -> LLM Providers -> Recode (or use Ollama / OpenRouter for free models).".into()
+    }
+
     fn provided_models(&self, cx: &App) -> Vec<LanguageModel> {
         self.opencode_models(cx)
             .values()
@@ -538,7 +546,7 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
                     .into()
             })
             .description(InlineDescription::Text(
-                "To use OpenCode models in Recode, you can provide an API key.".into(),
+                "To use Recode AI models, you can provide an API key.".into(),
             )),
         ))
     }
@@ -882,7 +890,7 @@ impl Render for ConfigurationView {
         let api_key_section = v_flex()
             .on_action(cx.listener(Self::save_api_key))
             .child(Label::new(
-                "To use OpenCode models in Recode, you can provide an API key:",
+                "To use Recode AI models, you can provide an API key:",
             ).color(Color::Muted))
             .child(
                 List::new()
@@ -890,13 +898,13 @@ impl Render for ConfigurationView {
                         ListBulletItem::new("")
                             .child(Label::new("Sign in and get your key at").color(Color::Muted))
                             .child(ButtonLink::new(
-                                "OpenCode Console",
+                                "Recode AI Console",
                                 "https://opencode.ai/auth",
                             )),
                     )
                     .when(is_editing, |this| {
                         this.child(ListBulletItem::new(
-                            "Paste your API key below and hit enter to start using OpenCode",
+                            "Paste your API key below and hit enter to start using Recode AI",
                         ).label_color(Color::Muted))
                     }),
             )
@@ -952,7 +960,7 @@ impl Render for ConfigurationView {
 
             let no_subscriptions_warning = if !show_zen && !show_go {
                 Some(Banner::new().severity(Severity::Warning).child(Label::new(
-                    "No subscriptions enabled. Enable at least one subscription to use OpenCode.",
+                    "No subscriptions enabled. Enable at least one subscription to use Recode AI.",
                 )))
             } else {
                 None
@@ -966,7 +974,7 @@ impl Render for ConfigurationView {
                         Banner::new()
                             .severity(Severity::Error)
                             .child(Label::new(format!(
-                                "Failed to load OpenCode {} models: {error}",
+                                "Failed to load Recode {} models: {error}",
                                 subscription.display_name()
                             )))
                     });
@@ -974,7 +982,7 @@ impl Render for ConfigurationView {
             v_flex()
                 .size_full()
                 .gap_2p5()
-                .child(Headline::new("OpenCode").size(HeadlineSize::Small))
+                .child(Headline::new("Recode").size(HeadlineSize::Small))
                 .child(api_key_section)
                 .child(Divider::horizontal())
                 .child(subscription_toggles)

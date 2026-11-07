@@ -1,4 +1,7 @@
 {
-  "version": "1.29.0",
-  "url": "https://github.com/Fortunehack45/Recode/releases/latest/download/RecodeSetup-x64.exe"
+  "version": "1.29.2",
+  "tag": "v1.29.2",
+  "url": "https://github.com/Fortunehack45/Recode/releases/download/v1.29.2/RecodeSetup-x64.exe",
+  "portable_url": "https://github.com/Fortunehack45/Recode/releases/download/v1.29.2/Recode-windows-x64-portable.zip",
+  "published_at": "2026-11-07T08:50:00Z"
 }
