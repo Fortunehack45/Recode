@@ -2922,7 +2922,7 @@
   },
   // The server to connect to. If the environment variable
   // ZED_SERVER_URL is set, it will override this setting.
-  "server_url": "https://github.com/Fortunehack45/Recode",
+  "server_url": "https://zed.dev",
   // Settings overrides to use when using Recode Preview.
   // Mostly useful for developers who are managing multiple instances of Recode.
   "preview": {

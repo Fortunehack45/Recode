@@ -277,10 +277,9 @@ impl HttpClientWithUrl {
     pub fn build_zed_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://zed.dev" => "https://api.zed.dev",
             "https://staging.zed.dev" => "https://api-staging.zed.dev",
             "http://localhost:3000" => "http://localhost:8080",
-            other => other,
+            _ => "https://api.zed.dev",
         };
 
         Ok(Url::parse_with_params(
@@ -293,10 +292,9 @@ impl HttpClientWithUrl {
     pub fn build_zed_cloud_url(&self, path: &str) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://zed.dev" => "https://cloud.zed.dev",
             "https://staging.zed.dev" => "https://cloud.zed.dev",
             "http://localhost:3000" => "http://localhost:8787",
-            other => other,
+            _ => "https://cloud.zed.dev",
         };
 
         Ok(Url::parse(&format!("{}{}", base_api_url, path))?)
@@ -306,10 +304,9 @@ impl HttpClientWithUrl {
     pub fn build_zed_cloud_url_with_query(&self, path: &str, query: impl Serialize) -> Result<Url> {
         let base_url = self.base_url();
         let base_api_url = match base_url.as_ref() {
-            "https://zed.dev" => "https://cloud.zed.dev",
             "https://staging.zed.dev" => "https://cloud.zed.dev",
             "http://localhost:3000" => "http://localhost:8787",
-            other => other,
+            _ => "https://cloud.zed.dev",
         };
         let query = serde_urlencoded::to_string(&query)?;
         Ok(Url::parse(&format!("{}{}?{}", base_api_url, path, query))?)

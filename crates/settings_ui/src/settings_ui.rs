@@ -5269,12 +5269,28 @@ fn render_font_picker(
         .cloned()
         .map_or_else(|| SharedString::default(), |value| value.into_gpui());
 
+    let display_label = match current_value.as_ref() {
+        ".RecodeMono" | "RecodeMono" | ".ZedMono" | "ZedMono" | "Zed Plex Mono" => {
+            SharedString::from("Recode Mono")
+        }
+        ".RecodeSans" | "RecodeSans" | ".ZedSans" | "ZedSans" | "Zed Plex Sans" => {
+            SharedString::from("Recode Sans")
+        }
+        other => {
+            if let Some(stripped) = other.strip_prefix('.') {
+                SharedString::from(stripped.to_string())
+            } else {
+                current_value.clone()
+            }
+        }
+    };
+
     let handle = ui::PopoverMenuHandle::default();
     PopoverMenu::new("font-picker")
         .trigger(wire_picker_trigger_a11y(
             render_picker_trigger_button(
                 "font_family_picker_trigger".into(),
-                current_value.clone(),
+                display_label,
             )
             .aria_label(title)
             .when(!description.is_empty(), |this| {

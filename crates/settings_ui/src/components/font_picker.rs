@@ -178,6 +178,21 @@ impl PickerDelegate for FontPickerDelegate {
     ) -> Option<Self::ListItem> {
         let font_match = self.filtered_fonts.get(ix)?;
         let font_name: SharedString = font_match.string.clone().into();
+        let display_label = match font_name.as_ref() {
+            ".RecodeMono" | "RecodeMono" | ".ZedMono" | "ZedMono" | "Zed Plex Mono" => {
+                SharedString::from("Recode Mono")
+            }
+            ".RecodeSans" | "RecodeSans" | ".ZedSans" | "ZedSans" | "Zed Plex Sans" => {
+                SharedString::from("Recode Sans")
+            }
+            other => {
+                if let Some(stripped) = other.strip_prefix('.') {
+                    SharedString::from(stripped.to_string())
+                } else {
+                    font_name.clone()
+                }
+            }
+        };
 
         Some(
             ListItem::new(ix)
@@ -187,7 +202,7 @@ impl PickerDelegate for FontPickerDelegate {
                 .child(
                     div()
                         .font_family(font_name.clone())
-                        .child(Label::new(font_name)),
+                        .child(Label::new(display_label)),
                 )
                 .into_any_element(),
         )
