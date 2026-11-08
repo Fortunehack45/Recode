@@ -120,8 +120,11 @@ pub struct Config {
     pub http_port: u16,
     pub database_url: String,
     pub database_max_connections: u32,
+    #[serde(alias = "livekit_url")]
     pub livekit_server: Option<String>,
+    #[serde(alias = "livekit_api_key")]
     pub livekit_key: Option<String>,
+    #[serde(alias = "livekit_api_secret")]
     pub livekit_secret: Option<String>,
     pub rust_log: Option<String>,
     pub log_json: Option<bool>,
