@@ -39,3 +39,4 @@ RUN apt-get update; \
 WORKDIR app
 COPY --from=builder /app/collab /app/collab
 ENTRYPOINT ["/app/collab"]
+CMD ["serve", "collab"]
