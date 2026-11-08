@@ -12,6 +12,8 @@ ARG CARGO_PROFILE_RELEASE_PANIC=abort
 ARG GITHUB_SHA
 
 ENV GITHUB_SHA=$GITHUB_SHA
+ENV CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16
+ENV CARGO_PROFILE_RELEASE_LTO=false
 
 # Also add `cmake`, since we need it to build `wasmtime`.
 # clang is needed because `webrtc-sys` uses Clang-specific compiler flags.
