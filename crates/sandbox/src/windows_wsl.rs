@@ -82,7 +82,7 @@ const HELPER_RESULT_PREFIX: &str = "zed-wsl-helper:";
 /// user's `PATH` and writes desktop entries we don't want. Instead the Windows
 /// side resolves the exact channel+version (see `wsl_zed_release`) and this
 /// script downloads that release's Linux tarball straight from
-/// `cloud.zed.dev/releases` and unpacks it into a private, off-`PATH` location
+/// `GitHub Releases` and unpacks it into a private, off-`PATH` location
 /// (`~/.local/libexec/zed/<channel>`, the conventional spot for executables run
 /// by other programs rather than directly by the user). One managed copy per
 /// channel is kept, tracked by a marker file so an exact channel+version match
@@ -118,7 +118,7 @@ case "$arch" in
     aarch64 | arm64) arch="aarch64" ;;
     *) echo "unsupported WSL architecture for the zed sandbox helper: $arch" >&2; exit 1 ;;
 esac
-url="https://cloud.zed.dev/releases/$channel/$version/download?asset=zed&arch=$arch&os=linux&source=zed-wsl-sandbox"
+url="https://github.com/Fortunehack45/Recode/releases/download/v$version/Recode-linux-$arch.tar.gz"
 
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/zed-wsl-helper-XXXXXX")
 trap 'rm -rf "$tmp"' EXIT

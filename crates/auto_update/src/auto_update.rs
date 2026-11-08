@@ -356,9 +356,9 @@ pub fn release_notes_url(cx: &mut App) -> Option<String> {
             auto_updater.client.http_client().build_url(&path)
         }
         ReleaseChannel::Nightly => {
-            "https://github.com/zed-industries/zed/commits/nightly/".to_string()
+            "https://github.com/Fortunehack45/Recode/commits/nightly/".to_string()
         }
-        ReleaseChannel::Dev => "https://github.com/zed-industries/zed/commits/main/".to_string(),
+        ReleaseChannel::Dev => "https://github.com/Fortunehack45/Recode/commits/main/".to_string(),
     };
     Some(url)
 }
@@ -704,7 +704,10 @@ impl AutoUpdater {
         };
         let http_client = client.http_client();
 
-        let primary_url = "https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json";
+        let env_updates_url = std::env::var("RECODE_UPDATES_URL").ok();
+        let primary_url = env_updates_url
+            .as_deref()
+            .unwrap_or("https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json");
         let fallback_url = "https://raw.githubusercontent.com/Fortunehack45/Recode/main/releases/latest.json";
         let mut response = match http_client.get(primary_url, Default::default(), true).await {
             Ok(resp) if resp.status().is_success() => resp,

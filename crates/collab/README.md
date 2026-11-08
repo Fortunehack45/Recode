@@ -1,6 +1,6 @@
 # Recode Server
 
-This crate is what we run at https://collab.zed.dev.
+This crate is what we run at https://recode-collab.fly.dev.
 
 It contains our back-end logic for collaboration, to which we connect from the Zed client via a websocket after authenticating via https://zed.dev, which is a separate repo running on Vercel.
 
@@ -52,8 +52,8 @@ This script starts one to four instances of Zed, depending on the `-2`, `-3` or 
 
 We run two instances of collab:
 
-- Staging (https://staging-collab.zed.dev)
-- Production (https://collab.zed.dev)
+- Staging (https://staging-recode-collab.fly.dev)
+- Production (https://recode-collab.fly.dev)
 
 Both of these run on the Kubernetes cluster hosted in Digital Ocean.
 

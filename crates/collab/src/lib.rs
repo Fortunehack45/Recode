@@ -148,8 +148,8 @@ impl Config {
     pub fn zed_dot_dev_url(&self) -> &str {
         match self.zed_environment.as_ref() {
             "development" => "http://localhost:3000",
-            "staging" => "https://staging.zed.dev",
-            _ => "https://zed.dev",
+            "staging" => "http://localhost:3000",
+            _ => "http://localhost:3000",
         }
     }
 
@@ -157,7 +157,7 @@ impl Config {
     pub fn zed_cloud_url(&self) -> &str {
         match self.zed_environment.as_ref() {
             "development" => "http://localhost:8787",
-            _ => "https://cloud.zed.dev",
+            _ => "http://localhost:8080",
         }
     }
 

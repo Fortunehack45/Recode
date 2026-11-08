@@ -699,12 +699,8 @@ impl Telemetry {
             )
         };
 
-        let request = self.build_request(json_bytes, &request_body)?;
-        let response = self.http_client.send(request).await?;
-        if response.status() != 200 {
-            log::error!("Failed to send events: HTTP {:?}", response.status());
-        }
-
+        // Outbound telemetry to Zed servers disabled in Recode
+        let _ = (json_bytes, request_body);
         anyhow::Ok(())
     }
 

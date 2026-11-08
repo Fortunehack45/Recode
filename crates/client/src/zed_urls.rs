@@ -1,63 +1,79 @@
-//! Contains helper functions for constructing URLs to various Recode-related pages.
+//! Contains helper functions for constructing URLs to various Recode services and pages.
+//! Central endpoints module: All external service URLs are constructed and overridable here.
 
 use gpui::App;
+use std::env;
 
-const RECODE_REPO_URL: &str = "https://github.com/Fortunehack45/Recode";
+pub const DEFAULT_RECODE_REPO_URL: &str = "https://github.com/Fortunehack45/Recode";
+pub const DEFAULT_RECODE_COLLAB_URL: &str = "wss://recode-collab.fly.dev";
+pub const DEFAULT_RECODE_API_URL: &str = "https://api.github.com/repos/Fortunehack45/Recode";
+pub const DEFAULT_RECODE_UPDATES_URL: &str = "https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json";
+pub const DEFAULT_RECODE_EXTENSIONS_URL: &str = "https://api.github.com/repos/Fortunehack45/Recode/releases";
+pub const DEFAULT_RECODE_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode#readme";
 
-fn server_url(_cx: &App) -> &str {
-    RECODE_REPO_URL
+/// Central API URL, overridable via `RECODE_API_URL`.
+pub fn api_url() -> String {
+    env::var("RECODE_API_URL").unwrap_or_else(|_| DEFAULT_RECODE_API_URL.to_string())
 }
 
-fn docs_url(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+/// Central Collaboration Server URL, overridable via `RECODE_COLLAB_URL`.
+pub fn collab_url() -> String {
+    env::var("RECODE_COLLAB_URL").unwrap_or_else(|_| DEFAULT_RECODE_COLLAB_URL.to_string())
 }
 
-/// Returns the URL to the account page.
+/// Central Auto-Updates manifest URL, overridable via `RECODE_UPDATES_URL`.
+pub fn updates_url() -> String {
+    env::var("RECODE_UPDATES_URL").unwrap_or_else(|_| DEFAULT_RECODE_UPDATES_URL.to_string())
+}
+
+/// Central Extensions index URL, overridable via `RECODE_EXTENSIONS_URL`.
+pub fn extensions_url() -> String {
+    env::var("RECODE_EXTENSIONS_URL").unwrap_or_else(|_| DEFAULT_RECODE_EXTENSIONS_URL.to_string())
+}
+
+/// Central Documentation URL, overridable via `RECODE_DOCS_URL`.
+pub fn docs_url(_cx: &App) -> String {
+    env::var("RECODE_DOCS_URL").unwrap_or_else(|_| DEFAULT_RECODE_DOCS_URL.to_string())
+}
+
 pub fn account_url(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    format!("{DEFAULT_RECODE_REPO_URL}#readme")
 }
 
-/// Returns the URL to the start trial page.
 pub fn start_trial_url(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    DEFAULT_RECODE_REPO_URL.to_string()
 }
 
-/// Returns the URL to the upgrade page.
 pub fn upgrade_to_zed_pro_url(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    DEFAULT_RECODE_REPO_URL.to_string()
 }
 
-/// Returns the URL to Recode's terms of service.
 pub fn terms_of_service(_cx: &App) -> String {
-    format!("{RECODE_REPO_URL}/blob/main/legal/terms.md")
+    format!("{DEFAULT_RECODE_REPO_URL}/blob/main/legal/terms.md")
 }
 
-/// Returns the URL to Recode AI's privacy and security docs.
 pub fn ai_privacy_and_security(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    format!("{DEFAULT_RECODE_REPO_URL}/blob/main/PRIVACY_NOTES.md")
 }
 
-/// Returns the URL to Recode's edit prediction documentation.
 pub fn edit_prediction_docs(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    docs_url(_cx)
 }
 
 pub fn skills_docs(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    format!("{DEFAULT_RECODE_REPO_URL}#readme")
 }
 
-/// Returns the URL to Recode's Agent sandboxing documentation.
 pub fn sandboxing_docs(_section: Option<&str>, _cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    format!("{DEFAULT_RECODE_REPO_URL}#readme")
 }
 
 pub fn llm_provider_docs(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    docs_url(_cx)
 }
 
-/// Returns the URL to Recode's ACP registry blog post.
 pub fn acp_registry_blog(_cx: &App) -> String {
-    RECODE_REPO_URL.to_string()
+    DEFAULT_RECODE_REPO_URL.to_string()
 }
 
 pub fn shared_agent_thread_url(session_id: &str) -> String {
