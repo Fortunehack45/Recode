@@ -1182,26 +1182,9 @@ impl Database {
             .one(tx)
             .await?;
 
-        if let Some(channel) = channel {
-            let requires_zed_cla = channel.requires_zed_cla
-                || channel::Entity::find()
-                    .filter(
-                        channel::Column::Id
-                            .is_in(channel.ancestors())
-                            .and(channel::Column::RequiresZedCla.eq(true)),
-                    )
-                    .count(tx)
-                    .await?
-                    > 0;
-            if requires_zed_cla
-                && contributor::Entity::find()
-                    .filter(contributor::Column::UserId.eq(user_id))
-                    .one(tx)
-                    .await?
-                    .is_none()
-            {
-                Err(anyhow!("user has not signed the Zed CLA"))?;
-            }
+        if let Some(_channel) = channel {
+            // In Recode, all collaboration channels and voice calls are open to authorized members
+            // without requiring a Zed CLA.
         }
         Ok(())
     }

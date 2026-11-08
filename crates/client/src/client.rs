@@ -1318,6 +1318,26 @@ impl Client {
                 return Url::parse(url).context("invalid rpc url");
             }
 
+            if let Ok(url) = std::env::var("RECODE_COLLAB_URL") {
+                let default_url = if url.ends_with("/rpc") {
+                    url
+                } else {
+                    format!("{}/rpc", url.trim_end_matches('/'))
+                };
+                return Url::parse(&default_url).context("invalid recode collab url");
+            }
+
+            // In Recode, directly use the configured collab server URL
+            let collab_endpoint = crate::recode_urls::collab_url();
+            let default_url = if collab_endpoint.ends_with("/rpc") {
+                collab_endpoint
+            } else {
+                format!("{}/rpc", collab_endpoint.trim_end_matches('/'))
+            };
+            if let Ok(parsed) = Url::parse(&default_url) {
+                return Ok(parsed);
+            }
+
             let mut url = http.build_url("/rpc");
             if let Some(preview_param) =
                 release_channel.and_then(|channel| channel.release_query_param())
@@ -1369,8 +1389,8 @@ impl Client {
 
             let mut rpc_url = rpc_url.await?;
             let url_scheme = match rpc_url.scheme() {
-                "https" => Https,
-                "http" => Http,
+                "https" | "wss" => Https,
+                "http" | "ws" => Http,
                 _ => Err(anyhow!("invalid rpc url: {}", rpc_url))?,
             };
 
