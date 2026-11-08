@@ -79,5 +79,16 @@ Recode: Independence, Full Rebrand, and Own Collaboration Backend.
 
 ---
 
+## 2026-11-08 - Phase 7: Recode Collab Backend (Fly.io + Supabase + LiveKit)
+- **What Was Done**:
+  - Updated `crates/collab/src/auth.rs` to validate GitHub bearer access tokens directly against the GitHub API (`https://api.github.com/user`), eliminating Zed Cloud dependency.
+  - Updated `crates/collab/src/main.rs` service banner to `recode:{mode}`.
+  - Created production-ready `fly.toml` for `recode-collab` deploying to Fly.io (`iad` region, port 8080, health probe `/healthz`).
+  - Verified SeaORM migrations compatibility with Supabase PostgreSQL and LiveKit WebRTC client configuration.
+- **What Was Learned**:
+  - Self-hosted collab server can run autonomously with zero Zed Cloud dependencies by utilizing direct GitHub OAuth validation and Supabase Postgres.
+
+---
+
 ## Open Questions & Decisions
-- None currently blocking. Ready to advance to Phase 7 (Recode Collaboration Backend).
+- None currently blocking. Ready to advance to Phase 8 (Audit, Hardening, and the 11 Architectural Documents).

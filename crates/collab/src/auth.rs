@@ -53,6 +53,43 @@ pub async fn validate_header<B>(mut req: Request<B>, next: Next<B>) -> impl Into
 
     let http_client = state.http_client.clone().expect("no HTTP client");
 
+    // Recode Direct GitHub OAuth verification:
+    // If the access token is a GitHub token (starts with gh or bearer token),
+    // authenticate directly against GitHub API without requiring Zed Cloud.
+    if access_token.starts_with("gh") || access_token.len() > 20 {
+        if let Ok(gh_resp) = http_client
+            .get("https://api.github.com/user")
+            .header("User-Agent", "Recode-Collab")
+            .header("Authorization", format!("Bearer {access_token}"))
+            .send()
+            .await
+        {
+            if gh_resp.status().is_success() {
+                #[derive(serde::Deserialize)]
+                struct GhUser {
+                    id: i64,
+                    login: String,
+                    name: Option<String>,
+                    avatar_url: Option<String>,
+                }
+                if let Ok(gh_user) = gh_resp.json::<GhUser>().await {
+                    let user = User {
+                        id: user_id,
+                        username: gh_user.login.clone(),
+                        github_login: gh_user.login,
+                        avatar_url: gh_user.avatar_url.unwrap_or_default(),
+                        name: gh_user.name,
+                        admin: false,
+                        connected_once: true,
+                    };
+
+                    req.extensions_mut().insert(Principal::User(user));
+                    return Ok::<_, Error>(next.run(req).await);
+                }
+            }
+        }
+    }
+
     let response = http_client
         .get(format!("{}/client/users/me", state.config.zed_cloud_url()))
         .header("Content-Type", "application/json")

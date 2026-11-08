@@ -194,7 +194,7 @@ async fn setup_app_database(config: &Config) -> Result<()> {
 }
 
 async fn handle_root(Extension(mode): Extension<ServiceMode>) -> String {
-    format!("zed:{mode} v{VERSION} ({})", REVISION.unwrap_or("unknown"))
+    format!("recode:{mode} v{VERSION} ({})", REVISION.unwrap_or("unknown"))
 }
 
 #[expect(clippy::result_large_err)]
