@@ -460,9 +460,24 @@ impl UiDensity {
 
 /// Font family name.
 #[with_fallible_options]
-#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, MergeFrom, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, JsonSchema, MergeFrom, PartialEq, Eq)]
 #[serde(transparent)]
 pub struct FontFamilyName(pub Arc<str>);
+
+impl<'de> Deserialize<'de> for FontFamilyName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        let normalized = match s.as_str() {
+            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => ".RecodeMono",
+            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => ".RecodeSans",
+            _ => s.as_str(),
+        };
+        Ok(FontFamilyName(Arc::from(normalized)))
+    }
+}
 
 impl AsRef<str> for FontFamilyName {
     fn as_ref(&self) -> &str {
@@ -472,7 +487,12 @@ impl AsRef<str> for FontFamilyName {
 
 impl From<String> for FontFamilyName {
     fn from(value: String) -> Self {
-        Self(Arc::from(value))
+        let normalized = match value.as_str() {
+            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => ".RecodeMono",
+            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => ".RecodeSans",
+            _ => value.as_str(),
+        };
+        Self(Arc::from(normalized))
     }
 }
 

@@ -24,9 +24,28 @@ impl FontPickerDelegate {
     ) -> Self {
         let font_family_cache = FontFamilyCache::global(cx);
 
-        let fonts = font_family_cache
+        let current_font = match current_font.as_ref() {
+            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => SharedString::from(".RecodeMono"),
+            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => SharedString::from(".RecodeSans"),
+            _ => current_font,
+        };
+
+        let mut fonts = font_family_cache
             .try_list_font_families()
             .unwrap_or_else(|| vec![current_font.clone()]);
+
+        fonts.retain(|font| {
+            let s = font.as_ref();
+            s != ".ZedMono" && s != ".ZedSans" && s != "ZedMono" && s != "ZedSans" && s != "Zed Plex Mono" && s != "Zed Plex Sans"
+        });
+
+        if !fonts.iter().any(|f| f.as_ref() == ".RecodeMono") {
+            fonts.insert(0, SharedString::from(".RecodeMono"));
+        }
+        if !fonts.iter().any(|f| f.as_ref() == ".RecodeSans") {
+            fonts.insert(1, SharedString::from(".RecodeSans"));
+        }
+
         let selected_index = fonts
             .iter()
             .position(|font| *font == current_font)

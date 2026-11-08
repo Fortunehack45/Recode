@@ -403,21 +403,21 @@ impl LanguageModelProvider for CloudLanguageModelProvider {
     }
 
     fn authentication_error_message(&self) -> SharedString {
-        "Failed to sign in with your Zed account (401).".into()
+        "Failed to sign in with your Recode account (401).".into()
     }
 
     fn missing_credentials_error_message(&self) -> SharedString {
-        "You are not signed in to your Zed account. \
+        "You are not signed in to your Recode account. \
         Sign in to continue."
             .into()
     }
 
     fn fast_mode_confirmation(&self, _cx: &App) -> Option<FastModeConfirmation> {
         Some(FastModeConfirmation {
-            title: "Enable Fast Mode for Zed?".into(),
+            title: "Enable Fast Mode for Recode?".into(),
             message: "Fast mode routes requests through the upstream provider's fast mode or priority tier. The \
                 upstream provider's premium per-token pricing applies and is passed through to \
-                your Zed billing."
+                your Recode billing."
                 .into(),
         })
     }
@@ -507,34 +507,34 @@ fn zed_ai_description(
     eligible_for_trial: bool,
 ) -> &'static str {
     if !is_connected {
-        return "Sign in to have access to Zed's complete agentic experience with hosted models.";
+        return "Sign in to have access to Recode's complete agentic experience with hosted models.";
     }
 
     match plan {
         Some(Plan::ZedPro) => {
-            "You have access to Zed's hosted models through your Pro subscription."
+            "You have access to Recode's hosted models through your Pro subscription."
         }
         Some(Plan::ZedProTrial) => {
             "Your Pro trial includes $5 of GPT Luna and unlimited edit predictions for 14 days from trial start."
         }
         Some(Plan::ZedStudent) => {
-            "You have access to Zed's hosted models through your Student subscription."
+            "You have access to Recode's hosted models through your Student subscription."
         }
         Some(Plan::ZedBusiness) => {
             if is_zed_model_provider_enabled {
-                "You have access to Zed's hosted models through your organization."
+                "You have access to Recode's hosted models through your organization."
             } else {
-                "Zed's hosted models are disabled by your organization's configuration."
+                "Recode's hosted models are disabled by your organization's configuration."
             }
         }
         Some(Plan::ZedVip) => {
-            "You have access to Zed's hosted models through your VIP subscription."
+            "You have access to Recode's hosted models through your VIP subscription."
         }
         Some(Plan::ZedFree) | None => {
             if eligible_for_trial {
                 "Start a free trial with $5 of GPT Luna and unlimited edit predictions for 14 days from trial start."
             } else {
-                "Subscribe for access to Zed's hosted models."
+                "Subscribe for access to Recode's hosted models."
             }
         }
     }
@@ -1008,7 +1008,7 @@ impl Component for ZedAiConfiguration {
     fn description() -> &'static str {
         "The configuration surface for Zed's hosted AI models, \
         showing the user's connection status, current plan, trial eligibility, \
-        and entry points for enabling the Zed model provider."
+        and entry points for enabling the Recode model provider."
     }
 
     fn preview(_window: &mut Window, _cx: &mut App) -> AnyElement {
@@ -1091,7 +1091,7 @@ impl Component for ZedAiConfiguration {
                     }),
                 ),
                 single_example(
-                    "Zed Pro Plan",
+                    "Recode Pro Plan",
                     configuration(PreviewConfiguration {
                         plan: Some(Plan::ZedPro),
                         is_connected: true,
@@ -1100,7 +1100,7 @@ impl Component for ZedAiConfiguration {
                     }),
                 ),
                 single_example(
-                    "Business Plan - Zed models enabled",
+                    "Business Plan - Recode models enabled",
                     configuration(PreviewConfiguration {
                         plan: Some(Plan::ZedBusiness),
                         is_connected: true,
@@ -1109,7 +1109,7 @@ impl Component for ZedAiConfiguration {
                     }),
                 ),
                 single_example(
-                    "Business Plan - Zed models disabled",
+                    "Business Plan - Recode models disabled",
                     configuration(PreviewConfiguration {
                         plan: Some(Plan::ZedBusiness),
                         is_connected: true,

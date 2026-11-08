@@ -90,7 +90,12 @@ impl IntoGpui for FontFamilyName {
     type Output = SharedString;
 
     fn into_gpui(self) -> Self::Output {
-        SharedString::from(self.0)
+        let normalized = match self.0.as_ref() {
+            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => ".RecodeMono",
+            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => ".RecodeSans",
+            other => other,
+        };
+        SharedString::from(normalized.to_string())
     }
 }
 

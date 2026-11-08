@@ -94,6 +94,7 @@ pub enum EditPredictionProvider {
     None,
     #[default]
     Copilot,
+    #[serde(alias = "recode")]
     Zed,
     Codestral,
     Ollama,
@@ -116,7 +117,7 @@ impl EditPredictionProvider {
 
     pub fn display_name(&self) -> Option<&'static str> {
         match self {
-            EditPredictionProvider::Zed => Some("Zed AI"),
+            EditPredictionProvider::Zed => Some("Recode AI"),
             EditPredictionProvider::Copilot => Some("GitHub Copilot"),
             EditPredictionProvider::Codestral => Some("Codestral"),
             EditPredictionProvider::Mercury => Some("Mercury"),

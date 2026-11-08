@@ -960,7 +960,7 @@ impl Render for ConfigurationView {
                         })),
                 );
 
-            let no_subscriptions_warning = if !show_zen && !show_go {
+            let no_subscriptions_warning = if !show_recode && !show_go {
                 Some(Banner::new().severity(Severity::Warning).child(Label::new(
                     "No subscriptions enabled. Enable at least one subscription to use Recode AI.",
                 )))

@@ -42,12 +42,22 @@ impl FontFamilyCache {
         }
 
         let mut lock = self.state.write();
-        lock.font_families = cx
+        let mut names: Vec<SharedString> = cx
             .text_system()
             .all_font_names()
             .into_iter()
+            .filter(|name| {
+                name != ".ZedMono" && name != ".ZedSans" && name != "ZedMono" && name != "ZedSans" && name != "Zed Plex Mono" && name != "Zed Plex Sans"
+            })
             .map(SharedString::from)
             .collect();
+        if !names.iter().any(|n| n.as_ref() == ".RecodeMono") {
+            names.insert(0, SharedString::from(".RecodeMono"));
+        }
+        if !names.iter().any(|n| n.as_ref() == ".RecodeSans") {
+            names.insert(1, SharedString::from(".RecodeSans"));
+        }
+        lock.font_families = names;
         lock.loaded_at = Some(Instant::now());
 
         lock.font_families.clone()
@@ -80,11 +90,20 @@ impl FontFamilyCache {
                 // We take this lock in the background executor to ensure that synchronous calls to `list_font_families` are blocked while we are prefetching,
                 // while not blocking the main thread and risking deadlocks
                 let mut lock = state.write();
-                let all_font_names = text_system
+                let mut all_font_names: Vec<SharedString> = text_system
                     .all_font_names()
                     .into_iter()
+                    .filter(|name| {
+                        name != ".ZedMono" && name != ".ZedSans" && name != "ZedMono" && name != "ZedSans" && name != "Zed Plex Mono" && name != "Zed Plex Sans"
+                    })
                     .map(SharedString::from)
                     .collect();
+                if !all_font_names.iter().any(|n| n.as_ref() == ".RecodeMono") {
+                    all_font_names.insert(0, SharedString::from(".RecodeMono"));
+                }
+                if !all_font_names.iter().any(|n| n.as_ref() == ".RecodeSans") {
+                    all_font_names.insert(1, SharedString::from(".RecodeSans"));
+                }
                 lock.font_families = all_font_names;
                 lock.loaded_at = Some(Instant::now());
             })
