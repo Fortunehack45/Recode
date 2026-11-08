@@ -7,12 +7,14 @@ use std::{env, str::FromStr, sync::LazyLock};
 use gpui::{App, Global};
 use semver::Version;
 
-const ZED_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode";
+const RECODE_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode";
 
 /// stable | dev | nightly | preview
 pub static RELEASE_CHANNEL_NAME: LazyLock<String> = LazyLock::new(|| {
     if cfg!(debug_assertions) {
-        env::var("ZED_RELEASE_CHANNEL").unwrap_or_else(|_| compile_time_release_channel_name())
+        env::var("RECODE_RELEASE_CHANNEL")
+            .or_else(|_| env::var("ZED_RELEASE_CHANNEL"))
+            .unwrap_or_else(|_| compile_time_release_channel_name())
     } else {
         compile_time_release_channel_name()
     }
@@ -101,8 +103,8 @@ impl AppVersion {
         build_id: Option<&str>,
         commit_sha: Option<AppCommitSha>,
     ) -> Version {
-        let mut version: Version = if let Ok(from_env) = env::var("ZED_APP_VERSION") {
-            from_env.parse().expect("invalid ZED_APP_VERSION")
+        let mut version: Version = if let Ok(from_env) = env::var("RECODE_APP_VERSION").or_else(|_| env::var("ZED_APP_VERSION")) {
+            from_env.parse().expect("invalid APP_VERSION")
         } else {
             pkg_version.parse().expect("invalid version in Cargo.toml")
         };
@@ -254,10 +256,10 @@ impl ReleaseChannel {
         };
 
         match channel_path_segment {
-            Some(channel) if slug.is_empty() => format!("{ZED_DOCS_URL}/{channel}"),
-            Some(channel) => format!("{ZED_DOCS_URL}/{channel}/{slug}"),
-            None if slug.is_empty() => ZED_DOCS_URL.to_string(),
-            None => format!("{ZED_DOCS_URL}/{slug}"),
+            Some(channel) if slug.is_empty() => format!("{RECODE_DOCS_URL}/{channel}"),
+            Some(channel) => format!("{RECODE_DOCS_URL}/{channel}/{slug}"),
+            None if slug.is_empty() => RECODE_DOCS_URL.to_string(),
+            None => format!("{RECODE_DOCS_URL}/{slug}"),
         }
     }
 }
@@ -288,19 +290,19 @@ mod tests {
     fn test_docs_url_for_release_channel() {
         assert_eq!(
             ReleaseChannel::Dev.docs_url("settings"),
-            "https://zed.dev/docs/nightly/settings"
+            "https://github.com/Fortunehack45/Recode/nightly/settings"
         );
         assert_eq!(
             ReleaseChannel::Nightly.docs_url("settings"),
-            "https://zed.dev/docs/nightly/settings"
+            "https://github.com/Fortunehack45/Recode/nightly/settings"
         );
         assert_eq!(
             ReleaseChannel::Preview.docs_url("settings"),
-            "https://zed.dev/docs/preview/settings"
+            "https://github.com/Fortunehack45/Recode/preview/settings"
         );
         assert_eq!(
             ReleaseChannel::Stable.docs_url("settings"),
-            "https://zed.dev/docs/settings"
+            "https://github.com/Fortunehack45/Recode/settings"
         );
     }
 }
