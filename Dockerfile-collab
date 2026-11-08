@@ -1,6 +1,12 @@
 # syntax = docker/dockerfile:1.2
 
 FROM rust:1.98.1-bookworm AS builder
+
+# Also add `cmake`, since we need it to build `wasmtime`.
+# clang is needed because `webrtc-sys` uses Clang-specific compiler flags.
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends cmake clang
+
 WORKDIR app
 COPY . .
 
@@ -14,11 +20,6 @@ ARG GITHUB_SHA
 ENV GITHUB_SHA=$GITHUB_SHA
 ENV CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16
 ENV CARGO_PROFILE_RELEASE_LTO=false
-
-# Also add `cmake`, since we need it to build `wasmtime`.
-# clang is needed because `webrtc-sys` uses Clang-specific compiler flags.
-RUN apt-get update; \
-    apt-get install -y --no-install-recommends cmake clang
 
 ENV CC=clang
 ENV CXX=clang++
