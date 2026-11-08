@@ -68,5 +68,16 @@ Recode: Independence, Full Rebrand, and Own Collaboration Backend.
 
 ---
 
+## 2026-11-08 - Phase 6: Documentation & Repository Files
+- **What Was Done**:
+  - Verified and enhanced `README.md` with high-resolution screenshot embeds (`recode-welcome.png` and `recode-editor-agent.jpg`) with detailed feature walkthroughs.
+  - Authored `SECURITY.md` establishing responsible disclosure procedures and security architecture principles (BYOK keychain isolation, zero telemetry).
+  - Authored `PRIVACY_NOTES.md` documenting zero telemetry, local crash logging, direct client-to-provider HTTPS inference, and unauthenticated offline operations.
+  - Updated `docs/book.toml` branding from Zed to Recode.
+- **What Was Learned**:
+  - All public facing docs and repository entry points now consistently present the Recode identity.
+
+---
+
 ## Open Questions & Decisions
-- None currently blocking. Ready to advance to Phase 6 (Documentation & Repository Files) and Phase 7 (Recode Collaboration Backend).
+- None currently blocking. Ready to advance to Phase 7 (Recode Collaboration Backend).
