@@ -794,8 +794,8 @@ pub fn is_agents_skills_path(path: &Path) -> bool {
     false
 }
 
-/// The `zed://` scheme used by share links.
-const SKILL_SHARE_LINK_SCHEME: &str = "zed";
+/// The `recode://` scheme used by share links.
+const SKILL_SHARE_LINK_SCHEME: &str = "recode";
 /// The host (the part after `zed://`) that identifies a skill share link.
 const SKILL_SHARE_LINK_HOST: &str = "skill";
 /// The query parameter that carries the embedded `SKILL.md` payload.
@@ -828,7 +828,7 @@ pub fn decode_skill_share_link(link: &str) -> Result<String> {
     use base64::Engine as _;
     let url = Url::parse(link).context("skill share link is not a valid URL")?;
     anyhow::ensure!(
-        url.scheme() == SKILL_SHARE_LINK_SCHEME && url.host_str() == Some(SKILL_SHARE_LINK_HOST),
+        (url.scheme() == SKILL_SHARE_LINK_SCHEME || url.scheme() == "zed") && url.host_str() == Some(SKILL_SHARE_LINK_HOST),
         "not a skill share link"
     );
     let data = url

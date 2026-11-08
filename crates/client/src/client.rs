@@ -5,7 +5,8 @@ mod llm_token;
 mod proxy;
 pub mod telemetry;
 pub mod user;
-pub mod zed_urls;
+pub mod recode_urls;
+pub use recode_urls as zed_urls;
 
 use anyhow::{Context as _, Result, anyhow};
 use async_tungstenite::tungstenite::{
@@ -1990,8 +1991,9 @@ impl ProtoClient for Client {
     }
 }
 
-/// prefix for the zed:// url scheme
-pub const ZED_URL_SCHEME: &str = "zed";
+/// prefix for the recode:// url scheme
+pub const RECODE_URL_SCHEME: &str = "recode";
+pub const ZED_URL_SCHEME: &str = "recode";
 
 /// A parsed Zed link that can be handled internally by the application.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2016,7 +2018,8 @@ pub fn parse_zed_link(link: &str, cx: &App) -> Option<ZedLink> {
         .strip_prefix(server_url)
         .and_then(|result| result.strip_prefix('/'))
         .or_else(|| {
-            link.strip_prefix(ZED_URL_SCHEME)
+            link.strip_prefix(RECODE_URL_SCHEME)
+                .or_else(|| link.strip_prefix("zed"))
                 .and_then(|result| result.strip_prefix("://"))
         })?;
 

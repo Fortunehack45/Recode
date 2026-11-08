@@ -155,6 +155,16 @@ impl OpenRequest {
         }
 
         for url in request.urls {
+            let normalized_url = if let Some(rest) = url.strip_prefix("recode://") {
+                format!("zed://{rest}")
+            } else if let Some(rest) = url.strip_prefix("recode-cli://") {
+                format!("zed-cli://{rest}")
+            } else if let Some(rest) = url.strip_prefix("recode-dock-action://") {
+                format!("zed-dock-action://{rest}")
+            } else {
+                url.clone()
+            };
+            let url = normalized_url;
             if let Some(server_name) = url.strip_prefix("zed-cli://") {
                 this.kind = Some(OpenRequestKind::CliConnection(connect_to_cli(server_name)?));
             } else if let Some(action_index) = url.strip_prefix("zed-dock-action://") {
