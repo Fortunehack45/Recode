@@ -275,8 +275,13 @@ impl HttpClientWithUrl {
 
     /// Builds an API URL using the given path (overridable via RECODE_API_URL).
     pub fn build_zed_api_url(&self, path: &str, query: &[(&str, &str)]) -> Result<Url> {
-        let base_api_url = std::env::var("RECODE_API_URL")
-            .unwrap_or_else(|_| "https://api.github.com/repos/Fortunehack45/Recode".to_string());
+        let base_api_url = if path.starts_with("/extensions") {
+            std::env::var("RECODE_EXTENSIONS_URL")
+                .unwrap_or_else(|_| "https://api.zed.dev".to_string())
+        } else {
+            std::env::var("RECODE_API_URL")
+                .unwrap_or_else(|_| "https://api.github.com/repos/Fortunehack45/Recode".to_string())
+        };
 
         Ok(Url::parse_with_params(
             &format!("{}{}", base_api_url, path),

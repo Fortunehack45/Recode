@@ -13,7 +13,7 @@ use cloud_llm_client::{
 use collections::{HashMap, HashSet, hash_map::Entry};
 use derive_more::Deref;
 use feature_flags::FeatureFlagAppExt;
-use futures::{Future, StreamExt, channel::mpsc};
+use futures::{AsyncReadExt, Future, StreamExt, channel::mpsc};
 use gpui::{
     App, AppContext as _, AsyncApp, Context, Entity, EventEmitter, SharedString, SharedUri, Task,
     TaskExt, WeakEntity,
@@ -242,7 +242,39 @@ impl UserStore {
                                         name: response.user.name.clone(),
                                     });
 
-                                    Some((user, response))
+                                    Some((user, Some(response)))
+                                } else if let Some(credentials) = client.credentials() {
+                                    let http = client.http_client();
+                                    let gh_user = async {
+                                        let req = http_client::http::Request::builder()
+                                            .method(http_client::http::Method::GET)
+                                            .uri("https://api.github.com/user")
+                                            .header("Authorization", format!("Bearer {}", credentials.access_token))
+                                            .header("User-Agent", "Recode")
+                                            .header("Accept", "application/vnd.github+json")
+                                            .body(http_client::AsyncBody::empty())
+                                            .ok()?;
+                                        let mut resp = http.send(req).await.ok()?;
+                                        let mut body = String::new();
+                                        resp.body_mut().read_to_string(&mut body).await.ok()?;
+                                        #[derive(serde::Deserialize)]
+                                        struct GhProfile {
+                                            id: u64,
+                                            login: String,
+                                            name: Option<String>,
+                                            avatar_url: Option<String>,
+                                        }
+                                        let profile: GhProfile = serde_json::from_str(&body).ok()?;
+                                        Some(Arc::new(User {
+                                            legacy_id: profile.id,
+                                            username: profile.login.into(),
+                                            avatar_uri: profile.avatar_url.unwrap_or_default().into(),
+                                            name: profile.name,
+                                        }))
+                                    }
+                                    .await;
+
+                                    gh_user.map(|u| (u, None))
                                 } else {
                                     None
                                 };
@@ -259,7 +291,10 @@ impl UserStore {
                                     if let Some((user, response)) = current_user_and_response {
                                         this.update(cx, |this, cx| {
                                             this.users.insert(user_id, user);
-                                            this.update_authenticated_user(response, cx)
+                                            if let Some(response) = response {
+                                                this.update_authenticated_user(response, cx)?;
+                                            }
+                                            anyhow::Ok(())
                                         })
                                     } else {
                                         anyhow::Ok(())

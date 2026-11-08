@@ -10,6 +10,12 @@ pub const DEFAULT_RECODE_API_URL: &str = "https://api.github.com/repos/Fortuneha
 pub const DEFAULT_RECODE_UPDATES_URL: &str = "https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json";
 pub const DEFAULT_RECODE_EXTENSIONS_URL: &str = "https://api.github.com/repos/Fortunehack45/Recode/releases";
 pub const DEFAULT_RECODE_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode#readme";
+pub const DEFAULT_RECODE_GITHUB_CLIENT_ID: &str = "Ov23liRecodeIDEApp";
+
+/// Central GitHub OAuth Client ID for Device Flow, overridable via `RECODE_GITHUB_CLIENT_ID`.
+pub fn github_client_id() -> String {
+    env::var("RECODE_GITHUB_CLIENT_ID").unwrap_or_else(|_| DEFAULT_RECODE_GITHUB_CLIENT_ID.to_string())
+}
 
 /// Central API URL, overridable via `RECODE_API_URL`.
 pub fn api_url() -> String {

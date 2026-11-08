@@ -599,6 +599,10 @@ impl Client {
         self.http.clone()
     }
 
+    pub fn credentials(&self) -> Option<Credentials> {
+        self.state.read().credentials.clone()
+    }
+
     pub fn credentials_provider(&self) -> Arc<dyn CredentialsProvider> {
         self.credentials_provider.provider.clone()
     }
@@ -963,15 +967,30 @@ impl Client {
         credentials: &Credentials,
         cx: &AsyncApp,
     ) -> Result<bool> {
-        match self
-            .cloud_client
-            .validate_credentials(credentials.user_id as u32, &credentials.access_token)
-            .await
+        let http = self.http.clone();
+        let request = match http_client::http::Request::builder()
+            .method(http_client::http::Method::GET)
+            .uri("https://api.github.com/user")
+            .header("Authorization", format!("Bearer {}", credentials.access_token))
+            .header("User-Agent", "Recode")
+            .header("Accept", "application/vnd.github+json")
+            .body(http_client::AsyncBody::empty())
         {
-            Ok(valid) => Ok(valid),
+            Ok(req) => req,
+            Err(_) => return Ok(true),
+        };
+
+        match http.send(request).await {
+            Ok(response) => {
+                if response.status() == http_client::http::StatusCode::UNAUTHORIZED {
+                    Ok(false)
+                } else {
+                    Ok(true)
+                }
+            }
             Err(err) => {
-                self.set_status(Status::AuthenticationError, cx);
-                Err(err.context("failed to validate credentials"))
+                log::warn!("could not reach GitHub to validate credentials (offline): {err:#}");
+                Ok(true)
             }
         }
     }
@@ -1431,129 +1450,176 @@ impl Client {
         let http = self.http.clone();
         let this = self.clone();
         cx.spawn(async move |cx| {
-            let background = cx.background_executor().clone();
+            let client_id = zed_urls::github_client_id();
 
-            let (open_url_tx, open_url_rx) = oneshot::channel::<String>();
-            cx.update(|cx| {
-                cx.spawn(async move |cx| {
-                    if let Ok(url) = open_url_rx.await {
-                        cx.update(|cx| cx.open_url(&url));
-                    }
-                })
-                .detach();
-            });
+            #[derive(Serialize)]
+            struct DeviceCodeRequest<'a> {
+                client_id: &'a str,
+                scope: &'a str,
+            }
 
-            let credentials = background
-                .clone()
-                .spawn(async move {
-                    // Generate a pair of asymmetric encryption keys. The public key will be used by the
-                    // zed server to encrypt the user's access token, so that it can'be intercepted by
-                    // any other app running on the user's device.
-                    let (public_key, private_key) =
-                        rpc::auth::keypair().context("failed to generate keypair for auth")?;
-                    let public_key = String::try_from(public_key)
-                        .context("failed to serialize public key for auth")?;
+            #[derive(Deserialize, Debug)]
+            struct DeviceCodeResponse {
+                device_code: String,
+                user_code: String,
+                verification_uri: String,
+                expires_in: u64,
+                interval: Option<u64>,
+            }
 
-                    if let Some((login, token)) =
-                        IMPERSONATE_LOGIN.as_ref().zip(ADMIN_API_TOKEN.as_ref())
-                    {
-                        if !*USE_WEB_LOGIN {
-                            eprintln!("authenticate as admin {login}, {token}");
+            let request = http_client::http::Request::builder()
+                .method(http_client::http::Method::POST)
+                .uri("https://github.com/login/device/code")
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("User-Agent", "Recode")
+                .body(
+                    serde_json::to_string(&DeviceCodeRequest {
+                        client_id: &client_id,
+                        scope: "read:user",
+                    })?
+                    .into(),
+                )?;
 
-                            return this
-                                .authenticate_as_admin(http, login.clone(), token.clone())
-                                .await;
-                        }
-                    }
+            let mut response = http.send(request).await?;
+            let mut body = String::new();
+            response.body_mut().read_to_string(&mut body).await?;
+            anyhow::ensure!(
+                response.status().is_success(),
+                "failed to initiate GitHub device flow ({}): {}",
+                response.status().as_u16(),
+                body
+            );
 
-                    // Start an HTTP server to receive the redirect from Zed's sign-in page.
-                    let server = tiny_http::Server::http("127.0.0.1:0")
-                        .map_err(|e| anyhow!(e).context("failed to bind callback port"))?;
-                    let port = server
-                        .server_addr()
-                        .to_ip()
-                        .context("server not bound to a TCP address")?
-                        .port();
+            let device_code_res: DeviceCodeResponse = serde_json::from_str(&body)
+                .context("failed to parse GitHub device code response")?;
 
-                    #[derive(Serialize)]
-                    struct NativeAppSignInQueryParams {
-                        native_app_port: u16,
-                        native_app_public_key: String,
-                        system_id: Option<Arc<str>>,
-                    }
+            let user_code = device_code_res.user_code;
+            let device_code = device_code_res.device_code;
+            let verification_uri = device_code_res.verification_uri;
+            let poll_interval = Duration::from_secs(device_code_res.interval.unwrap_or(5).max(5));
+            let expires_at = Instant::now() + Duration::from_secs(device_code_res.expires_in);
 
-                    // Open the Zed sign-in page in the user's browser, with query parameters that indicate
-                    // that the user is signing in from a Zed app running on the same device.
-                    let url = http.build_url(&format!(
-                        "/native_app_signin?{}",
-                        serde_urlencoded::to_string(&NativeAppSignInQueryParams {
-                            native_app_port: port,
-                            native_app_public_key: public_key,
-                            system_id: this.telemetry.system_id(),
+            // Copy user_code to system clipboard and open verification URI in the default browser
+            let user_code_for_clip = user_code.clone();
+            let uri_for_browser = verification_uri.clone();
+            cx.update(move |cx| {
+                cx.write_to_clipboard(gpui::ClipboardItem::new_string(user_code_for_clip));
+                cx.open_url(&uri_for_browser);
+            })?;
+
+            #[derive(Serialize)]
+            struct AccessTokenRequest<'a> {
+                client_id: &'a str,
+                device_code: &'a str,
+                grant_type: &'a str,
+            }
+
+            #[derive(Deserialize, Debug)]
+            struct AccessTokenResponse {
+                access_token: Option<String>,
+                token_type: Option<String>,
+                scope: Option<String>,
+                error: Option<String>,
+                error_description: Option<String>,
+                interval: Option<u64>,
+            }
+
+            let mut interval = poll_interval;
+            let access_token = loop {
+                if Instant::now() > expires_at {
+                    anyhow::bail!("GitHub device flow timed out. Please try signing in again.");
+                }
+
+                cx.background_executor().timer(interval).await;
+
+                let poll_req = http_client::http::Request::builder()
+                    .method(http_client::http::Method::POST)
+                    .uri("https://github.com/login/oauth/access_token")
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .header("User-Agent", "Recode")
+                    .body(
+                        serde_json::to_string(&AccessTokenRequest {
+                            client_id: &client_id,
+                            device_code: &device_code,
+                            grant_type: "urn:ietf:params:oauth:grant-type:device_code",
                         })?
-                    ));
+                        .into(),
+                    )?;
 
-                    open_url_tx.send(url).log_err();
+                let mut poll_res = http.send(poll_req).await?;
+                let mut poll_body = String::new();
+                poll_res.body_mut().read_to_string(&mut poll_body).await?;
 
-                    #[derive(Deserialize)]
-                    struct CallbackParams {
-                        pub user_id: String,
-                        pub access_token: String,
+                if !poll_res.status().is_success() {
+                    continue;
+                }
+
+                let token_res: AccessTokenResponse = serde_json::from_str(&poll_body)
+                    .context("failed to parse GitHub access token response")?;
+
+                if let Some(token) = token_res.access_token {
+                    break token;
+                }
+
+                match token_res.error.as_deref() {
+                    Some("authorization_pending") => {
+                        // User hasn't finished authorizing yet; keep polling
                     }
+                    Some("slow_down") => {
+                        interval += Duration::from_secs(token_res.interval.unwrap_or(5));
+                    }
+                    Some("expired_token") => {
+                        anyhow::bail!("GitHub authorization code expired. Please try again.");
+                    }
+                    Some("access_denied") => {
+                        anyhow::bail!("GitHub sign-in was cancelled.");
+                    }
+                    Some(err) => {
+                        let desc = token_res.error_description.unwrap_or_default();
+                        anyhow::bail!("GitHub sign-in error: {err} ({desc})");
+                    }
+                    None => {}
+                }
+            };
 
-                    // Receive the HTTP request from the user's browser. Retrieve the user id and encrypted
-                    // access token from the query params.
-                    //
-                    // TODO - Avoid ever starting more than one HTTP server. Maybe switch to using a
-                    // custom URL scheme instead of this local HTTP server.
-                    let (user_id, access_token) = background
-                        .spawn(async move {
-                            for _ in 0..100 {
-                                if let Some(req) = server.recv_timeout(Duration::from_secs(1))? {
-                                    let path = req.url();
-                                    let url = Url::parse(&format!("http://example.com{}", path))
-                                        .context("failed to parse login notification url")?;
-                                    let callback_params: CallbackParams =
-                                        serde_urlencoded::from_str(url.query().unwrap_or_default())
-                                            .context(
-                                                "failed to parse sign-in callback query parameters",
-                                            )?;
+            // Fetch authenticated user profile from GitHub API
+            #[derive(Deserialize, Debug)]
+            struct GitHubUserProfile {
+                id: u64,
+                login: String,
+                name: Option<String>,
+                avatar_url: Option<String>,
+            }
 
-                                    let post_auth_url =
-                                        http.build_url("/native_app_signin_succeeded");
-                                    req.respond(
-                                        tiny_http::Response::empty(302).with_header(
-                                            tiny_http::Header::from_bytes(
-                                                &b"Location"[..],
-                                                post_auth_url.as_bytes(),
-                                            )
-                                            .unwrap(),
-                                        ),
-                                    )
-                                    .context("failed to respond to login http request")?;
-                                    return Ok((
-                                        callback_params.user_id,
-                                        callback_params.access_token,
-                                    ));
-                                }
-                            }
+            let profile_req = http_client::http::Request::builder()
+                .method(http_client::http::Method::GET)
+                .uri("https://api.github.com/user")
+                .header("Authorization", format!("Bearer {access_token}"))
+                .header("User-Agent", "Recode")
+                .header("Accept", "application/vnd.github+json")
+                .body(http_client::AsyncBody::empty())?;
 
-                            anyhow::bail!("didn't receive login redirect");
-                        })
-                        .await?;
+            let mut profile_res = http.send(profile_req).await?;
+            let mut profile_body = String::new();
+            profile_res.body_mut().read_to_string(&mut profile_body).await?;
+            anyhow::ensure!(
+                profile_res.status().is_success(),
+                "failed to fetch GitHub profile ({}): {}",
+                profile_res.status().as_u16(),
+                profile_body
+            );
 
-                    let access_token = private_key
-                        .decrypt_string(&access_token)
-                        .context("failed to decrypt access token")?;
+            let profile: GitHubUserProfile = serde_json::from_str(&profile_body)
+                .context("failed to parse GitHub user profile")?;
 
-                    Ok(Credentials {
-                        user_id: user_id.parse()?,
-                        access_token,
-                    })
-                })
-                .await?;
+            let credentials = Credentials {
+                user_id: profile.id,
+                access_token,
+            };
 
-            cx.update(|cx| cx.activate(true));
+            cx.update(|cx| cx.activate(true))?;
             Ok(credentials)
         })
     }

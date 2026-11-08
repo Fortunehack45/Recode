@@ -141,6 +141,13 @@ impl RenderOnce for ApiKeysWithoutProviders {
                     )),
             )
             .child(
+                Label::new(
+                    "Your key is stored in your system keychain and never leaves your device except to call the provider you chose.",
+                )
+                .size(LabelSize::XSmall)
+                .color(Color::Muted),
+            )
+            .child(
                 h_flex()
                     .gap_2()
                     .child(

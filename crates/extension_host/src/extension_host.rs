@@ -819,26 +819,43 @@ impl ExtensionStore {
         let url = self.http_client.build_zed_api_url(path, query);
         let http_client = self.http_client.clone();
         cx.spawn(async move |_, _| {
-            let mut response = http_client
-                .get(url?.as_ref(), AsyncBody::empty(), true)
-                .await?;
+            let Ok(url) = url else {
+                return Ok(Vec::new());
+            };
+            let mut response = match http_client
+                .get(url.as_ref(), AsyncBody::empty(), true)
+                .await
+            {
+                Ok(resp) => resp,
+                Err(err) => {
+                    log::warn!("failed to fetch extensions from API: {err:#}");
+                    return Ok(Vec::new());
+                }
+            };
 
             let mut body = Vec::new();
-            response
-                .body_mut()
-                .read_to_end(&mut body)
-                .await
-                .context("error reading extensions")?;
-
-            if response.status().is_client_error() {
-                let text = String::from_utf8_lossy(body.as_slice());
-                bail!(
-                    "status error {}, response: {text:?}",
-                    response.status().as_u16()
-                );
+            if let Err(err) = response.body_mut().read_to_end(&mut body).await {
+                log::warn!("error reading extensions body: {err:#}");
+                return Ok(Vec::new());
             }
 
-            let mut response: GetExtensionsResponse = serde_json::from_slice(&body)?;
+            if response.status().is_client_error() || response.status().is_server_error() {
+                let text = String::from_utf8_lossy(body.as_slice());
+                log::warn!(
+                    "extension registry returned status {}, response: {text:?}",
+                    response.status().as_u16()
+                );
+                return Ok(Vec::new());
+            }
+
+            let response: Result<GetExtensionsResponse, _> = serde_json::from_slice(&body);
+            let mut response = match response {
+                Ok(res) => res,
+                Err(err) => {
+                    log::warn!("failed to deserialize extensions response: {err:#}");
+                    return Ok(Vec::new());
+                }
+            };
 
             response
                 .data

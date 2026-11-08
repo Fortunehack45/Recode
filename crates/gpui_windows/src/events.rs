@@ -805,7 +805,10 @@ impl WindowsWindowInner {
 
         unsafe {
             let params = lparam.0 as *mut NCCALCSIZE_PARAMS;
-            if self.state.is_maximized() {
+            let is_maximized = self.state.is_maximized()
+                || IsZoomed(handle).as_bool()
+                || (GetWindowLongW(handle, GWL_STYLE) as u32 & WS_MAXIMIZE.0) != 0;
+            if is_maximized {
                 // When maximized, constrain the client area strictly to the monitor's work area
                 // so the bottom status bar and prompt bar are completely visible above the taskbar.
                 let monitor = MonitorFromWindow(handle, MONITOR_DEFAULTTONEAREST);
