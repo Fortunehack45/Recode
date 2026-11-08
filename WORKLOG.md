@@ -116,6 +116,25 @@ Recode: Independence, Full Rebrand, and Own Collaboration Backend.
 
 ---
 
+## 2026-11-09 - Phase 9: Production Deployment to Fly.io & Live Verification
+- **What Was Done**:
+  - **Docker Build Context Optimization**: Created `.dockerignore` excluding GUI crates, `assets/`, `docs/`, `tooling/`, markdown, and test fixtures, slimming context transfer down from 30.55MB to 3.4 seconds upload.
+  - **Fast Multi-Core Compilation**: Placed `apt-get` dependency installation before `COPY . .` in `Dockerfile-collab`, configured `CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16` and disabled single-threaded LTO (`CARGO_PROFILE_RELEASE_LTO=false`), compiling release binaries in 6m45s on Fly's Depot cloud builder.
+  - **Database Prepared Statement Resolution**: Diagnosed PgBouncer transaction mode collision (`prepared statement "sqlx_s_1" already exists` on port 6543) and migrated `DATABASE_URL` secret to Supabase Session Pooler (port `5432`), enabling seamless prepared statement execution for sqlx and SeaORM.
+  - **Live Production Deployment**:
+    - App `recode-collab` deployed under organization `personal` (`fortune-937`).
+    - Staged secrets: `DATABASE_URL`, `LIVEKIT_SERVER`, `LIVEKIT_KEY`, `LIVEKIT_SECRET`, `ZED_CLOUD_INTERNAL_API_KEY`.
+    - Production endpoints live and verified:
+      - Health Probe: `https://recode-collab.fly.dev/healthz` -> HTTP 200 `ok` (verifies live DB queries against Supabase).
+      - Service Mode: `https://recode-collab.fly.dev/` -> HTTP 200 `recode:collab v0.44.0 ()`.
+      - Collaboration RPC: `wss://recode-collab.fly.dev/rpc`.
+  - **Auto-Start & Keep-Alive**: Verified Fly Machines auto-wake instantly on incoming HTTPS/WebSocket requests. Noted Fly free trial 5-minute idle auto-stop protocol and documented upgrade path via `https://fly.io/trial` for permanent uptime.
+- **What Was Learned**:
+  - Supabase Transaction Pooler (port 6543) rejects prepared statement reuse with sqlx; Session Pooler (port 5432) natively supports prepared statements without code changes.
+
+---
+
 ## Status
-- All Phases (0 through 8) are complete, verified, and committed.
+- All Phases (0 through 9) are 100% complete, deployed, verified, and committed.
+
 
