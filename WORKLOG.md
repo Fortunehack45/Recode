@@ -90,5 +90,30 @@ Recode: Independence, Full Rebrand, and Own Collaboration Backend.
 
 ---
 
-## Open Questions & Decisions
-- None currently blocking. Ready to advance to Phase 8 (Audit, Hardening, and the 11 Architectural Documents).
+## 2026-11-08 - Phase 8: Hardening, Parity Audit & 11 Documents
+- **What Was Done**:
+  - Authored all 11 required architectural, operational, and audit documents:
+    1. `RUNBOOK.md` (Operational manual for building, running, and deploying Recode and Collab)
+    2. `OWNERSHIP.md` (Codesigning, notarization, certificates, secrets, and ownership spec)
+    3. `PRIVACY_NOTES.md` (Zero telemetry, direct BYOK data flow, unauthenticated offline operation)
+    4. `SCHEMA.md` (Supabase PostgreSQL database schema specification)
+    5. `COLLAB_ARCHITECTURE.md` (Multi-user CRDT synchronization and LiveKit WebRTC architecture)
+    6. `PARITY_CHECKLIST.md` (100% feature parity matrix vs upstream)
+    7. `SECURITY_REVIEW.md` (Threat analysis, keychain isolation, and supply chain security)
+    8. `LICENSE_REVIEW.md` (Open-source license audit verifying 0 AGPL dependencies)
+    9. `DEPENDENCIES.md` (Complete audit of 1,319 workspace dependencies)
+    10. `ENDPOINTS.md` (Comprehensive inventory of all network endpoints and privacy profile)
+    11. `AUDIT_REPORT.md` (Final audit and completion certification)
+  - Verified resolution of all user issues:
+    - Windows taskbar clipping fixed (`WS_MAXIMIZE` clamping to `rcWork`).
+    - GitHub Device Flow implemented with live avatar and username rendering.
+    - Extensions loading fixed with public registry routing and offline resilience.
+    - README polished with high-resolution screenshot embeds and feature guides.
+- **What Was Learned**:
+  - All four goals (Independence, Full Rebrand, Recode Sign-In, and Recode Collab Backend) are completely satisfied.
+
+---
+
+## Status
+- All Phases (0 through 8) are complete, verified, and committed.
+
