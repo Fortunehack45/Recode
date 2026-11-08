@@ -1,8 +1,12 @@
 # Prevent GitHub from displaying comments within JSON files as errors.
 *.json linguist-language=JSON-with-Comments
 
-# Ensure Rust files and scripts always have LF line endings across all platforms
+# Ensure Rust source files and scripts always have LF line endings across all platforms
+* text=auto eol=lf
 *.rs text eol=lf
 *.hbs text eol=lf
 *.sh text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
 crates/zed/resources/windows/zed.sh text eol=lf
