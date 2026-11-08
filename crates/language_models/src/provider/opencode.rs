@@ -1008,8 +1008,8 @@ mod tests {
             "opencode": {
                 "npm": "@ai-sdk/anthropic",
                 "models": {
-                    "zen-model": {
-                        "id": "zen-model",
+                    "recode-model": {
+                        "id": "recode-model",
                         "name": "Recode Model",
                         "tool_call": true,
                         "modalities": {"input":["text"],"output":["text"]},
@@ -1063,7 +1063,7 @@ mod tests {
                     let status = if *fail_request.lock() { 503 } else { 200 };
                     async move {
                         Ok(Response::builder().status(status).body(AsyncBody::from(
-                            test_catalog().replace("zen-model", "updated-model"),
+                            test_catalog().replace("recode-model", "updated-model"),
                         ))?)
                     }
                 }
@@ -1089,7 +1089,7 @@ mod tests {
             cx.run_until_parked();
             assert_eq!(*requests.lock(), initial_requests);
             let expected = if initial_requests == 0 || fail {
-                "zen-model"
+                "recode-model"
             } else {
                 "updated-model"
             };
@@ -1123,7 +1123,7 @@ mod tests {
                 serde_json::from_str::<serde_json::Value>(&fs.load(&cache_path).await.unwrap())
                     .unwrap(),
                 serde_json::from_str::<serde_json::Value>(
-                    &test_catalog().replace("zen-model", "updated-model")
+                    &test_catalog().replace("recode-model", "updated-model")
                 )
                 .unwrap(),
             );
@@ -1211,7 +1211,7 @@ mod tests {
         discovered_models.insert(
             OpenCodeSubscription::Recode,
             vec![DiscoveredModel {
-                model: test_model("old-zen", ApiProtocol::Anthropic),
+                model: test_model("old-recode", ApiProtocol::Anthropic),
                 supports_images: true,
                 supports_thinking: false,
             }],
@@ -1242,7 +1242,7 @@ mod tests {
 
         assert_eq!(
             discovered_models[&OpenCodeSubscription::Recode][0].model.id(),
-            "old-zen"
+            "old-recode"
         );
         assert_eq!(
             discovered_models[&OpenCodeSubscription::Go][0].model.id(),

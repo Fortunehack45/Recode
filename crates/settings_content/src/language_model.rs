@@ -259,7 +259,6 @@ pub struct OpenCodeSettingsContent {
     pub available_models: Option<Vec<OpenCodeAvailableModel>>,
     pub custom_headers: Option<HashMap<String, String>>,
     /// Whether to show OpenCode Recode models. Defaults to true.
-    #[serde(alias = "show_zen_models")]
     pub show_recode_models: Option<bool>,
     /// Whether to show OpenCode Go models. Defaults to true.
     pub show_go_models: Option<bool>,
@@ -280,7 +279,6 @@ pub enum OpenCodeApiProtocol {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema, MergeFrom)]
 #[serde(rename_all = "snake_case")]
 pub enum OpenCodeModelSubscription {
-    #[serde(alias = "zen")]
     Recode,
     Go,
 }

@@ -1150,39 +1150,10 @@ impl EditPredictionStore {
             .map(|organization| organization.id.clone());
 
         cx.spawn(async move |this, cx| {
-            let experiments = cx
-                .background_spawn(async move {
-                    let organization_id =
-                        organization_id.ok_or_else(|| anyhow!("No organization selected."))?;
-                    let url = client.http_client().build_zed_llm_url(
-                        "/edit_prediction_experiments",
-                        &[("is_jumps_api", if is_jumps_api { "true" } else { "false" })],
-                    )?;
-                    let mut response = client
-                        .authenticated_llm_request(&llm_token, organization_id, |token| {
-                            Ok(http_client::Request::builder()
-                                .method(Method::GET)
-                                .uri(url.as_ref())
-                                .header("Authorization", format!("Bearer {token}"))
-                                .header(ZED_VERSION_HEADER_NAME, app_version.to_string())
-                                .body(Default::default())?)
-                        })
-                        .await?;
-                    if response.status().is_success() {
-                        let mut body = Vec::new();
-                        response.body_mut().read_to_end(&mut body).await?;
-                        let experiments: Vec<String> = serde_json::from_slice(&body)?;
-                        Ok(experiments)
-                    } else {
-                        let mut body = String::new();
-                        response.body_mut().read_to_string(&mut body).await?;
-                        anyhow::bail!(
-                            "Failed to fetch experiments: {:?}\nBody: {}",
-                            response.status(),
-                            body
-                        );
-                    }
-                })
+            let experiments = cx.background_spawn(async move {
+                let _ = (client, llm_token, organization_id, app_version, is_jumps_api);
+                Ok(Vec::<String>::new())
+            });
                 .await?;
             this.update(cx, |this, cx| {
                 this.available_experiments = experiments;
@@ -1930,36 +1901,7 @@ impl EditPredictionStore {
 
             let url = client
                 .http_client()
-                .build_zed_llm_url("/predict_edits/reject", &[])
-                .unwrap();
-
-            let flush_count = batched
-                .len()
-                // in case items have accumulated after failure
-                .min(MAX_EDIT_PREDICTION_REJECTIONS_PER_REQUEST);
-            let start = batched.len() - flush_count;
-
-            let body = RejectEditPredictionsBodyRef {
-                rejections: &batched[start..],
-            };
-
-            let result = Self::send_api_request::<()>(
-                |builder| {
-                    let req = builder
-                        .uri(url.as_ref())
-                        .body(serde_json::to_string(&body)?.into());
-                    anyhow::Ok(req?)
-                },
-                client.clone(),
-                llm_token.clone(),
-                organization_id,
-                app_version.clone(),
-            )
-            .await;
-
-            if result.log_err().is_some() {
-                batched.drain(start..);
-            }
+            batched.clear();
         }
     }
 
@@ -2386,14 +2328,8 @@ async fn send_settled_batches(
         collections::FxBuildHasher,
     >,
 ) {
-    let Some(url) = client
-        .http_client()
-        .build_zed_llm_url("/predict_edits/settled", &[])
-        .context("failed to build edit predictions settled url")
-        .log_err()
-    else {
-        return;
-    };
+    // Settled edit predictions telemetry to Zed removed
+    return;
 
     for (organization_id, ready_predictions) in ready_predictions_by_organization_id {
         let mut ready_predictions = ready_predictions.into_iter();
@@ -2969,9 +2905,7 @@ impl EditPredictionStore {
         let url = if let Some(custom_url) = custom_url {
             custom_url.as_ref().clone()
         } else {
-            client
-                .http_client()
-                .build_zed_llm_url("/predict_edits/raw", &[])?
+            anyhow::bail!("custom_url is required; Zed cloud edit prediction is disabled");
         };
 
         Self::send_api_request(
@@ -3054,7 +2988,7 @@ impl EditPredictionStore {
         Req: serde::Serialize,
         Res: serde::de::DeserializeOwned,
     {
-        let url = client.http_client().build_zed_llm_url(path, &[])?;
+        anyhow::bail!("Zed cloud edit prediction is disabled; configure Copilot, Ollama, or Codestral");
         let request_id = uuid::Uuid::new_v4().to_string();
 
         let json_bytes = serde_json::to_vec(&request)?;

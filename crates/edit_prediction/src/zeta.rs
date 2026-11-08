@@ -859,27 +859,8 @@ pub(crate) fn edit_prediction_accepted(
         .map(|organization| organization.id.clone());
     let app_version = AppVersion::global(cx);
 
-    cx.background_spawn(async move {
-        let body = serde_json::to_string(&AcceptEditPredictionBody {
-            request_id,
-            model_version,
-            e2e_latency_ms: Some(e2e_latency.as_millis()),
-        })?;
-
-        let url = client
-            .http_client()
-            .build_zed_llm_url("/predict_edits/accept", &[])?;
-        EditPredictionStore::send_api_request::<()>(
-            move |builder| Ok(builder.uri(url.as_ref()).body(body.clone().into())?),
-            client,
-            llm_token,
-            organization_id,
-            app_version,
-        )
-        .await?;
-        anyhow::Ok(())
-    })
-    .detach_and_log_err(cx);
+    // Acceptance telemetry to Zed cloud removed
+    let _ = (request_id, model_version, e2e_latency, client, llm_token, organization_id, app_version);
 }
 
 pub fn compute_edits(

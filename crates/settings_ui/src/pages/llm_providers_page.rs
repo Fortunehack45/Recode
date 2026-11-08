@@ -45,7 +45,6 @@ pub(crate) fn render_llm_providers_page(
             "opencode" => 10,
             "bedrock" => 11,
             "vercel_ai_gateway" => 12,
-            "cloud" => 13,
             _ => 20,
         }
     });

@@ -1167,7 +1167,7 @@ impl EditPredictionButton {
                     .custom_row(move |_window, cx| {
                         let description = indoc! {
                             "Suggestions at every keystroke, powered by Zeta, our open-source, \
-                            open-data model. Included with Zed Pro and the Pro trial."
+                            Configure your preferred local or API provider."
                         };
 
                         v_flex()
@@ -1339,7 +1339,7 @@ impl EditPredictionButton {
                             },
                             |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
                         )
-                        .entry("Upgrade to Zed Pro or contact us.", None, |_window, cx| {
+                        .entry("Configure providers in Settings.", None, |_window, cx| {
                             telemetry::event!(
                                 "Edit Prediction Menu Action",
                                 action = "upsell_clicked",
@@ -1583,7 +1583,6 @@ pub fn set_completion_provider(fs: Arc<dyn Fs>, cx: &mut App, provider: EditPred
 pub fn get_available_providers(cx: &mut App) -> Vec<EditPredictionProvider> {
     let mut providers = Vec::new();
 
-    providers.push(EditPredictionProvider::Zed);
 
     let app_state = workspace::AppState::global(cx);
     if copilot::GlobalCopilotAuth::try_get_or_init(app_state, cx)

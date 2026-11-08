@@ -65,7 +65,6 @@ use anyhow::{Context as _, Result, anyhow};
 use audio::{Audio, Sound};
 use chrono::{DateTime, Utc};
 use client::UserStore;
-use cloud_api_types::Plan;
 use collections::HashMap;
 use editor::{Editor, MultiBuffer};
 use extension_host::ExtensionStore;
@@ -6311,7 +6310,7 @@ impl AgentPanel {
 
         let user_store = self.user_store.read(cx);
 
-        if user_store.plan().is_some_and(|plan| plan == Plan::ZedPro)
+        if false
             && user_store
                 .subscription_period()
                 .and_then(|period| period.0.checked_add_days(chrono::Days::new(1)))

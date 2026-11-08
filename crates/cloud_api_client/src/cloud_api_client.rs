@@ -98,8 +98,7 @@ impl CloudApiClient {
     }
 
     pub fn cloud_host(&self) -> String {
-        self.http_client
-            .build_zed_cloud_url("/")
+        Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())
             .ok()
             .and_then(|url| url.host_str().map(String::from))
             .unwrap_or_else(|| "cloud.zed.dev".into())
@@ -112,8 +111,7 @@ impl CloudApiClient {
         let request_builder = Request::builder()
             .method(Method::GET)
             .uri(
-                self.http_client
-                    .build_zed_cloud_url("/client/users/me")
+                Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())
                     .map_err(ClientApiError::RequestBuildFailed)?
                     .as_ref(),
             )
@@ -133,8 +131,7 @@ impl CloudApiClient {
         let request_builder = Request::builder()
             .method(Method::POST)
             .uri(
-                self.http_client
-                    .build_zed_cloud_url("/client/llm_tokens")
+                Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())
                     .map_err(ClientApiError::RequestBuildFailed)?
                     .as_ref(),
             )
@@ -157,8 +154,7 @@ impl CloudApiClient {
         let request_builder = Request::builder()
             .method(Method::PATCH)
             .uri(
-                self.http_client
-                    .build_zed_cloud_url("/client/system_settings")
+                Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())
                     .map_err(ClientApiError::RequestBuildFailed)?
                     .as_ref(),
             )
@@ -240,8 +236,7 @@ impl CloudApiClient {
     pub async fn validate_credentials(&self, user_id: u32, access_token: &str) -> Result<bool> {
         let request = build_request(
             Request::builder().method(Method::GET).uri(
-                self.http_client
-                    .build_zed_cloud_url("/client/users/me")?
+                Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())?
                     .as_ref(),
             ),
             AsyncBody::default(),
@@ -271,8 +266,7 @@ impl CloudApiClient {
 
     pub async fn submit_agent_feedback(&self, body: SubmitAgentThreadFeedbackBody) -> Result<()> {
         let request = Request::builder().method(Method::POST).uri(
-            self.http_client
-                .build_zed_cloud_url("/client/feedback/agent_thread")?
+            Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())?
                 .as_ref(),
         );
 
@@ -286,8 +280,7 @@ impl CloudApiClient {
         body: SubmitAgentThreadFeedbackCommentsBody,
     ) -> Result<()> {
         let request = Request::builder().method(Method::POST).uri(
-            self.http_client
-                .build_zed_cloud_url("/client/feedback/agent_thread_comments")?
+            Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())?
                 .as_ref(),
         );
 
@@ -301,8 +294,7 @@ impl CloudApiClient {
         body: SubmitEditPredictionFeedbackBody,
     ) -> Result<()> {
         let request = Request::builder().method(Method::POST).uri(
-            self.http_client
-                .build_zed_cloud_url("/client/feedback/edit_prediction")?
+            Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())?
                 .as_ref(),
         );
 

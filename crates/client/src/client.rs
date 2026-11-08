@@ -1575,9 +1575,7 @@ impl Client {
             access_token: String,
         }
 
-        let url = self
-            .http
-            .build_zed_cloud_url("/internal/users/impersonate")?;
+        anyhow::bail!("impersonate not supported");
         let request = Request::post(url.as_str())
             .header("Content-Type", "application/json")
             .header("Authorization", format!("Bearer {api_token}"))

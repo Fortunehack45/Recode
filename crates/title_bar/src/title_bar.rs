@@ -1,12 +1,10 @@
 mod application_menu;
 pub mod collab;
 mod onboarding_banner;
-mod plan_chip;
 mod title_bar_settings;
 mod update_version;
 
 use crate::application_menu::{ApplicationMenu, show_menus};
-use crate::plan_chip::PlanChip;
 use agent_settings::{AgentSettings, WindowLayout};
 use arrayvec::ArrayVec;
 use git_ui_core::worktree_picker::WorktreePicker;
@@ -1348,7 +1346,7 @@ impl TitleBar {
                                                         )
                                                     }),
                                             )
-                                            .children(plan.map(|plan| PlanChip::new(plan)))
+                                            /* plan chip removed */
                                             .into_any_element()
                                     }
                                 },
