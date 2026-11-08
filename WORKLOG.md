@@ -84,7 +84,9 @@ Recode: Independence, Full Rebrand, and Own Collaboration Backend.
   - Updated `crates/collab/src/auth.rs` to validate GitHub bearer access tokens directly against the GitHub API (`https://api.github.com/user`), eliminating Zed Cloud dependency.
   - Updated `crates/collab/src/main.rs` service banner to `recode:{mode}`.
   - Created production-ready `fly.toml` for `recode-collab` deploying to Fly.io (`iad` region, port 8080, health probe `/healthz`).
-  - Verified SeaORM migrations compatibility with Supabase PostgreSQL and LiveKit WebRTC client configuration.
+  - Added LiveKit credentials (`wss://recode-f6dxt9wg.livekit.cloud`) to `crates/collab/.env.secret.toml` and supported `serde` aliases.
+  - Connected directly to user's Supabase PostgreSQL cluster (`aws-0-eu-west-1.pooler.supabase.com:6543`), verified 0 conflicts with existing tables, and successfully applied the full 29-table schema (201 DDL statements succeeded, 0 errors).
+  - Verified with Supabase MCP tool `list_tables` that all 29 collab tables (`channels`, `channel_members`, `buffers`, `rooms`, `room_participants`, `projects`, etc.) are active.
 - **What Was Learned**:
   - Self-hosted collab server can run autonomously with zero Zed Cloud dependencies by utilizing direct GitHub OAuth validation and Supabase Postgres.
 
