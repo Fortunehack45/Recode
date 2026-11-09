@@ -15,7 +15,6 @@ import {
 } from "@recode/sdk";
 import { UI } from "./ui.js";
 import { c } from "./colors.js";
-import { stripAnsi, visibleWidth } from "./text.js";
 
 export type AgentMode = "build" | "plan";
 
@@ -32,6 +31,7 @@ export class Repl {
   private workspaceDir: string;
   private mode: AgentMode = "build";
   private running = true;
+  private cumulativeTokens = 1240;
 
   constructor(options: ReplOptions = {}) {
     this.workspaceDir = options.workspaceDir || process.cwd();
@@ -72,7 +72,7 @@ export class Repl {
 
     console.clear();
     const status = this.recode.status();
-    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode);
+    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
 
     // If no provider key is configured, show onboarding connect card right away
     const hasAnyKey = Object.values(status.providers).some((p) => p.configured);
@@ -83,9 +83,12 @@ export class Repl {
     while (this.running) {
       let line = "";
       try {
-        const modeColor = this.mode === "build" ? c.green : c.magenta;
+        const modeBadge =
+          this.mode === "build"
+            ? c.green("[build]")
+            : c.magenta("[plan]");
         const promptSymbol =
-          c.bold("rec ") + modeColor(`[${this.mode}]`) + c.cyan(c.bold(" ❯ "));
+          c.bold("rec ") + modeBadge + c.cyan(c.bold(" > "));
         line = await rl.question(promptSymbol);
       } catch {
         break;
@@ -114,7 +117,7 @@ export class Repl {
       if (!this.hasActiveKey()) {
         UI.printConnectMenu();
         console.log(
-          c.yellow("✦ Recode needs an AI provider connected before executing prompts.\n") +
+          c.yellow("[!] Recode needs an AI provider connected before executing prompts.\n") +
             c.dim("  Connect now: ") +
             c.cyan("/connect") +
             c.dim(" or ") +
@@ -133,11 +136,15 @@ export class Repl {
       const { augmentedPrompt, attachedFiles } = this.extractFileReferences(line);
       if (attachedFiles.length > 0) {
         console.log(
-          c.dim(`📎 Loaded ${attachedFiles.length} file context(s): `) +
+          c.dim(`[file] Loaded ${attachedFiles.length} file context(s): `) +
             attachedFiles.map((f) => c.cyan(f)).join(", ")
         );
       }
 
+      // 5. Display prompt in user message container
+      UI.printUserMessage(line);
+
+      // 6. Run agent turn with Thinking Container and Assistant Container
       await this.runTurn(augmentedPrompt);
     }
 
@@ -151,11 +158,7 @@ export class Repl {
   }
 
   /**
-   * Intelligently normalize input and check if it represents a command.
-   * Strips leading ".\recode", "recode", or "/" so users can type:
-   *   "models", "/models", ".\recode models", "recode models"
-   *   "login", "/login", "auth login", ".\recode auth login"
-   *   "connect", "/connect", "mode", "/mode build"
+   * Normalize input and detect commands.
    */
   private parseCommand(raw: string): { isCommand: boolean; cmd: string; args: string[] } {
     let text = raw.trim();
@@ -227,7 +230,14 @@ export class Repl {
       case "cls":
         console.clear();
         this.session.reset();
-        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.2",
+          this.session.id
+        );
         break;
 
       case "exit":
@@ -238,7 +248,7 @@ export class Repl {
 
       case "version":
       case "v":
-        console.log(`recode v1.30.0\n`);
+        console.log(`recode v1.30.2\n`);
         break;
 
       case "models": {
@@ -249,14 +259,14 @@ export class Repl {
 
       case "model":
         if (args.length === 0) {
-          console.log(`Current active model: ${c.cyan(c.bold(this.currentModel))}\n`);
+          console.log(`  Current active model: ${c.cyan(c.bold(this.currentModel))}\n`);
         } else {
           const modelName = args[0];
           const info = resolveModel(modelName);
           this.currentModel = info.id;
           this.session = this.createConfiguredSession();
           console.log(
-            `✓ Switched model to ${c.cyan(c.bold(info.name))} ${c.dim(`(${info.id})`)}\n`
+            `  ${c.green("[✓]")} Switched model to ${c.cyan(c.bold(info.name))} ${c.dim(`(${info.id})`)}\n`
           );
         }
         break;
@@ -270,10 +280,10 @@ export class Repl {
         }
         this.session = this.createConfiguredSession();
         console.log(
-          `✓ Mode switched to ${
+          `  ${c.green("[✓]")} Mode switched to ${
             this.mode === "build"
-              ? c.green(c.bold("Build (read/write/exec)"))
-              : c.magenta(c.bold("Plan (read-only analysis)"))
+              ? c.green(c.bold("[BUILD] (read/write/exec)"))
+              : c.magenta(c.bold("[PLAN] (read-only analysis)"))
           }\n`
         );
         break;
@@ -291,8 +301,15 @@ export class Repl {
 
       case "logout":
         RecodeAuth.logoutGitHub();
-        console.log(c.green("✓ Logged out of GitHub.\n"));
-        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
+        console.log(c.green("  [✓] Logged out of GitHub.\n"));
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.2",
+          this.session.id
+        );
         break;
 
       case "auth":
@@ -306,10 +323,10 @@ export class Repl {
             encoding: "utf-8",
           });
           console.log(
-            `\n${c.bold("Git Diff Summary:")}\n${diff || "No changes in working tree."}\n`
+            `\n  ${c.bold("Git Diff Summary:")}\n${diff ? "  " + diff.replace(/\n/g, "\n  ") : "  No changes in working tree."}\n`
           );
         } catch {
-          console.log(c.yellow("Git diff unavailable (not inside a Git repository).\n"));
+          console.log(c.yellow("  Git diff unavailable (not inside a Git repository).\n"));
         }
         break;
 
@@ -319,9 +336,9 @@ export class Repl {
             cwd: this.workspaceDir,
             encoding: "utf-8",
           });
-          console.log(`\n${c.bold("Git Status:")}\n${st || "Working tree clean."}\n`);
+          console.log(`\n  ${c.bold("Git Status:")}\n${st ? "  " + st.replace(/\n/g, "\n  ") : "  Working tree clean."}\n`);
         } catch {
-          console.log(c.yellow("Git status unavailable.\n"));
+          console.log(c.yellow("  Git status unavailable.\n"));
         }
         break;
 
@@ -330,7 +347,7 @@ export class Repl {
         break;
 
       default:
-        console.log(c.yellow(`Unknown command "${cmd}". Type /help for available commands.\n`));
+        console.log(c.yellow(`  Unknown command "${cmd}". Type /help for available commands.\n`));
     }
   }
 
@@ -340,16 +357,16 @@ export class Repl {
 
     // If no provider given, present an interactive choice
     if (!provider) {
-      console.log(`\n${c.bold("Select an AI Provider to connect:")}`);
-      console.log(`  1. Google Gemini   ${c.dim("(Generous free tier, 1M context — Recommended)")}`);
-      console.log(`  2. OpenAI          ${c.dim("(GPT-4o, o3-mini)")}`);
-      console.log(`  3. Anthropic       ${c.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
-      console.log(`  4. DeepSeek        ${c.dim("(DeepSeek V3, DeepSeek R1)")}`);
-      console.log(`  5. Groq            ${c.dim("(Llama 3.3 70B - ultra fast)")}`);
-      console.log(`  6. Local Ollama    ${c.dim("(100% Free & offline local AI)")}`);
-      console.log(`  0. Cancel\n`);
+      console.log(`\n  ${c.bold("Select an AI Provider to connect:")}`);
+      console.log(`  [1] Google Gemini   ${c.dim("(Generous free tier, 1M context — Recommended)")}`);
+      console.log(`  [2] OpenAI          ${c.dim("(GPT-4o, o3-mini)")}`);
+      console.log(`  [3] Anthropic       ${c.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
+      console.log(`  [4] DeepSeek        ${c.dim("(DeepSeek V3, DeepSeek R1)")}`);
+      console.log(`  [5] Groq            ${c.dim("(Llama 3.3 70B - ultra fast)")}`);
+      console.log(`  [6] Local Ollama    ${c.dim("(100% Free & offline local AI)")}`);
+      console.log(`  [0] Cancel\n`);
 
-      const choice = (await rl.question(c.cyan("Select [1-6]: "))).trim();
+      const choice = (await rl.question(c.cyan("  Select [1-6]: "))).trim();
       const choiceMap: Record<string, string> = {
         "1": "gemini",
         "2": "openai",
@@ -361,7 +378,7 @@ export class Repl {
 
       provider = choiceMap[choice];
       if (!provider) {
-        console.log(c.yellow("Connect cancelled.\n"));
+        console.log(c.yellow("  Connect cancelled.\n"));
         return;
       }
     }
@@ -369,18 +386,18 @@ export class Repl {
     if (provider === "ollama") {
       this.currentModel = "ollama-local";
       this.session = this.createConfiguredSession();
-      console.log(c.green(`\n✓ Configured local Ollama! Active model set to ollama-local.\n`));
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
+      console.log(c.green(`\n  [✓] Configured local Ollama! Active model set to ollama-local.\n`));
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
       return;
     }
 
     // Prompt for key if not passed inline
     if (!key) {
       key = (
-        await rl.question(c.cyan(`Enter API key for ${provider.toUpperCase()}: `))
+        await rl.question(c.cyan(`  Enter API key for ${provider.toUpperCase()}: `))
       ).trim();
       if (!key) {
-        console.log(c.yellow("No key entered. Cancelled.\n"));
+        console.log(c.yellow("  No key entered. Cancelled.\n"));
         return;
       }
     }
@@ -390,15 +407,15 @@ export class Repl {
     this.currentModel = targetModel;
     this.session = this.createConfiguredSession();
 
-    console.log(c.green(`\n✓ Stored API key for ${provider.toUpperCase()}!`));
+    console.log(c.green(`\n  [✓] Stored API key for ${provider.toUpperCase()}!`));
     console.log(
-      c.green(`✓ Active model automatically set to ${c.bold(this.currentModel)}.\n`)
+      c.green(`  [✓] Active model automatically set to ${c.bold(this.currentModel)}.\n`)
     );
-    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
+    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
   }
 
   private async handleLogin(rl: readline.Interface): Promise<void> {
-    console.log(c.dim("\nInitiating GitHub Device Authorization..."));
+    console.log(c.dim("\n  Initiating GitHub Device Authorization..."));
 
     try {
       const auth = await RecodeAuth.loginWithGitHubDeviceCode(
@@ -437,33 +454,33 @@ export class Repl {
       );
 
       UI.printDeviceAuthSuccess(auth.user.login);
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
     } catch (err: any) {
-      console.log(c.red(`\n✗ GitHub Login Failed: ${err.message}\n`));
+      console.log(c.red(`\n  [x] GitHub Login Failed: ${err.message}\n`));
     }
   }
 
   private printAuthStatus(): void {
     const status = this.recode.status();
-    console.log(`\n${c.bold("Authentication Status:")}`);
+    console.log(`\n  ${c.bold("Authentication Status:")}`);
     if (status.github) {
       console.log(`  ${c.green("GitHub:")} @${status.github.username} (connected)`);
     } else {
       console.log(`  ${c.yellow("GitHub:")} Not connected (run /login to connect)`);
     }
 
-    console.log(`\n${c.bold("Configured Provider Keys:")}`);
+    console.log(`\n  ${c.bold("Configured Provider Keys:")}`);
     for (const [p, info] of Object.entries(status.providers)) {
-      const mark = info.configured ? c.green("✓ Configured") : c.dim("Not set");
+      const mark = info.configured ? c.green("[✓] Configured") : c.dim("Not set");
       console.log(`  ${p.padEnd(14)}: ${mark} ${c.dim(`(${info.maskedKey})`)}`);
     }
     console.log(`\n  Default Model: ${c.cyan(c.bold(this.currentModel))}\n`);
   }
 
   private handleCollab(args: string[]): void {
-    console.log(`\n${c.bold("Recode Collaboration Service:")}`);
+    console.log(`\n  ${c.bold("Recode Collaboration Service:")}`);
     console.log(`  Server: ${c.cyan("wss://recode-collab.fly.dev")}`);
-    console.log(`  Status: ${c.green("● Online")}`);
+    console.log(`  Status: ${c.green("[✓] Online")}`);
     if (args[0]) {
       console.log(`  Room  : ${c.bold(args[0])}`);
     }
@@ -471,7 +488,7 @@ export class Repl {
   }
 
   private executeShellCommand(cmd: string): void {
-    console.log(c.dim(`\n$ ${cmd}`));
+    console.log(c.dim(`\n  $ ${cmd}`));
     try {
       const out = execSync(cmd, {
         cwd: this.workspaceDir,
@@ -479,11 +496,11 @@ export class Repl {
         stdio: ["inherit", "pipe", "pipe"],
       });
       if (out) process.stdout.write(out);
-      console.log(c.green(`✓ Completed\n`));
+      console.log(c.green(`  [✓] Completed\n`));
     } catch (err: any) {
       if (err.stdout) process.stdout.write(err.stdout);
       if (err.stderr) process.stderr.write(err.stderr);
-      console.log(c.red(`✗ Process exited with code ${err.status ?? 1}\n`));
+      console.log(c.red(`  [x] Process exited with code ${err.status ?? 1}\n`));
     }
   }
 
@@ -518,24 +535,58 @@ export class Repl {
     };
   }
 
+  /**
+   * Run turn with Thinking Container, Assistant Container, and Bottom Status Dock.
+   */
   private async runTurn(userPrompt: string): Promise<void> {
     const abortController = new AbortController();
 
     const onSigInt = () => {
-      console.log(c.yellow("\n[Interrupted by user]"));
+      console.log(c.yellow("\n  [Interrupted by user]"));
       abortController.abort();
     };
 
     process.once("SIGINT", onSigInt);
 
+    const startTime = Date.now();
+    let thinkingText = "";
+    let inAssistantResponse = false;
+    let turnTokens = Math.ceil(userPrompt.length / 4);
+
+    // Initial Simmering / Thinking indicator (Image 4)
+    process.stdout.write(c.yellow("  * Simmering...\r"));
+
     try {
-      console.log();
       for await (const event of this.session.prompt(userPrompt, {
         signal: abortController.signal,
       })) {
-        if (event.type === "token" && event.content) {
+        if (event.type === "thinking" && event.content) {
+          thinkingText += event.content;
+          const elapsed = (Date.now() - startTime) / 1000;
+          process.stdout.write(
+            `\r  ${c.yellow("*")} ${c.yellow(c.bold("Thinking..."))} ${c.dim(`[${elapsed.toFixed(1)}s]`)}    `
+          );
+        } else if (event.type === "token" && event.content) {
+          if (!inAssistantResponse) {
+            inAssistantResponse = true;
+            process.stdout.write("\r" + " ".repeat(40) + "\r"); // clear thinking line
+            const durationSec = (Date.now() - startTime) / 1000;
+            if (thinkingText.trim()) {
+              UI.printThinkingBlock(thinkingText, durationSec);
+            } else {
+              UI.printThinkingSummary(durationSec);
+            }
+            UI.printAssistantStart();
+          }
+          turnTokens += Math.ceil(event.content.length / 4);
           process.stdout.write(event.content);
         } else if (event.type === "tool_start" && event.toolCall) {
+          if (inAssistantResponse) {
+            UI.printAssistantEnd();
+            inAssistantResponse = false;
+          } else {
+            process.stdout.write("\r" + " ".repeat(40) + "\r");
+          }
           UI.printToolStart(event.toolCall.name, event.toolCall.arguments);
         } else if (event.type === "tool_end" && event.toolCall && event.toolResult) {
           UI.printToolEnd(
@@ -545,12 +596,25 @@ export class Repl {
             event.toolResult.error
           );
         } else if (event.type === "error") {
-          console.log(`\n${c.red("Error:")} ${event.error}`);
+          if (inAssistantResponse) {
+            UI.printAssistantEnd();
+            inAssistantResponse = false;
+          }
+          console.log(`\n  ${c.red("[x] Error:")} ${event.error}\n`);
         }
       }
-      console.log("\n");
+
+      if (inAssistantResponse) {
+        UI.printAssistantEnd();
+      } else {
+        process.stdout.write("\r" + " ".repeat(40) + "\r");
+      }
+
+      // Update token dock
+      this.cumulativeTokens += turnTokens;
+      UI.printStatusDock(this.mode, this.workspaceDir, this.cumulativeTokens, this.currentModel);
     } catch (err: any) {
-      console.log(`\n${c.red("Execution error:")} ${err.message}\n`);
+      console.log(`\n  ${c.red("[x] Execution error:")} ${err.message}\n`);
     } finally {
       process.removeListener("SIGINT", onSigInt);
     }

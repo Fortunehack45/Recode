@@ -7,6 +7,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node ./bin/recode.cjs"
@@ -19,5 +23,14 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fortunehack45/Recode.git"
+  },
+  "homepage": "https://github.com/Fortunehack45/Recode#readme"
 }

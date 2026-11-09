@@ -38,7 +38,7 @@ export interface ToolCall {
 }
 
 export interface LLMStreamChunk {
-  type: "token" | "tool_call_delta" | "tool_call_complete" | "finish";
+  type: "token" | "thinking" | "tool_call_delta" | "tool_call_complete" | "finish";
   content?: string;
   toolCall?: ToolCall;
   finishReason?: string;

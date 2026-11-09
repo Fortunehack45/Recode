@@ -1,0 +1,42 @@
+name: Publish Recode Packages to NPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'NPM dist-tag (e.g. latest, beta, next)'
+        required: true
+        default: 'latest'
+
+jobs:
+  publish:
+    name: Publish Packages (@recode/core, @recode/sdk, @recode/cli, @recode/tui)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build All Packages
+        run: pnpm -r run build
+
+      - name: Run Tests
+        run: pnpm -r test
+
+      - name: Publish to NPM
+        run: pnpm -r publish --access public --no-git-checks --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

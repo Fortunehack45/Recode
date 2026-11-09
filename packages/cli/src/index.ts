@@ -3,7 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { Recode, RecodeAuth, DEFAULT_MODELS, ModelInfo } from "@recode/sdk";
 import { Repl, UI, c } from "@recode/tui";
 
-const VERSION = "1.30.0";
+const VERSION = "1.30.2";
 
 function printUsage(): void {
   UI.printBanner(VERSION);
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
   }
   if (subCommand === "logout") {
     RecodeAuth.logoutGitHub();
-    console.log(c.green("✓ Successfully logged out of GitHub."));
+    console.log(c.green("[✓] Successfully logged out of GitHub."));
     return;
   }
   if (subCommand === "connect" || subCommand === "key") {
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     RecodeAuth.setApiKey(provider, key);
-    console.log(c.green(`✓ Stored API key for ${provider.toUpperCase()}.`));
+    console.log(c.green(`[✓] Stored API key for ${provider.toUpperCase()}.`));
     return;
   }
 
@@ -98,7 +98,7 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       RecodeAuth.setApiKey(provider, key);
-      console.log(c.green(`✓ Stored API key for ${provider}.`));
+      console.log(c.green(`[✓] Stored API key for ${provider}.`));
       return;
     }
 
@@ -141,14 +141,14 @@ function printAuthStatus(): void {
   const status = RecodeAuth.status();
   console.log(`\n${c.bold("Recode Authentication Status:")}`);
   if (status.github) {
-    console.log(`  ${c.green("✓ GitHub:")} @${status.github.username} (authenticated ${status.github.authenticatedAt})`);
+    console.log(`  ${c.green("[✓] GitHub:")} @${status.github.username} (authenticated ${status.github.authenticatedAt})`);
   } else {
-    console.log(`  ${c.yellow("! GitHub:")} Not connected. Run ${c.cyan("recode auth login")} to connect.`);
+    console.log(`  ${c.yellow("[!] GitHub:")} Not connected. Run ${c.cyan("recode auth login")} to connect.`);
   }
 
   console.log(`\n${c.bold("Configured Provider Keys:")}`);
   for (const [p, info] of Object.entries(status.providers)) {
-    const mark = info.configured ? c.green("✓ Configured") : c.dim("Not set");
+    const mark = info.configured ? c.green("[✓] Configured") : c.dim("Not set");
     console.log(`  ${p.padEnd(14)}: ${mark} ${c.dim(`(${info.maskedKey})`)}`);
   }
   console.log(`\n${c.dim("Default Provider:")} ${status.defaultProvider}`);
@@ -173,9 +173,9 @@ async function runAuthLogin(): Promise<void> {
     }
     try {
       const auth = await RecodeAuth.loginWithGitHubToken(pat);
-      console.log(c.green(`\n✓ Authenticated successfully as @${auth.user.login}!\n`));
+      console.log(c.green(`\n[✓] Authenticated successfully as @${auth.user.login}!\n`));
     } catch (err: any) {
-      console.log(c.red(`\n✗ Error: ${err.message}\n`));
+      console.log(c.red(`\n[x] Error: ${err.message}\n`));
     }
   } else {
     rl.close();
@@ -193,9 +193,9 @@ async function runAuthLogin(): Promise<void> {
         }
       );
       const st = RecodeAuth.status();
-      console.log(c.green(`\n✓ Successfully authenticated as @${st.github?.username}!\n`));
+      console.log(c.green(`\n[✓] Successfully authenticated as @${st.github?.username}!\n`));
     } catch (err: any) {
-      console.log(c.red(`\n✗ Authorization failed: ${err.message}\n`));
+      console.log(c.red(`\n[x] Authorization failed: ${err.message}\n`));
     }
   }
 }

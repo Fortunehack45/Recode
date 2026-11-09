@@ -4,6 +4,9 @@
   "description": "Core engine, agentic loop, tools, and auth for Recode Terminal and SDK",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "node --test dist/**/*.test.js"
@@ -15,5 +18,14 @@
     "@types/diff": "^7.0.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fortunehack45/Recode.git"
+  },
+  "homepage": "https://github.com/Fortunehack45/Recode#readme"
 }

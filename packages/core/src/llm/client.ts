@@ -160,7 +160,9 @@ export class LLMClient {
             }
           } else if (type === "content_block_delta") {
             const delta = parsed.delta;
-            if (delta?.type === "text_delta") {
+            if (delta?.type === "thinking_delta" && delta.thinking) {
+              yield { type: "thinking", content: delta.thinking };
+            } else if (delta?.type === "text_delta") {
               yield { type: "token", content: delta.text };
             } else if (delta?.type === "input_json_delta") {
               if (currentToolCall) {
@@ -341,6 +343,10 @@ export class LLMClient {
           if (!choice) continue;
 
           const delta = choice.delta;
+          const reasoning = delta?.reasoning_content || delta?.reasoning || (delta as any)?.thought;
+          if (reasoning) {
+            yield { type: "thinking", content: reasoning };
+          }
           if (delta?.content) {
             yield { type: "token", content: delta.content };
           }

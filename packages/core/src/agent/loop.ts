@@ -6,6 +6,7 @@ import { AuthStore } from "../auth/store.js";
 
 export type AgentEventType =
   | "start"
+  | "thinking"
   | "token"
   | "tool_start"
   | "tool_end"
@@ -136,7 +137,9 @@ export class Agent {
             return assistantResponse;
           }
 
-          if (chunk.type === "token" && chunk.content) {
+          if (chunk.type === "thinking" && chunk.content) {
+            yield { type: "thinking", content: chunk.content };
+          } else if (chunk.type === "token" && chunk.content) {
             assistantResponse += chunk.content;
             yield { type: "token", content: chunk.content };
           } else if (chunk.type === "tool_call_complete" && chunk.toolCall) {
