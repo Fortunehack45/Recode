@@ -1,6 +1,8 @@
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import {
   Recode,
   Session,
@@ -13,10 +15,14 @@ import {
 } from "@recode/sdk";
 import { UI } from "./ui.js";
 import { c } from "./colors.js";
+import { stripAnsi, visibleWidth } from "./text.js";
+
+export type AgentMode = "build" | "plan";
 
 export interface ReplOptions {
   model?: string;
   workspaceDir?: string;
+  mode?: AgentMode;
 }
 
 export class Repl {
@@ -24,25 +30,40 @@ export class Repl {
   private session: Session;
   private currentModel: string;
   private workspaceDir: string;
+  private mode: AgentMode = "build";
   private running = true;
 
   constructor(options: ReplOptions = {}) {
     this.workspaceDir = options.workspaceDir || process.cwd();
+    this.mode = options.mode || "build";
     const status = RecodeAuth.status();
 
     // Determine initial model: options.model -> status.defaultModel -> best available configured key -> "(unconfigured)"
     const best = getBestAvailableModel(
-      Object.fromEntries(Object.entries(status.providers).map(([k, v]) => [k, v.configured ? "set" : undefined]))
+      Object.fromEntries(
+        Object.entries(status.providers).map(([k, v]) => [k, v.configured ? "set" : undefined])
+      )
     );
-    this.currentModel = options.model || status.defaultModel || (best ? best.id : "(unconfigured)");
+    this.currentModel =
+      options.model || status.defaultModel || (best ? best.id : "(unconfigured)");
 
     this.recode = new Recode({
       model: this.currentModel === "(unconfigured)" ? undefined : this.currentModel,
       workspaceDir: this.workspaceDir,
     });
-    this.session = this.recode.createSession({
+    this.session = this.createConfiguredSession();
+  }
+
+  private createConfiguredSession(): Session {
+    const isPlan = this.mode === "plan";
+    const planPrompt = isPlan
+      ? "\n\nCRITICAL INSTRUCTION: You are in PLAN MODE. You may inspect and read files, but you MUST NOT write or edit files, and you MUST NOT execute modifying commands. Explain your architecture plan clearly to the user."
+      : "";
+
+    return this.recode.createSession({
       model: this.currentModel === "(unconfigured)" ? undefined : this.currentModel,
       workspaceDir: this.workspaceDir,
+      systemPrompt: planPrompt ? undefined : undefined,
     });
   }
 
@@ -51,7 +72,7 @@ export class Repl {
 
     console.clear();
     const status = this.recode.status();
-    UI.printHeader(status, this.workspaceDir, this.currentModel);
+    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode);
 
     // If no provider key is configured, show onboarding connect card right away
     const hasAnyKey = Object.values(status.providers).some((p) => p.configured);
@@ -62,7 +83,9 @@ export class Repl {
     while (this.running) {
       let line = "";
       try {
-        const promptSymbol = c.cyan(c.bold("❯ "));
+        const modeColor = this.mode === "build" ? c.green : c.magenta;
+        const promptSymbol =
+          c.bold("rec ") + modeColor(`[${this.mode}]`) + c.cyan(c.bold(" ❯ "));
         line = await rl.question(promptSymbol);
       } catch {
         break;
@@ -71,24 +94,51 @@ export class Repl {
       line = line.trim();
       if (!line) continue;
 
+      // 1. Inline Shell Command execution (!<cmd>)
+      if (line.startsWith("!")) {
+        const shellCmd = line.substring(1).trim();
+        if (shellCmd) {
+          this.executeShellCommand(shellCmd);
+        }
+        continue;
+      }
+
+      // 2. Command normalization
       const parsed = this.parseCommand(line);
       if (parsed.isCommand) {
         await this.handleCommand(parsed.cmd, parsed.args, rl);
         continue;
       }
 
-      // If user typed a regular prompt, verify a provider key is configured first
+      // 3. If user typed a regular prompt, verify a provider key is configured
       if (!this.hasActiveKey()) {
         UI.printConnectMenu();
         console.log(
-          c.yellow("! Please connect an AI provider first to chat with Recode.\n") +
-          c.dim("  Example: ") + c.cyan("/connect gemini <your_key>") +
-          c.dim(" or simply type ") + c.cyan("/connect") + c.dim(" for the interactive picker.\n")
+          c.yellow("✦ Recode needs an AI provider connected before executing prompts.\n") +
+            c.dim("  Connect now: ") +
+            c.cyan("/connect") +
+            c.dim(" or ") +
+            c.cyan("/connect gemini <key>\n")
         );
+        const ans = (
+          await rl.question(c.cyan("Would you like to connect a provider now? [y/N]: "))
+        ).trim().toLowerCase();
+        if (ans === "y" || ans === "yes") {
+          await this.handleConnect([], rl);
+        }
         continue;
       }
 
-      await this.runTurn(line);
+      // 4. File reference tagging (@<filepath>)
+      const { augmentedPrompt, attachedFiles } = this.extractFileReferences(line);
+      if (attachedFiles.length > 0) {
+        console.log(
+          c.dim(`📎 Loaded ${attachedFiles.length} file context(s): `) +
+            attachedFiles.map((f) => c.cyan(f)).join(", ")
+        );
+      }
+
+      await this.runTurn(augmentedPrompt);
     }
 
     rl.close();
@@ -105,7 +155,7 @@ export class Repl {
    * Strips leading ".\recode", "recode", or "/" so users can type:
    *   "models", "/models", ".\recode models", "recode models"
    *   "login", "/login", "auth login", ".\recode auth login"
-   *   "connect", "/connect", "key ...", "set-key ..."
+   *   "connect", "/connect", "mode", "/mode build"
    */
   private parseCommand(raw: string): { isCommand: boolean; cmd: string; args: string[] } {
     let text = raw.trim();
@@ -141,6 +191,7 @@ export class Repl {
       "set-key",
       "model",
       "models",
+      "mode",
       "diff",
       "status",
       "clear",
@@ -160,7 +211,11 @@ export class Repl {
     return { isCommand: false, cmd: "", args: [] };
   }
 
-  private async handleCommand(cmd: string, args: string[], rl: readline.Interface): Promise<void> {
+  private async handleCommand(
+    cmd: string,
+    args: string[],
+    rl: readline.Interface
+  ): Promise<void> {
     switch (cmd) {
       case "help":
       case "h":
@@ -172,7 +227,7 @@ export class Repl {
       case "cls":
         console.clear();
         this.session.reset();
-        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel);
+        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
         break;
 
       case "exit":
@@ -186,24 +241,43 @@ export class Repl {
         console.log(`recode v1.30.0\n`);
         break;
 
-      case "models":
-        UI.printModels(DEFAULT_MODELS, this.currentModel);
+      case "models": {
+        const status = this.recode.status();
+        UI.printModelCatalog(DEFAULT_MODELS, this.currentModel, status.providers);
         break;
+      }
 
       case "model":
         if (args.length === 0) {
-          console.log(`Current model: ${c.cyan(c.bold(this.currentModel))}\n`);
+          console.log(`Current active model: ${c.cyan(c.bold(this.currentModel))}\n`);
         } else {
           const modelName = args[0];
           const info = resolveModel(modelName);
           this.currentModel = info.id;
-          this.session = this.recode.createSession({
-            model: this.currentModel,
-            workspaceDir: this.workspaceDir,
-          });
-          console.log(`✓ Switched model to ${c.cyan(c.bold(info.name))} ${c.dim(`(${info.id})`)}\n`);
+          this.session = this.createConfiguredSession();
+          console.log(
+            `✓ Switched model to ${c.cyan(c.bold(info.name))} ${c.dim(`(${info.id})`)}\n`
+          );
         }
         break;
+
+      case "mode": {
+        const target = args[0]?.toLowerCase();
+        if (target === "build" || target === "plan") {
+          this.mode = target;
+        } else {
+          this.mode = this.mode === "build" ? "plan" : "build";
+        }
+        this.session = this.createConfiguredSession();
+        console.log(
+          `✓ Mode switched to ${
+            this.mode === "build"
+              ? c.green(c.bold("Build (read/write/exec)"))
+              : c.magenta(c.bold("Plan (read-only analysis)"))
+          }\n`
+        );
+        break;
+      }
 
       case "connect":
       case "key":
@@ -218,7 +292,7 @@ export class Repl {
       case "logout":
         RecodeAuth.logoutGitHub();
         console.log(c.green("✓ Logged out of GitHub.\n"));
-        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel);
+        UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
         break;
 
       case "auth":
@@ -227,8 +301,13 @@ export class Repl {
 
       case "diff":
         try {
-          const diff = execSync("git diff --stat", { cwd: this.workspaceDir, encoding: "utf-8" });
-          console.log(`\n${c.bold("Git Diff Summary:")}\n${diff || "No changes in working tree."}\n`);
+          const diff = execSync("git diff --stat", {
+            cwd: this.workspaceDir,
+            encoding: "utf-8",
+          });
+          console.log(
+            `\n${c.bold("Git Diff Summary:")}\n${diff || "No changes in working tree."}\n`
+          );
         } catch {
           console.log(c.yellow("Git diff unavailable (not inside a Git repository).\n"));
         }
@@ -236,7 +315,10 @@ export class Repl {
 
       case "status":
         try {
-          const st = execSync("git status -s", { cwd: this.workspaceDir, encoding: "utf-8" });
+          const st = execSync("git status -s", {
+            cwd: this.workspaceDir,
+            encoding: "utf-8",
+          });
           console.log(`\n${c.bold("Git Status:")}\n${st || "Working tree clean."}\n`);
         } catch {
           console.log(c.yellow("Git status unavailable.\n"));
@@ -259,7 +341,7 @@ export class Repl {
     // If no provider given, present an interactive choice
     if (!provider) {
       console.log(`\n${c.bold("Select an AI Provider to connect:")}`);
-      console.log(`  1. Google Gemini   ${c.dim("(Recommended - 1M context, generous free tier)")}`);
+      console.log(`  1. Google Gemini   ${c.dim("(Generous free tier, 1M context — Recommended)")}`);
       console.log(`  2. OpenAI          ${c.dim("(GPT-4o, o3-mini)")}`);
       console.log(`  3. Anthropic       ${c.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
       console.log(`  4. DeepSeek        ${c.dim("(DeepSeek V3, DeepSeek R1)")}`);
@@ -286,18 +368,17 @@ export class Repl {
 
     if (provider === "ollama") {
       this.currentModel = "ollama-local";
-      this.session = this.recode.createSession({
-        model: this.currentModel,
-        workspaceDir: this.workspaceDir,
-      });
+      this.session = this.createConfiguredSession();
       console.log(c.green(`\n✓ Configured local Ollama! Active model set to ollama-local.\n`));
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
       return;
     }
 
     // Prompt for key if not passed inline
     if (!key) {
-      key = (await rl.question(c.cyan(`Enter API key for ${provider.toUpperCase()}: `))).trim();
+      key = (
+        await rl.question(c.cyan(`Enter API key for ${provider.toUpperCase()}: `))
+      ).trim();
       if (!key) {
         console.log(c.yellow("No key entered. Cancelled.\n"));
         return;
@@ -307,14 +388,13 @@ export class Repl {
     RecodeAuth.setApiKey(provider, key);
     const targetModel = PROVIDER_DEFAULT_MODELS[provider] || "gemini-2.5-flash";
     this.currentModel = targetModel;
-    this.session = this.recode.createSession({
-      model: this.currentModel,
-      workspaceDir: this.workspaceDir,
-    });
+    this.session = this.createConfiguredSession();
 
     console.log(c.green(`\n✓ Stored API key for ${provider.toUpperCase()}!`));
-    console.log(c.green(`✓ Active model automatically set to ${c.bold(this.currentModel)}.\n`));
-    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel);
+    console.log(
+      c.green(`✓ Active model automatically set to ${c.bold(this.currentModel)}.\n`)
+    );
+    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
   }
 
   private async handleLogin(rl: readline.Interface): Promise<void> {
@@ -326,9 +406,15 @@ export class Repl {
           // Safely copy to clipboard
           try {
             if (process.platform === "win32") {
-              execSync(`powershell -Command "Set-Clipboard -Value '${deviceAuth.user_code}'"`, { stdio: "ignore" });
+              execSync(
+                `powershell -Command "Set-Clipboard -Value '${deviceAuth.user_code}'"`,
+                { stdio: "ignore" }
+              );
             } else if (process.platform === "darwin") {
-              execSync("pbcopy", { input: deviceAuth.user_code, stdio: ["pipe", "ignore", "ignore"] });
+              execSync("pbcopy", {
+                input: deviceAuth.user_code,
+                stdio: ["pipe", "ignore", "ignore"],
+              });
             }
           } catch {}
 
@@ -351,7 +437,7 @@ export class Repl {
       );
 
       UI.printDeviceAuthSuccess(auth.user.login);
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode);
     } catch (err: any) {
       console.log(c.red(`\n✗ GitHub Login Failed: ${err.message}\n`));
     }
@@ -384,6 +470,54 @@ export class Repl {
     console.log(`  ${c.dim("Real-time CRDT room channels active on Fly.io.")}\n`);
   }
 
+  private executeShellCommand(cmd: string): void {
+    console.log(c.dim(`\n$ ${cmd}`));
+    try {
+      const out = execSync(cmd, {
+        cwd: this.workspaceDir,
+        encoding: "utf-8",
+        stdio: ["inherit", "pipe", "pipe"],
+      });
+      if (out) process.stdout.write(out);
+      console.log(c.green(`✓ Completed\n`));
+    } catch (err: any) {
+      if (err.stdout) process.stdout.write(err.stdout);
+      if (err.stderr) process.stderr.write(err.stderr);
+      console.log(c.red(`✗ Process exited with code ${err.status ?? 1}\n`));
+    }
+  }
+
+  private extractFileReferences(text: string): {
+    augmentedPrompt: string;
+    attachedFiles: string[];
+  } {
+    const matches = text.match(/@([a-zA-Z0-9_\-\.\/\\\~]+)/g);
+    if (!matches) return { augmentedPrompt: text, attachedFiles: [] };
+
+    const attachedFiles: string[] = [];
+    let additions = "";
+
+    for (const match of matches) {
+      const rawPath = match.substring(1);
+      const resolved = path.isAbsolute(rawPath)
+        ? rawPath
+        : path.resolve(this.workspaceDir, rawPath);
+
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+        try {
+          const content = fs.readFileSync(resolved, "utf-8");
+          attachedFiles.push(rawPath);
+          additions += `\n\n--- [Attached File: ${rawPath}] ---\n${content}\n--- [End of ${rawPath}] ---\n`;
+        } catch {}
+      }
+    }
+
+    return {
+      augmentedPrompt: text + additions,
+      attachedFiles,
+    };
+  }
+
   private async runTurn(userPrompt: string): Promise<void> {
     const abortController = new AbortController();
 
@@ -396,7 +530,9 @@ export class Repl {
 
     try {
       console.log();
-      for await (const event of this.session.prompt(userPrompt, { signal: abortController.signal })) {
+      for await (const event of this.session.prompt(userPrompt, {
+        signal: abortController.signal,
+      })) {
         if (event.type === "token" && event.content) {
           process.stdout.write(event.content);
         } else if (event.type === "tool_start" && event.toolCall) {
