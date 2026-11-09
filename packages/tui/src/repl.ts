@@ -853,8 +853,10 @@ export class Repl {
         UI.printAssistantEnd();
       }
 
-      // Update token dock
+      // Update token dock and show clean turn summary
       this.cumulativeTokens += turnTokens;
+      const turnDuration = (Date.now() - startTime) / 1000;
+      UI.printTurnSummary(turnDuration, turnTokens);
     } catch (err: any) {
       this.indicator.clear();
       console.log(`\n  ${this.theme.error("[x] Execution error:")} ${err.message}\n`);

@@ -150,7 +150,13 @@ export class LiveActionIndicator {
         break;
     }
 
-    const detailText = this.currentDetail ? ` ${theme.dim(`(${this.currentDetail})`)}` : "";
+    // Truncate detail so line never wraps on standard 80-col consoles
+    const maxDetailLen = Math.max(20, Math.min(process.stdout.columns || 80, 78) - 32);
+    const cleanDetail = this.currentDetail.length > maxDetailLen
+      ? this.currentDetail.slice(0, maxDetailLen - 3) + "..."
+      : this.currentDetail;
+
+    const detailText = cleanDetail ? ` ${theme.dim(`(${cleanDetail})`)}` : "";
     const outputLine = `  ${colorFn(frame)} ${colorFn(theme.bold(label))}${detailText}`;
 
     if (this.isTTY) {

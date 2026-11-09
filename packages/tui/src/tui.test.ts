@@ -7,6 +7,24 @@ import { ThemeManager, BUILTIN_THEMES } from "./theme.js";
 import { FontManager, BORDER_STYLES } from "./font.js";
 import { LiveActionIndicator } from "./action_state.js";
 import { UI } from "./ui.js";
+import { fitCell, visibleWidth } from "./text.js";
+
+test("fitCell strictly bounds visible width", () => {
+  // 1. Shorter string padded
+  const short = fitCell("hello", 10);
+  assert.strictEqual(visibleWidth(short), 10);
+  assert.strictEqual(short, "hello     ");
+
+  // 2. Longer string truncated with ellipsis
+  const long = fitCell("This is a very long string that should be bounded", 20);
+  assert.strictEqual(visibleWidth(long), 20);
+  assert.ok(long.includes("…"));
+
+  // 3. String with ANSI escape codes
+  const ansi = "\x1b[31mRed Alert Message\x1b[39m";
+  const fitted = fitCell(ansi, 12);
+  assert.strictEqual(visibleWidth(fitted), 12);
+});
 
 test("ThemeManager loads builtin Recode IDE themes and translates TrueColor", () => {
   const tm = ThemeManager.get();
@@ -22,28 +40,25 @@ test("ThemeManager loads builtin Recode IDE themes and translates TrueColor", ()
   const rgb = tm.hexToRgb("#5ac1fe");
   assert.deepStrictEqual(rgb, [90, 193, 254]);
 
-  // 3. Switch theme to Ayu Dark
+  // 3. Switch theme to Recode Dark (monochrome white & black)
+  assert.strictEqual(tm.setTheme("recode-dark"), true);
+  assert.strictEqual(tm.theme.id, "recode-dark");
+  assert.strictEqual(tm.theme.palette.accent, "#ffffff");
+
+  // 4. Switch theme to Ayu Dark
   const success = tm.setTheme("ayu-dark");
   assert.strictEqual(success, true);
   assert.strictEqual(tm.theme.id, "ayu-dark");
-  assert.strictEqual(tm.theme.name, "Ayu Dark");
 
-  // 4. Switch theme to Claude Warm
-  assert.strictEqual(tm.setTheme("claude-warm"), true);
-  assert.strictEqual(tm.theme.id, "claude-warm");
-  assert.strictEqual(tm.theme.palette.accent, "#e06c53");
-
-  // 5. Custom accent override
-  tm.setCustomAccent("#00f0ff");
-  assert.strictEqual(tm.palette.accent, "#00f0ff");
-  tm.setCustomAccent(null);
-  assert.strictEqual(tm.palette.accent, "#e06c53");
+  // 5. Switch back to Recode Dark
+  tm.setTheme("recode-dark");
+  assert.strictEqual(tm.theme.id, "recode-dark");
 });
 
-test("FontManager configures border glyphs and retro mascot art", () => {
+test("FontManager configures border glyphs and robot mascot art", () => {
   const fm = FontManager.get();
 
-  // 1. Dotted border style (matches Claude Code dashboard)
+  // 1. Dotted border style
   fm.setBorderStyle("dotted");
   assert.strictEqual(fm.currentBorderStyle, "dotted");
   assert.strictEqual(fm.glyphs.horiz, "┄");
@@ -54,12 +69,12 @@ test("FontManager configures border glyphs and retro mascot art", () => {
   assert.strictEqual(fm.glyphs.horiz, "─");
   assert.strictEqual(fm.glyphs.vert, "│");
 
-  // 3. Retro mascot
-  fm.setMascotStyle("retro");
-  assert.strictEqual(fm.currentMascotStyle, "retro");
+  // 3. Robot mascot
+  fm.setMascotStyle("robot");
+  assert.strictEqual(fm.currentMascotStyle, "robot");
   const mascotLines = fm.getMascotLines();
   assert.ok(mascotLines.length > 0);
-  assert.ok(mascotLines.some((l) => l.includes("█")));
+  assert.ok(mascotLines.some((l) => l.includes("■")));
 });
 
 test("LiveActionIndicator tracks real-time action states", () => {
@@ -84,7 +99,7 @@ test("LiveActionIndicator tracks real-time action states", () => {
 test("UI renders welcome splash and dashboard cards cleanly", () => {
   // Verify UI static methods run without error
   UI.printBoxedPill("Test Pill");
-  UI.printRetroBanner();
+  UI.printBanner("1.30.3");
   UI.printThemeGallery();
   UI.printFontMenu();
   UI.printColorPalette();

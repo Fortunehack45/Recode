@@ -36,6 +36,66 @@ export interface TerminalConfig {
 }
 
 export const BUILTIN_THEMES: Record<string, ThemeDefinition> = {
+  "recode-dark": {
+    id: "recode-dark",
+    name: "Recode Dark",
+    appearance: "dark",
+    description: "Official Recode high-contrast monochrome theme with crisp white text and dark borders",
+    palette: {
+      bg: "#0d1117",
+      fg: "#f0f6fc",
+      muted: "#8b949e",
+      accent: "#ffffff",
+      secondary: "#c9d1d9",
+      border: "#30363d",
+      cardBorder: "#ffffff",
+      inputBg: "#161b22",
+      mascot: "#ffffff",
+      success: "#3fb950",
+      warning: "#d29922",
+      error: "#f85149",
+    },
+  },
+  "one-dark": {
+    id: "one-dark",
+    name: "One Dark",
+    appearance: "dark",
+    description: "Recode IDE standard One Dark theme with balanced pastel tones",
+    palette: {
+      bg: "#282c34",
+      fg: "#abb2bf",
+      muted: "#5c6370",
+      accent: "#61afef",
+      secondary: "#98c379",
+      border: "#464b57",
+      cardBorder: "#61afef",
+      inputBg: "#2f343e",
+      mascot: "#61afef",
+      success: "#98c379",
+      warning: "#e5c07b",
+      error: "#e06c75",
+    },
+  },
+  "one-light": {
+    id: "one-light",
+    name: "One Light",
+    appearance: "light",
+    description: "Crisp light theme matching One Light in Recode IDE",
+    palette: {
+      bg: "#fafafa",
+      fg: "#383a42",
+      muted: "#a0a1a7",
+      accent: "#4078f2",
+      secondary: "#50a14f",
+      border: "#d0d0d0",
+      cardBorder: "#4078f2",
+      inputBg: "#f0f0f0",
+      mascot: "#4078f2",
+      success: "#50a14f",
+      warning: "#c18401",
+      error: "#e45649",
+    },
+  },
   "ayu-dark": {
     id: "ayu-dark",
     name: "Ayu Dark",
@@ -94,46 +154,6 @@ export const BUILTIN_THEMES: Record<string, ThemeDefinition> = {
       success: "#86b300",
       warning: "#fa8d3e",
       error: "#f05656",
-    },
-  },
-  "one-dark": {
-    id: "one-dark",
-    name: "One Dark",
-    appearance: "dark",
-    description: "Recode IDE standard One Dark theme with balanced pastel tones",
-    palette: {
-      bg: "#282c34",
-      fg: "#abb2bf",
-      muted: "#5c6370",
-      accent: "#61afef",
-      secondary: "#98c379",
-      border: "#464b57",
-      cardBorder: "#61afef",
-      inputBg: "#2f343e",
-      mascot: "#61afef",
-      success: "#98c379",
-      warning: "#e5c07b",
-      error: "#e06c75",
-    },
-  },
-  "one-light": {
-    id: "one-light",
-    name: "One Light",
-    appearance: "light",
-    description: "Crisp light theme matching One Light in Recode IDE",
-    palette: {
-      bg: "#fafafa",
-      fg: "#383a42",
-      muted: "#a0a1a7",
-      accent: "#4078f2",
-      secondary: "#50a14f",
-      border: "#d0d0d0",
-      cardBorder: "#4078f2",
-      inputBg: "#f0f0f0",
-      mascot: "#4078f2",
-      success: "#50a14f",
-      warning: "#c18401",
-      error: "#e45649",
     },
   },
   "gruvbox-dark": {
@@ -196,9 +216,9 @@ export const BUILTIN_THEMES: Record<string, ThemeDefinition> = {
       error: "#9d0006",
     },
   },
-  "recode-dark": {
-    id: "recode-dark",
-    name: "Recode Dark",
+  "recode-cyan": {
+    id: "recode-cyan",
+    name: "Recode Cyan",
     appearance: "dark",
     description: "Recode signature obsidian palette with electric cyan & neon magenta",
     palette: {
@@ -379,7 +399,6 @@ export class ThemeManager {
     try {
       if (fs.existsSync(idePath)) {
         const raw = fs.readFileSync(idePath, "utf-8");
-        // Strip comments if present
         const cleaned = raw.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
         const parsed = JSON.parse(cleaned);
 
@@ -398,7 +417,7 @@ export class ThemeManager {
   }
 
   /**
-   * Map IDE theme names (e.g. "Ayu Dark", "Gruvbox Dark Soft") to theme id.
+   * Map theme names to theme id.
    */
   public static normalizeThemeId(name: string): string {
     const clean = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").trim();
@@ -408,6 +427,14 @@ export class ThemeManager {
       if (def.name.toLowerCase() === name.toLowerCase()) return id;
     }
 
+    if (clean.includes("recode")) {
+      if (clean.includes("cyan")) return "recode-cyan";
+      return "recode-dark";
+    }
+    if (clean.includes("one")) {
+      if (clean.includes("light")) return "one-light";
+      return "one-dark";
+    }
     if (clean.includes("ayu")) {
       if (clean.includes("light")) return "ayu-light";
       if (clean.includes("mirage")) return "ayu-mirage";
@@ -418,15 +445,11 @@ export class ThemeManager {
       if (clean.includes("soft")) return "gruvbox-dark-soft";
       return "gruvbox-dark";
     }
-    if (clean.includes("one")) {
-      if (clean.includes("light")) return "one-light";
-      return "one-dark";
-    }
     if (clean.includes("claude")) return "claude-warm";
     if (clean.includes("dracula")) return "dracula";
     if (clean.includes("nord")) return "nord";
 
-    return "ayu-dark";
+    return "recode-dark";
   }
 
   private resolveInitialTheme(): ThemeDefinition {
@@ -435,22 +458,13 @@ export class ThemeManager {
       this.customAccent = config.customAccent;
     }
 
-    // 1. Explicit terminal config choice
-    if (config.theme && BUILTIN_THEMES[config.theme]) {
+    // Explicit choice in terminal.json (ignore stale orange claude-warm)
+    if (config.theme && config.theme !== "claude-warm" && BUILTIN_THEMES[config.theme]) {
       return BUILTIN_THEMES[config.theme];
     }
 
-    // 2. Synced from Recode IDE settings.json
-    const ideTheme = ThemeManager.detectIdeTheme();
-    if (ideTheme) {
-      const resolvedId = ThemeManager.normalizeThemeId(ideTheme);
-      if (BUILTIN_THEMES[resolvedId]) {
-        return BUILTIN_THEMES[resolvedId];
-      }
-    }
-
-    // 3. Default to Ayu Dark (user's active IDE theme)
-    return BUILTIN_THEMES["ayu-dark"];
+    // Default to Recode Dark (monochrome white and black theme)
+    return BUILTIN_THEMES["recode-dark"];
   }
 
   public get theme(): ThemeDefinition {
@@ -499,8 +513,8 @@ export class ThemeManager {
         if (!parsed.theme || typeof parsed.theme === "string") {
           parsed.theme = {
             mode: appearance,
-            dark: appearance === "dark" ? themeName : parsed.theme || "Ayu Dark",
-            light: appearance === "light" ? themeName : "Gruvbox Light Soft",
+            dark: appearance === "dark" ? themeName : parsed.theme || "Recode Dark",
+            light: appearance === "light" ? themeName : "One Light",
           };
         } else {
           parsed.theme.mode = appearance;

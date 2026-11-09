@@ -1,8 +1,10 @@
 import readline from "node:readline/promises";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { ThemeManager } from "./theme.js";
 import { FontManager } from "./font.js";
+import { fitCell } from "./text.js";
 
 export interface InputContext {
   mode: "build" | "plan";
@@ -49,8 +51,7 @@ export class NativeInputBox {
       let renderedLines = 0;
 
       const render = () => {
-        const termWidth = Math.max(50, Math.min(process.stdout.columns || 80, 100));
-        const innerWidth = termWidth - 4; // 2 border chars + 2 padding
+        const innerWidth = 69; // Exactly 73 columns visible width (matches dashboard)
         const glyphs = font.glyphs;
 
         // Clear previously rendered lines if any
@@ -60,7 +61,7 @@ export class NativeInputBox {
 
         const lines: string[] = [];
 
-        // 1. Top border
+        // 1. Top border (73 cols)
         const top =
           "  " +
           theme.border(glyphs.tl) +
@@ -68,10 +69,10 @@ export class NativeInputBox {
           theme.border(glyphs.tr);
         lines.push(top);
 
-        // 2. Middle prompt line
+        // 2. Middle prompt line (73 cols)
         const promptSymbol = theme.accent(theme.bold("> "));
-        // Truncate/scroll if buffer exceeds inner width
-        const availableTextWidth = innerWidth - 4;
+        // Truncate/scroll if buffer exceeds inner text width
+        const availableTextWidth = innerWidth - 4; // 65 chars
         let displayBuffer = buffer;
         let displayCursor = cursor;
 
@@ -140,6 +141,27 @@ export class NativeInputBox {
         }
       };
 
+      const getClipboardText = (): string => {
+        try {
+          if (process.platform === "win32") {
+            return execSync("powershell -NoProfile -Command Get-Clipboard", {
+              encoding: "utf-8",
+              stdio: ["ignore", "pipe", "ignore"],
+            })
+              .replace(/\r?\n/g, " ")
+              .trim();
+          }
+          if (process.platform === "darwin") {
+            return execSync("pbpaste", { encoding: "utf-8" }).replace(/\r?\n/g, " ").trim();
+          }
+          return execSync("xclip -selection clipboard -o", { encoding: "utf-8" })
+            .replace(/\r?\n/g, " ")
+            .trim();
+        } catch {
+          return "";
+        }
+      };
+
       const onData = (data: string) => {
         // 1. Enter key (\r or \n)
         if (data === "\r" || data === "\n") {
@@ -165,7 +187,30 @@ export class NativeInputBox {
           process.exit(0);
         }
 
-        // 3. Shift+Tab (\x1b[Z) or Ctrl+T (\x14) - Instant mode toggle!
+        // 3. Ctrl+V (\x16) - Clipboard paste on Windows/macOS/Linux!
+        if (data === "\x16") {
+          const pasted = getClipboardText();
+          if (pasted) {
+            buffer = buffer.slice(0, cursor) + pasted + buffer.slice(cursor);
+            cursor += pasted.length;
+            render();
+          }
+          return;
+        }
+
+        // 4. Bracketed paste support (e.g. Right-click paste or Shift+Insert)
+        if (data.includes("\x1b[200~")) {
+          const pasted = data
+            .replace(/\x1b\[200~/g, "")
+            .replace(/\x1b\[201~/g, "")
+            .replace(/\r?\n/g, " ");
+          buffer = buffer.slice(0, cursor) + pasted + buffer.slice(cursor);
+          cursor += pasted.length;
+          render();
+          return;
+        }
+
+        // 5. Shift+Tab (\x1b[Z) or Ctrl+T (\x14) - Instant mode toggle!
         if (data === "\x1b[Z" || data === "\x14") {
           mode = mode === "build" ? "plan" : "build";
           if (onModeToggle) onModeToggle(mode);
@@ -173,10 +218,11 @@ export class NativeInputBox {
           return;
         }
 
-        // 4. Tab key (\t) - Autocompletion
+        // 6. Tab key (\t) - Autocompletion
         if (data === "\t") {
           if (buffer.startsWith("/")) {
             const commands = [
+              "/welcome",
               "/theme",
               "/font",
               "/color",
@@ -217,7 +263,7 @@ export class NativeInputBox {
           return;
         }
 
-        // 5. Backspace (\x7f or \b)
+        // 7. Backspace (\x7f or \b)
         if (data === "\x7f" || data === "\b") {
           if (cursor > 0) {
             buffer = buffer.slice(0, cursor - 1) + buffer.slice(cursor);
@@ -227,7 +273,7 @@ export class NativeInputBox {
           return;
         }
 
-        // 6. Escape sequences (arrows, home, end, delete)
+        // 8. Escape sequences (arrows, home, end, delete)
         if (data.startsWith("\x1b")) {
           // Left arrow
           if (data === "\x1b[D") {
@@ -298,9 +344,13 @@ export class NativeInputBox {
           return;
         }
 
-        // 7. Regular text input
-        // Filter out unprintable control characters
-        const cleanChars = data.replace(/[\x00-\x1F\x7F]/g, "");
+        // 9. Regular text input & pasted text chunks
+        // Filter out unprintable control characters, but convert newlines to spaces so multiline paste won't break
+        const cleanChars = data
+          .replace(/\r\n/g, " ")
+          .replace(/[\r\n]/g, " ")
+          .replace(/\t/g, "  ")
+          .replace(/[\x00-\x1F\x7F]/g, "");
         if (cleanChars) {
           buffer = buffer.slice(0, cursor) + cleanChars + buffer.slice(cursor);
           cursor += cleanChars.length;

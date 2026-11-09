@@ -88,7 +88,7 @@ export const BORDER_STYLES: Record<BorderStyleType, BorderGlyphs> = {
 export class FontManager {
   private static instance: FontManager | null = null;
   private borderStyle: BorderStyleType = "rounded";
-  private mascotStyle: MascotStyleType = "retro";
+  private mascotStyle: MascotStyleType = "robot";
   private fontFamily: string | null = null;
   private fontSize: number | null = null;
 
@@ -109,7 +109,7 @@ export class FontManager {
       this.borderStyle = config.borderStyle;
     }
     if (config.mascotStyle) {
-      this.mascotStyle = config.mascotStyle;
+      this.mascotStyle = config.mascotStyle === "retro" ? "robot" : config.mascotStyle;
     }
     if (config.fontFamily) {
       this.fontFamily = config.fontFamily;
@@ -154,35 +154,26 @@ export class FontManager {
   }
 
   /**
-   * Return mascot pixel art lines styled with the active theme color.
+   * Return Recode mascot lines styled with the active theme color.
    */
   public getMascotLines(theme = ThemeManager.get()): string[] {
     const col = (str: string) => theme.mascot(str);
 
     switch (this.mascotStyle) {
-      case "retro":
-        // 8-bit space/bot mascot inspired by Claude Code (Image 3)
-        return [
-          col("      ▄▄█▄▄      "),
-          col("    ██ █ █ ██    "),
-          col("    █████████    "),
-          col("    ██ █ █ ██    "),
-          col("     ▀▀   ▀▀     "),
-        ];
-
       case "robot":
+      case "retro":
+      default:
+        // Classic Recode Robot Logo
         return [
-          col("    [■■■■■]    "),
-          col("   [ o   o ]   "),
-          col("    [ === ]    "),
-          col("     /| |\\     "),
+          col("          [■■■]           "),
+          col("         [ o o ]          "),
+          col("          [===]           "),
         ];
 
       case "mini":
-        return [col("  [● recode ●]  ")];
+        return [col("   [● recode ●]   ")];
 
       case "off":
-      default:
         return [];
     }
   }

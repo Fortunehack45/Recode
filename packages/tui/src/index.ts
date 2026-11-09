@@ -1,7 +1,7 @@
 export { Repl, ReplOptions, AgentMode } from "./repl.js";
 export { UI } from "./ui.js";
 export { c } from "./colors.js";
-export { stripAnsi, visibleWidth, renderBox, padRight, padCenter } from "./text.js";
+export { stripAnsi, visibleWidth, renderBox, padRight, padCenter, fitCell } from "./text.js";
 export {
   ThemeManager,
   BUILTIN_THEMES,

@@ -1,12 +1,12 @@
 import path from "node:path";
 import { ThemeManager, BUILTIN_THEMES, ThemeDefinition } from "./theme.js";
 import { FontManager, BORDER_STYLES, BorderStyleType, MascotStyleType } from "./font.js";
-import { padRight, visibleWidth } from "./text.js";
+import { fitCell, visibleWidth } from "./text.js";
 import { AuthStatus, ModelInfo } from "@recode-dev/sdk";
 
 export class UI {
   /**
-   * Boxed Pill Badge with rounded border and asterisk bullet (matching uploaded image).
+   * Boxed Pill Badge with rounded border and asterisk bullet.
    */
   public static printBoxedPill(text: string): void {
     const theme = ThemeManager.get();
@@ -15,47 +15,49 @@ export class UI {
     const content = `* ${text}`;
     const innerW = visibleWidth(content) + 4;
 
-    console.log(`  ${theme.cardBorder(glyphs.tl + glyphs.horiz.repeat(innerW) + glyphs.tr)}`);
-    console.log(`  ${theme.cardBorder(glyphs.vert)}  ${theme.accent("*")} ${theme.bold(theme.text(text))}  ${theme.cardBorder(glyphs.vert)}`);
-    console.log(`  ${theme.cardBorder(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br)}`);
+    console.log(`  ${theme.border(glyphs.tl + glyphs.horiz.repeat(innerW) + glyphs.tr)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent("*")} ${theme.bold(theme.text(text))}  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br)}`);
   }
 
-  /**
-   * Top Pill Badge.
-   */
   public static printPill(text: string): void {
     this.printBoxedPill(text);
   }
 
   /**
-   * Retro 3D outlined block banner matching Claude Code (Image 4 & uploaded photo).
+   * Iconic Recode Giant Double-Stroke ASCII Banner.
    */
-  public static printRetroBanner(): void {
+  public static printBanner(version = "1.30.3"): void {
     const theme = ThemeManager.get();
     const bannerLines = [
-      "  ____   _____  ____  ___   ____   _____ ",
-      " |  _ \\ | ____|/ ___// _ \\ |  _ \\ | ____|",
-      " | |_) ||  _| | |   | | | || | | ||  _|  ",
-      " |  _ < | |___| |___| |_| || |_| || |___ ",
-      " |_| \\_\\|_____|\\____\\\\___/ |____/ |_____|",
+      " ██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗",
+      " ██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝",
+      " ██████╔╝█████╗  ██║     ██║   ██║██║  ██║█████╗  ",
+      " ██╔══██╗██╔══╝  ██║     ██║   ██║██║  ██║██╔══╝  ",
+      " ██║  ██║███████╗╚██████╗╚██████╔╝██████╔╝███████╗",
+      " ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
     ];
 
+    console.log();
     for (const line of bannerLines) {
       console.log(theme.accent(theme.bold(line)));
     }
+    console.log(
+      `  ${theme.muted("Autonomous AI Software Engineering Terminal")} ${theme.border("·")} ${theme.bold(theme.text(`v${version}`))}\n`
+    );
   }
 
   /**
-   * Welcome Splash Screen matching the uploaded image exactly.
-   * Shows boxed pill, retro 3D font, security notes, and "Press Enter to continue...".
+   * Welcome Splash Screen.
+   * Uses the iconic Recode logo banner, security notes, and interactive prompt.
    */
   public static printWelcomeSplash(version = "1.30.3"): void {
     const theme = ThemeManager.get();
     console.clear();
     console.log();
-    this.printBoxedPill(`Welcome to Recode research preview!`);
+    this.printBoxedPill(`Welcome to Recode research preview! [v${version}]`);
     console.log();
-    this.printRetroBanner();
+    this.printBanner(version);
     console.log();
     this.printBoxedPill(`Welcome to Recode research preview!`);
     console.log();
@@ -69,12 +71,13 @@ export class UI {
     console.log(`  ${theme.text("3. Due to prompt injection risks, only use it with code you trust")}`);
     console.log(`     ${theme.muted("For more details see:")}`);
     console.log(`     ${theme.accent("https://github.com/Fortunehack45/Recode#security")}\n`);
-    console.log(`  ${theme.accent(theme.bold("Press Enter to continue..."))}`);
+    console.log(`  ${theme.bold(theme.accent("Press Enter to continue..."))}`);
   }
 
   /**
-   * 2-Column Hero Dashboard Card inspired by Claude Code (pure terminal TUI).
-   * ZERO emojis, NO window chrome / no 3-dot decorations.
+   * 2-Column Hero Dashboard Card.
+   * Strictly formatted and cell-bounded to exactly 71 chars outer width.
+   * Zero overflow, zero wrapping on any 80+ column terminal.
    */
   public static printDashboard(
     status: AuthStatus,
@@ -103,20 +106,24 @@ export class UI {
         ? theme.fg(theme.palette.success)(modeBadge)
         : theme.fg(theme.palette.secondary)(modeBadge);
 
-    // Left Column items
+    // Left Column: exactly 26 visible chars per cell
+    const leftW = 26;
     const mascotLines = font.getMascotLines(theme);
+
     const leftCol: string[] = [
       theme.bold(theme.text("Welcome to Recode!")),
       "",
       ...(mascotLines.length > 0 ? mascotLines : [""]),
       "",
-      `${theme.bold(theme.text("Model:"))} ${theme.accent(modelName)}`,
+      `${theme.bold(theme.text("Model:"))} ${theme.accent(fitCell(modelName, 18))}`,
       `${theme.bold(theme.text("Mode :"))} ${modeColored}`,
-      `${theme.bold(theme.text("Path :"))} ${theme.muted(relPath)}`,
-      `${theme.bold(theme.text("User :"))} ${theme.text(userBadge)}`,
+      `${theme.bold(theme.text("Path :"))} ${theme.muted(fitCell(relPath, 18))}`,
+      `${theme.bold(theme.text("User :"))} ${theme.text(fitCell(userBadge, 18))}`,
     ];
 
-    // Right Column items
+    // Right Column: exactly 38 visible chars per cell
+    const rightW = 38;
+
     const rightColTop: string[] = [
       theme.bold(theme.text("Recent Activity")),
       `${theme.muted("1m ago")}   Loaded workspace context`,
@@ -127,90 +134,89 @@ export class UI {
 
     const rightColBottom: string[] = [
       theme.bold(theme.text("Quick Actions")),
-      `${theme.accent("/theme")}    Change theme (synced with Recode IDE)`,
+      `${theme.accent("/theme")}    Change theme (IDE sync)`,
       `${theme.accent("/font")}     Configure borders & mascot`,
-      `${theme.accent("/color")}    Customize accent & text colors`,
-      `${theme.accent("/mode")}     Toggle Build vs Plan mode`,
-      `${theme.accent("/connect")}  Connect Gemini, OpenAI, Claude, DeepSeek`,
+      `${theme.accent("/color")}    Customize accent & text`,
+      `${theme.accent("/mode")}     Toggle Build vs Plan`,
+      `${theme.accent("/connect")}  Connect AI API keys`,
       `${theme.muted(".../help for more")}`,
     ];
 
-    // Align column heights
-    const leftWidth = 28;
-    const rightWidth = 46;
-    const totalInner = leftWidth + 3 + rightWidth; // left + " │ " + right
-
     const cardLines: string[] = [];
 
-    // Header border
+    // Header border: Exactly 71 visible characters
+    // left: tl (1) + horiz (1) + title (22) + horiz.repeat(5) = 29
+    // divider: teeTop (1)
+    // right: horiz.repeat(40) + tr (1) = 41
+    // Total = 29 + 1 + 41 = 71
     const title = ` Recode Agent v${version} `;
-    const titleLen = visibleWidth(title);
-    const rightBorderLen = Math.max(0, totalInner - titleLen - 2);
-    cardLines.push(
-      "  " +
-        theme.cardBorder(glyphs.tl + glyphs.horiz) +
-        theme.bold(theme.accent(title)) +
-        theme.cardBorder(glyphs.horiz.repeat(rightBorderLen) + glyphs.tr)
-    );
+    const leftTopBorder =
+      glyphs.tl + glyphs.horiz + title + glyphs.horiz.repeat(Math.max(0, leftW + 3 - 2 - visibleWidth(title)));
+    const rightTopBorder = glyphs.horiz.repeat(rightW + 2) + glyphs.tr;
+    cardLines.push("  " + theme.cardBorder(leftTopBorder + glyphs.teeTop + rightTopBorder));
 
-    // Top section
-    const topMaxRows = Math.max(5, rightColTop.length);
-    for (let i = 0; i < topMaxRows; i++) {
-      const leftPart = padRight(leftCol[i] || "", leftWidth);
-      const rightPart = padRight(rightColTop[i] || "", rightWidth);
+    // Top Section rows
+    const topRows = Math.max(5, rightColTop.length);
+    for (let i = 0; i < topRows; i++) {
+      const leftCell = fitCell(leftCol[i] || "", leftW);
+      const rightCell = fitCell(rightColTop[i] || "", rightW);
       cardLines.push(
         "  " +
           theme.border(glyphs.vert) +
           " " +
-          leftPart +
+          leftCell +
           " " +
           theme.border(glyphs.vert) +
           " " +
-          rightPart +
+          rightCell +
           " " +
           theme.border(glyphs.vert)
       );
     }
 
-    // Divider in right column
-    const leftMid = padRight(leftCol[topMaxRows] || "", leftWidth);
+    // Divider between Recent Activity and Quick Actions
+    // left: vert (1) + " " (1) + cell (26) + " " (1) = 29
+    // divider: teeLeft (1)
+    // right: horiz.repeat(40) + teeRight (1) = 41
+    // Total = 71
+    const leftMidCell = fitCell(leftCol[topRows] || "", leftW);
     cardLines.push(
       "  " +
         theme.border(glyphs.vert) +
         " " +
-        leftMid +
+        leftMidCell +
         " " +
-        theme.border(glyphs.teeLeft + glyphs.horiz.repeat(rightWidth + 1)) +
-        theme.border(glyphs.teeRight)
+        theme.border(glyphs.teeLeft + glyphs.horiz.repeat(rightW + 2) + glyphs.teeRight)
     );
 
-    // Bottom section
-    const botRows = Math.max(leftCol.length - topMaxRows - 1, rightColBottom.length);
+    // Bottom Section rows
+    const botRows = Math.max(leftCol.length - topRows - 1, rightColBottom.length);
     for (let i = 0; i < botRows; i++) {
-      const leftPart = padRight(leftCol[topMaxRows + 1 + i] || "", leftWidth);
-      const rightPart = padRight(rightColBottom[i] || "", rightWidth);
+      const leftCell = fitCell(leftCol[topRows + 1 + i] || "", leftW);
+      const rightCell = fitCell(rightColBottom[i] || "", rightW);
       cardLines.push(
         "  " +
           theme.border(glyphs.vert) +
           " " +
-          leftPart +
+          leftCell +
           " " +
           theme.border(glyphs.vert) +
           " " +
-          rightPart +
+          rightCell +
           " " +
           theme.border(glyphs.vert)
       );
     }
 
-    // Footer border
+    // Footer border: Exactly 71 visible characters
+    // bl (1) + horiz.repeat(28) + teeBottom (1) + horiz.repeat(40) + br (1) = 71
     cardLines.push(
       "  " +
         theme.cardBorder(
           glyphs.bl +
-            glyphs.horiz.repeat(leftWidth + 2) +
+            glyphs.horiz.repeat(leftW + 2) +
             glyphs.teeBottom +
-            glyphs.horiz.repeat(rightWidth + 2) +
+            glyphs.horiz.repeat(rightW + 2) +
             glyphs.br
         )
     );
@@ -227,7 +233,7 @@ export class UI {
     const activeTheme = theme.theme.name;
 
     console.log(`  ${theme.success("[✓]")} Recode engine: ${theme.bold("ready")}`);
-    console.log(`  ${theme.success("[✓]")} Active theme : ${theme.accent(activeTheme)} ${theme.dim("(synced with Recode IDE)")}`);
+    console.log(`  ${theme.success("[✓]")} Active theme : ${theme.accent(activeTheme)}`);
     console.log(`  ${theme.success("[✓]")} Session thread: ${theme.muted(threadId)}`);
     console.log(`  ${theme.success("[✓]")} Autonomous tools: ${theme.dim("read_file, edit_file, write_file, exec, grep, search")}`);
     console.log(`\n  ${theme.bold(theme.text("Ready to code! What would you like to build?"))}`);
@@ -235,7 +241,7 @@ export class UI {
   }
 
   /**
-   * Full Hero Header: Boxed Pill + Dashboard + Status Checks.
+   * Full Hero Header.
    */
   public static printHeader(
     status: AuthStatus,
@@ -253,10 +259,62 @@ export class UI {
 
   /**
    * User message container.
+   * Sleek 73-character framed card with clean wrap and distinct user header.
    */
   public static printUserMessage(prompt: string): void {
     const theme = ThemeManager.get();
-    console.log(`\n  ${theme.accent("│")} ${theme.bold(theme.text("> " + prompt))}\n`);
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    const innerW = 69;
+    const title = " You ";
+    const topBorder =
+      "  " +
+      theme.accent(
+        glyphs.tl +
+          glyphs.horiz +
+          title +
+          glyphs.horiz.repeat(Math.max(0, innerW - 1 - title.length)) +
+          glyphs.tr
+      );
+
+    // Word wrap prompt to lines of at most 65 characters
+    const words = prompt.trim().split(/\s+/);
+    const wrappedLines: string[] = [];
+    let currentLine = "";
+
+    for (const w of words) {
+      if (!currentLine) {
+        currentLine = w;
+      } else if (visibleWidth(currentLine + " " + w) <= 65) {
+        currentLine += " " + w;
+      } else {
+        wrappedLines.push(currentLine);
+        currentLine = w;
+      }
+    }
+    if (currentLine) wrappedLines.push(currentLine);
+    if (wrappedLines.length === 0) wrappedLines.push("");
+
+    const contentLines = wrappedLines.map(
+      (line) =>
+        "  " +
+        theme.accent(glyphs.vert) +
+        " " +
+        fitCell(theme.bold(theme.text(line)), 67) +
+        " " +
+        theme.accent(glyphs.vert)
+    );
+
+    const botBorder =
+      "  " +
+      theme.accent(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
+
+    console.log();
+    console.log(topBorder);
+    console.log(contentLines.join("\n"));
+    console.log(botBorder);
+    console.log();
   }
 
   /**
@@ -264,45 +322,32 @@ export class UI {
    */
   public static printAssistantStart(): void {
     const theme = ThemeManager.get();
-    const font = FontManager.get();
-    const glyphs = font.glyphs;
-    console.log(`  ${theme.accent(glyphs.tl + glyphs.horiz + " [recode]")}`);
+    console.log(`  ${theme.accent("●")} ${theme.bold(theme.text("Recode"))}\n`);
   }
 
   public static printAssistantEnd(): void {
-    const theme = ThemeManager.get();
-    const font = FontManager.get();
-    const glyphs = font.glyphs;
-    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(50))}\n`);
+    console.log();
   }
 
   /**
-   * Thinking block.
+   * Thinking summary / thought pill.
    */
   public static printThinkingSummary(durationSeconds: number): void {
     const theme = ThemeManager.get();
-    console.log(`  ${theme.dim(`[✓] Thought for ${durationSeconds.toFixed(1)}s`)}\n`);
+    console.log(`  ${theme.dim(`› Thought for ${durationSeconds.toFixed(1)}s`)}\n`);
   }
 
   public static printThinkingBlock(reasoning: string, durationSeconds?: number): void {
     const theme = ThemeManager.get();
-    const font = FontManager.get();
-    const glyphs = font.glyphs;
-    const durStr = durationSeconds !== undefined ? ` · ${durationSeconds.toFixed(1)}s` : "";
-
-    const lines = [
-      theme.warning(`  ${glyphs.tl}${glyphs.horiz} [think] (Reasoning${durStr}) ───────────────────────`),
-      ...reasoning
-        .trim()
-        .split("\n")
-        .map((l) => theme.warning(`  ${glyphs.vert} `) + theme.dim(l)),
-      theme.warning(`  ${glyphs.bl}${glyphs.horiz.repeat(50)}`),
-    ];
-    console.log(lines.join("\n"));
+    const durStr = durationSeconds !== undefined ? ` (${durationSeconds.toFixed(1)}s)` : "";
+    const firstLine = reasoning.trim().split("\n")[0] || "";
+    const preview = firstLine.length > 55 ? firstLine.slice(0, 52) + "..." : firstLine;
+    console.log(`  ${theme.dim(`› Thought${durStr}:`)} ${theme.muted(preview)}\n`);
   }
 
   /**
-   * Compact tool completion tile.
+   * Compact, professional tool completion line.
+   * Clean, single-line, informative, not stuffy!
    */
   public static printToolEnd(
     toolName: string,
@@ -312,26 +357,26 @@ export class UI {
     durationMs?: number
   ): void {
     const theme = ThemeManager.get();
-    const font = FontManager.get();
-    const glyphs = font.glyphs;
-    const timeStr = durationMs !== undefined ? ` (${durationMs}ms)` : "";
+    const timeStr = durationMs !== undefined ? ` ${theme.dim(`(${durationMs}ms)`)}` : "";
 
     if (success) {
+      let preview = output.replace(/\r?\n/g, " ").trim();
+      if (preview.length > 48) preview = preview.slice(0, 45) + "...";
       const lineCount = output ? output.split("\n").length : 0;
-      const preview = output.slice(0, 160).replace(/\r?\n/g, " ").trim();
-      const summary =
-        lineCount > 1
-          ? `${lineCount} lines: ${preview.slice(0, 60)}...`
-          : preview || "Success";
-
-      console.log(`  ${theme.border(glyphs.tl + glyphs.horiz + " [tool]")} ${theme.bold(theme.text(toolName))}`);
-      console.log(`  ${theme.border(glyphs.vert)}   ${theme.dim(summary)}`);
-      console.log(`  ${theme.border(glyphs.bl + glyphs.horiz)} ${theme.success(`[✓] Completed successfully${timeStr}`)}\n`);
+      const countBadge = lineCount > 1 ? ` ${theme.dim(`[${lineCount} lines]`)}` : "";
+      console.log(`  ${theme.success("●")} ${theme.bold(theme.text(toolName))}${countBadge}${preview ? " " + theme.dim(preview) : ""}${timeStr}`);
     } else {
-      console.log(`  ${theme.border(glyphs.tl + glyphs.horiz + " [tool]")} ${theme.bold(theme.text(toolName))}`);
-      console.log(`  ${theme.border(glyphs.vert)}   ${theme.error(error || "Execution failed")}`);
-      console.log(`  ${theme.border(glyphs.bl + glyphs.horiz)} ${theme.error(`[x] Failed${timeStr}`)}\n`);
+      console.log(`  ${theme.error("✗")} ${theme.error(theme.bold(toolName))}: ${theme.error(error || "Execution failed")}${timeStr}`);
     }
+  }
+
+  /**
+   * Turn summary dock.
+   */
+  public static printTurnSummary(durationSeconds: number, tokens?: number): void {
+    const theme = ThemeManager.get();
+    const tokStr = tokens ? ` · ${tokens.toLocaleString()} tokens` : "";
+    console.log(`  ${theme.dim(`✓ Done in ${durationSeconds.toFixed(1)}s${tokStr}`)}\n`);
   }
 
   /**
@@ -357,7 +402,7 @@ export class UI {
       const c4 = theme.bg(def.palette.error)("  ");
       const swatch = `${c1}${c2}${c3}${c4}`;
 
-      const namePadded = padRight(def.name, 18);
+      const namePadded = fitCell(def.name, 18);
       const appBadge = def.appearance === "dark" ? theme.dim("dark") : theme.accent("light");
       const currentLabel = isCurrent ? theme.accent(" (Active)") : "";
 
@@ -382,25 +427,25 @@ export class UI {
     console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Recode Typography & Border Styles"))} ${theme.accent(glyphs.horiz.repeat(30) + glyphs.tr)}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Border Styles:"))}`);
 
-    for (const style of ["dotted", "rounded", "sharp", "double", "minimal"] as BorderStyleType[]) {
+    for (const style of ["rounded", "dotted", "sharp", "double", "minimal"] as BorderStyleType[]) {
       const g = BORDER_STYLES[style];
       const isCur = font.currentBorderStyle === style;
       const sample = `${g.tl}${g.horiz}${g.horiz}${g.tr}  ${g.vert}  ${g.bl}${g.horiz}${g.horiz}${g.br}`;
       const marker = isCur ? theme.accent("[*]") : theme.dim("[ ]");
-      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${padRight(style, 10)} ${theme.accent(sample)}${isCur ? theme.accent(" (Active)") : ""}`);
+      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${fitCell(style, 10)} ${theme.accent(sample)}${isCur ? theme.accent(" (Active)") : ""}`);
     }
 
     console.log(`  ${theme.border(glyphs.vert)}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Mascot Styles:"))}`);
-    for (const m of ["retro", "robot", "mini", "off"] as MascotStyleType[]) {
+    for (const m of ["robot", "mini", "off"] as MascotStyleType[]) {
       const isCur = font.currentMascotStyle === m;
       const marker = isCur ? theme.accent("[*]") : theme.dim("[ ]");
-      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${padRight(m, 10)}${isCur ? theme.accent(" (Active)") : ""}`);
+      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${fitCell(m, 10)}${isCur ? theme.accent(" (Active)") : ""}`);
     }
 
     console.log(`  ${theme.border(glyphs.vert)}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change border style:"))} ${theme.accent("/font style <dotted|rounded|sharp|double>")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change mascot art  :"))} ${theme.accent("/font mascot <retro|robot|mini|off>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change border style:"))} ${theme.accent("/font style <rounded|dotted|sharp|double>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change mascot art  :"))} ${theme.accent("/font mascot <robot|mini|off>")}`);
     console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
   }
 
@@ -429,7 +474,7 @@ export class UI {
 
     for (const item of items) {
       const swatch = theme.bg(item.hex)("      ");
-      console.log(`  ${theme.border(glyphs.vert)}  ${padRight(item.name, 16)} ${swatch}  ${theme.muted(item.hex)}`);
+      console.log(`  ${theme.border(glyphs.vert)}  ${fitCell(item.name, 16)} ${swatch}  ${theme.muted(item.hex)}`);
     }
 
     console.log(`  ${theme.border(glyphs.vert)}`);
@@ -464,11 +509,12 @@ export class UI {
       { cmd: "@<path>", desc: "Attach file context into prompt (e.g. @src/index.ts)" },
       { cmd: "!<command>", desc: "Execute shell command directly (e.g. !cargo test)" },
       { cmd: "Shift+Tab", desc: "Instant hotkey to toggle Build vs Plan mode" },
+      { cmd: "Ctrl+V", desc: "Paste from system clipboard into input prompt" },
       { cmd: "/exit", desc: "Quit Recode terminal assistant" },
     ];
 
     for (const c of cmds) {
-      console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(padRight(c.cmd, 24))} ${theme.dim(c.desc)}`);
+      console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(fitCell(c.cmd, 24))} ${theme.dim(c.desc)}`);
     }
 
     console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
@@ -519,7 +565,7 @@ export class UI {
         ? theme.success("[Ready]")
         : theme.warning("[Key Required]");
 
-      console.log(`  ${theme.border(glyphs.vert)}  ${marker} ${theme.bold(theme.text(padRight(id, 22)))} ${statusPill} ${theme.muted(m.provider)}`);
+      console.log(`  ${theme.border(glyphs.vert)}  ${marker} ${theme.bold(theme.text(fitCell(id, 22)))} ${statusPill} ${theme.muted(m.provider)}`);
       console.log(`  ${theme.border(glyphs.vert)}      ${theme.dim(`${m.description} (${(m.contextWindow / 1000).toFixed(0)}k context)`)}`);
     }
 
