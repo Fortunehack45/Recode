@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node -e \"console.log('TUI passed')\""
+    "test": "node --test dist/tui.test.js"
   },
   "dependencies": {
     "@recode-dev/core": "workspace:*",

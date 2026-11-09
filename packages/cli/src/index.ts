@@ -1,31 +1,45 @@
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { Recode, RecodeAuth, DEFAULT_MODELS, ModelInfo } from "@recode-dev/sdk";
-import { Repl, UI, c } from "@recode-dev/tui";
+import {
+  Repl,
+  UI,
+  c,
+  ThemeManager,
+  FontManager,
+  BorderStyleType,
+  LiveActionIndicator,
+} from "@recode-dev/tui";
 
 const VERSION = "1.30.2";
 
 function printUsage(): void {
-  UI.printBanner(VERSION);
+  const theme = ThemeManager.get();
+  UI.printPill(`Recode Terminal Coding Assistant v${VERSION}`);
   console.log(`
-${c.bold("Usage:")}
+${theme.bold(theme.text("Usage:"))}
   recode [command] [options]
 
-${c.bold("Commands:")}
-  ${c.cyan("(none)")}                      Launch interactive terminal coding assistant
-  ${c.cyan("run <instruction>")}           Execute prompt headlessly and output results
-  ${c.cyan("auth status")}                 Show current GitHub & API provider status
-  ${c.cyan("auth login")}                  Authenticate with GitHub (Device Flow or PAT)
-  ${c.cyan("auth logout")}                 Clear GitHub authentication
-  ${c.cyan("auth set-key <p> <key>")}      Store API key for provider (e.g. anthropic, gemini)
-  ${c.cyan("models")}                      List available AI models
-  ${c.cyan("version")}                     Print version (${VERSION})
+${theme.bold(theme.text("Commands:"))}
+  ${theme.accent("(none)")}                      Launch interactive terminal coding assistant
+  ${theme.accent("run <instruction>")}           Execute prompt headlessly and output results
+  ${theme.accent("theme [name]")}                Browse or set active theme (synced with Recode IDE)
+  ${theme.accent("font [style]")}                Configure border style (dotted, rounded, sharp, double)
+  ${theme.accent("welcome")}                     Display onboarding welcome & security preview splash
+  ${theme.accent("auth status")}                 Show current GitHub & API provider status
+  ${theme.accent("auth login")}                  Authenticate with GitHub (Device Flow or PAT)
+  ${theme.accent("auth logout")}                 Clear GitHub authentication
+  ${theme.accent("auth set-key <p> <key>")}      Store API key for provider (e.g. anthropic, gemini)
+  ${theme.accent("models")}                      List available AI models
+  ${theme.accent("version")}                     Print version (${VERSION})
 
-${c.bold("Options:")}
-  ${c.cyan("-m, --model <name>")}          Specify AI model (e.g. claude-3-7-sonnet, gpt-4o)
-  ${c.cyan("-w, --workspace <dir>")}       Workspace directory (defaults to current dir)
-  ${c.cyan("-h, --help")}                  Display help information
-  ${c.cyan("-v, --version")}               Display version
+${theme.bold(theme.text("Options:"))}
+  ${theme.accent("-m, --model <name>")}          Specify AI model (e.g. claude-3-7-sonnet, gpt-4o)
+  ${theme.accent("-w, --workspace <dir>")}       Workspace directory (defaults to current dir)
+  ${theme.accent("-t, --theme <name>")}          Launch with specific theme (e.g. ayu-dark, claude-warm)
+  ${theme.accent("--welcome")}                   Force display of welcome splash on launch
+  ${theme.accent("-h, --help")}                  Display help information
+  ${theme.accent("-v, --version")}               Display version
 `);
 }
 
@@ -34,6 +48,8 @@ async function main(): Promise<void> {
 
   let model: string | undefined;
   let workspaceDir = process.cwd();
+  let explicitTheme: string | undefined;
+  let showWelcome = false;
   const positional: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
@@ -42,6 +58,10 @@ async function main(): Promise<void> {
       model = args[++i];
     } else if (arg === "-w" || arg === "--workspace") {
       workspaceDir = args[++i];
+    } else if (arg === "-t" || arg === "--theme") {
+      explicitTheme = args[++i];
+    } else if (arg === "--welcome") {
+      showWelcome = true;
     } else if (arg === "-v" || arg === "--version" || arg === "version") {
       console.log(`recode v${VERSION}`);
       return;
@@ -54,6 +74,45 @@ async function main(): Promise<void> {
   }
 
   const subCommand = positional[0]?.toLowerCase();
+
+  // Theme subcommand
+  if (subCommand === "theme" || subCommand === "themes") {
+    const targetTheme = positional[1];
+    if (!targetTheme) {
+      UI.printThemeGallery();
+      return;
+    }
+    const tm = ThemeManager.get();
+    const ok = tm.setTheme(targetTheme, { syncIde: true });
+    if (ok) {
+      console.log(tm.success(`[✓] Switched theme to ${tm.theme.name} (synced with Recode IDE).`));
+    } else {
+      console.log(tm.error(`[x] Unknown theme "${targetTheme}". Run 'recode theme' to see all themes.`));
+    }
+    return;
+  }
+
+  // Font subcommand
+  if (subCommand === "font") {
+    const style = positional[1] as BorderStyleType;
+    if (!style) {
+      UI.printFontMenu();
+      return;
+    }
+    const fm = FontManager.get();
+    fm.setBorderStyle(style);
+    console.log(c.green(`[✓] Updated border style to ${style}.`));
+    return;
+  }
+
+  // Welcome subcommand
+  if (subCommand === "welcome") {
+    UI.printWelcomeSplash(VERSION);
+    const rl = readline.createInterface({ input, output });
+    await rl.question("");
+    rl.close();
+    return;
+  }
 
   // Direct subcommands
   if (subCommand === "login") {
@@ -129,10 +188,16 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Apply explicit theme flag if passed
+  if (explicitTheme) {
+    ThemeManager.get().setTheme(explicitTheme);
+  }
+
   // 4. Interactive TUI (default)
   const repl = new Repl({
     model,
     workspaceDir,
+    showWelcome,
   });
   await repl.start();
 }
@@ -220,8 +285,9 @@ async function runHeadless(instruction: string, model?: string, workspaceDir?: s
       if (event.type === "token" && event.content) {
         process.stdout.write(event.content);
       } else if (event.type === "tool_start" && event.toolCall) {
-        UI.printToolStart(event.toolCall.name, event.toolCall.arguments);
+        LiveActionIndicator.get().startTool(event.toolCall.name, event.toolCall.arguments);
       } else if (event.type === "tool_end" && event.toolCall && event.toolResult) {
+        LiveActionIndicator.get().clear();
         UI.printToolEnd(
           event.toolCall.name,
           event.toolResult.success,
@@ -229,12 +295,15 @@ async function runHeadless(instruction: string, model?: string, workspaceDir?: s
           event.toolResult.error
         );
       } else if (event.type === "error") {
+        LiveActionIndicator.get().clear();
         console.error(`\n${c.red("Error:")} ${event.error}`);
         process.exit(1);
       }
     }
+    LiveActionIndicator.get().clear();
     console.log();
   } catch (err: any) {
+    LiveActionIndicator.get().clear();
     console.error(`\n${c.red("Execution failed:")} ${err.message}`);
     process.exit(1);
   }

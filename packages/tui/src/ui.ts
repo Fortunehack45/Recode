@@ -1,67 +1,92 @@
 import path from "node:path";
-import { c } from "./colors.js";
-import { renderBox, padRight, visibleWidth } from "./text.js";
+import { ThemeManager, BUILTIN_THEMES, ThemeDefinition } from "./theme.js";
+import { FontManager, BORDER_STYLES, BorderStyleType, MascotStyleType } from "./font.js";
+import { padRight, visibleWidth } from "./text.js";
 import { AuthStatus, ModelInfo } from "@recode-dev/sdk";
 
 export class UI {
   /**
-   * Top Pill Badge inspired by Claude Code (Image 1 & 4).
-   * ZERO emojis: uses '*' bullet and clean box-drawing glyphs.
+   * Boxed Pill Badge with rounded border and asterisk bullet (matching uploaded image).
+   */
+  public static printBoxedPill(text: string): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+    const content = `* ${text}`;
+    const innerW = visibleWidth(content) + 4;
+
+    console.log(`  ${theme.cardBorder(glyphs.tl + glyphs.horiz.repeat(innerW) + glyphs.tr)}`);
+    console.log(`  ${theme.cardBorder(glyphs.vert)}  ${theme.accent("*")} ${theme.bold(theme.text(text))}  ${theme.cardBorder(glyphs.vert)}`);
+    console.log(`  ${theme.cardBorder(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br)}`);
+  }
+
+  /**
+   * Top Pill Badge.
    */
   public static printPill(text: string): void {
-    console.log(`\n  ${c.cyan("*")} ${c.bold(text)}\n`);
+    this.printBoxedPill(text);
   }
 
   /**
-   * Giant double-stroke retro ASCII Banner with Robot Mascot (Image 1 & 2).
+   * Retro 3D outlined block banner matching Claude Code (Image 4 & uploaded photo).
    */
-  public static printBanner(version = "1.30.2"): void {
+  public static printRetroBanner(): void {
+    const theme = ThemeManager.get();
     const bannerLines = [
-      " ██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗",
-      " ██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝",
-      " ██████╔╝█████╗  ██║     ██║   ██║██║  ██║█████╗  ",
-      " ██╔══██╗██╔══╝  ██║     ██║   ██║██║  ██║██╔══╝  ",
-      " ██║  ██║███████╗╚██████╗╚██████╔╝██████╔╝███████╗",
-      " ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
+      "  ____   _____  ____  ___   ____   _____ ",
+      " |  _ \\ | ____|/ ___// _ \\ |  _ \\ | ____|",
+      " | |_) ||  _| | |   | | | || | | ||  _|  ",
+      " |  _ < | |___| |___| |_| || |_| || |___ ",
+      " |_| \\_\\|_____|\\____\\\\___/ |____/ |_____|",
     ];
 
-    console.log();
     for (const line of bannerLines) {
-      console.log(c.cyan(line));
+      console.log(theme.accent(theme.bold(line)));
     }
-    console.log(
-      `  ${c.dim("Autonomous AI Software Engineering Terminal")} ${c.gray("·")} ${c.cyan(c.bold(`v${version}`))}\n`
-    );
   }
 
   /**
-   * Philosophy / Code Poem block inspired by Image 4.
+   * Welcome Splash Screen matching the uploaded image exactly.
+   * Shows boxed pill, retro 3D font, security notes, and "Press Enter to continue...".
    */
-  public static printPhilosophy(): void {
-    const code = [
-      `  ${c.dim("while")}(${c.cyan("curious")}) {`,
-      `      ${c.magenta("question_everything")}();`,
-      `      ${c.magenta("dig_deeper")}();`,
-      `      ${c.magenta("connect_dots")}(${c.dim("unexpected")});`,
-      "",
-      `      ${c.dim("if")} (${c.cyan("stuck")}) {`,
-      `          ${c.yellow("keep_thinking")}();`,
-      `      }`,
-      `  }`,
-    ];
-    console.log(code.join("\n") + "\n");
+  public static printWelcomeSplash(version = "1.30.3"): void {
+    const theme = ThemeManager.get();
+    console.clear();
+    console.log();
+    this.printBoxedPill(`Welcome to Recode research preview!`);
+    console.log();
+    this.printRetroBanner();
+    console.log();
+    this.printBoxedPill(`Welcome to Recode research preview!`);
+    console.log();
+    console.log(`  ${theme.bold(theme.text("Security notes:"))}\n`);
+    console.log(`  ${theme.text("1. Recode is currently in research preview")}`);
+    console.log(`     ${theme.muted("This version integrates autonomous coding tools with direct terminal execution.")}`);
+    console.log(`     ${theme.muted("Run /help at any time to inspect available commands.")}\n`);
+    console.log(`  ${theme.text("2. Recode can make mistakes")}`);
+    console.log(`     ${theme.muted("You should always review Recode's responses, especially when")}`);
+    console.log(`     ${theme.muted("running code or executing shell commands.")}\n`);
+    console.log(`  ${theme.text("3. Due to prompt injection risks, only use it with code you trust")}`);
+    console.log(`     ${theme.muted("For more details see:")}`);
+    console.log(`     ${theme.accent("https://github.com/Fortunehack45/Recode#security")}\n`);
+    console.log(`  ${theme.accent(theme.bold("Press Enter to continue..."))}`);
   }
 
   /**
-   * Multi-column Dashboard Card inspired by Claude Code (Image 3).
+   * 2-Column Hero Dashboard Card inspired by Claude Code (pure terminal TUI).
+   * ZERO emojis, NO window chrome / no 3-dot decorations.
    */
   public static printDashboard(
     status: AuthStatus,
     workspaceDir: string,
     currentModel: string,
     mode: "build" | "plan" = "build",
-    version = "1.30.2"
+    version = "1.30.3"
   ): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
     const relPath = path.basename(workspaceDir) || workspaceDir;
     const userBadge = status.github
       ? `@${status.github.username}`
@@ -73,142 +98,212 @@ export class UI {
         : currentModel;
 
     const modeBadge = mode === "build" ? "[BUILD] Auto-edit" : "[PLAN] Read-only";
+    const modeColored =
+      mode === "build"
+        ? theme.fg(theme.palette.success)(modeBadge)
+        : theme.fg(theme.palette.secondary)(modeBadge);
 
-    const leftCol = [
-      c.bold("Welcome to Recode!"),
+    // Left Column items
+    const mascotLines = font.getMascotLines(theme);
+    const leftCol: string[] = [
+      theme.bold(theme.text("Welcome to Recode!")),
       "",
-      `    ${c.cyan("[■■■]")}`,
-      `   ${c.cyan("[ o o ]")}`,
-      `    ${c.cyan("[===]")}`,
+      ...(mascotLines.length > 0 ? mascotLines : [""]),
       "",
-      `${c.bold("Model:")} ${c.cyan(modelName)}`,
-      `${c.bold("Mode :")} ${mode === "build" ? c.green(modeBadge) : c.magenta(modeBadge)}`,
-      `${c.bold("Path :")} ${c.dim(relPath)}`,
-      `${c.bold("User :")} ${c.white(userBadge)}`,
+      `${theme.bold(theme.text("Model:"))} ${theme.accent(modelName)}`,
+      `${theme.bold(theme.text("Mode :"))} ${modeColored}`,
+      `${theme.bold(theme.text("Path :"))} ${theme.muted(relPath)}`,
+      `${theme.bold(theme.text("User :"))} ${theme.text(userBadge)}`,
     ];
 
-    const rightColTop = [
-      c.bold("Recent Activity"),
-      `${c.dim("1m ago")}   Loaded workspace context`,
-      `${c.dim("8m ago")}   Configured AI providers`,
-      `${c.dim("2d ago")}   Initialized Recode engine`,
-      `${c.dim(".../status for more")}`,
+    // Right Column items
+    const rightColTop: string[] = [
+      theme.bold(theme.text("Recent Activity")),
+      `${theme.muted("1m ago")}   Loaded workspace context`,
+      `${theme.muted("8m ago")}   Configured AI providers`,
+      `${theme.muted("2d ago")}   Initialized Recode engine`,
+      `${theme.muted(".../status for more")}`,
     ];
 
-    const rightColBottom = [
-      c.bold("What's new"),
-      `${c.cyan("/mode")}     Toggle Build vs Plan mode`,
-      `${c.cyan("/connect")}  Connect Gemini, OpenAI, Claude, DeepSeek`,
-      `${c.cyan("@file")}     Instant file context lookup`,
-      `${c.cyan("!<cmd>")}    Inline shell command execution`,
-      `${c.dim(".../help for more")}`,
+    const rightColBottom: string[] = [
+      theme.bold(theme.text("Quick Actions")),
+      `${theme.accent("/theme")}    Change theme (synced with Recode IDE)`,
+      `${theme.accent("/font")}     Configure borders & mascot`,
+      `${theme.accent("/color")}    Customize accent & text colors`,
+      `${theme.accent("/mode")}     Toggle Build vs Plan mode`,
+      `${theme.accent("/connect")}  Connect Gemini, OpenAI, Claude, DeepSeek`,
+      `${theme.muted(".../help for more")}`,
     ];
 
-    // Combine into a multi-column bordered card
-    const cardLines = [
-      `╭─ Recode Agent v${version} ─────────────────────────────────────────────────────────────╮`,
-      `│  ${padRight(leftCol[0], 28)} │  ${padRight(rightColTop[0], 42)}│`,
-      `│  ${padRight(leftCol[1], 28)} │  ${padRight(rightColTop[1], 42)}│`,
-      `│  ${padRight(leftCol[2], 28)} │  ${padRight(rightColTop[2], 42)}│`,
-      `│  ${padRight(leftCol[3], 28)} │  ${padRight(rightColTop[3], 42)}│`,
-      `│  ${padRight(leftCol[4], 28)} │  ${padRight(rightColTop[4], 42)}│`,
-      `│  ${padRight(leftCol[5], 28)} ├────────────────────────────────────────────┤`,
-      `│  ${padRight(leftCol[6], 28)} │  ${padRight(rightColBottom[0], 42)}│`,
-      `│  ${padRight(leftCol[7], 28)} │  ${padRight(rightColBottom[1], 42)}│`,
-      `│  ${padRight(leftCol[8], 28)} │  ${padRight(rightColBottom[2], 42)}│`,
-      `│  ${padRight(leftCol[9], 28)} │  ${padRight(rightColBottom[3], 42)}│`,
-      `╰──────────────────────────────┴────────────────────────────────────────────╯`,
-    ];
+    // Align column heights
+    const leftWidth = 28;
+    const rightWidth = 46;
+    const totalInner = leftWidth + 3 + rightWidth; // left + " │ " + right
+
+    const cardLines: string[] = [];
+
+    // Header border
+    const title = ` Recode Agent v${version} `;
+    const titleLen = visibleWidth(title);
+    const rightBorderLen = Math.max(0, totalInner - titleLen - 2);
+    cardLines.push(
+      "  " +
+        theme.cardBorder(glyphs.tl + glyphs.horiz) +
+        theme.bold(theme.accent(title)) +
+        theme.cardBorder(glyphs.horiz.repeat(rightBorderLen) + glyphs.tr)
+    );
+
+    // Top section
+    const topMaxRows = Math.max(5, rightColTop.length);
+    for (let i = 0; i < topMaxRows; i++) {
+      const leftPart = padRight(leftCol[i] || "", leftWidth);
+      const rightPart = padRight(rightColTop[i] || "", rightWidth);
+      cardLines.push(
+        "  " +
+          theme.border(glyphs.vert) +
+          " " +
+          leftPart +
+          " " +
+          theme.border(glyphs.vert) +
+          " " +
+          rightPart +
+          " " +
+          theme.border(glyphs.vert)
+      );
+    }
+
+    // Divider in right column
+    const leftMid = padRight(leftCol[topMaxRows] || "", leftWidth);
+    cardLines.push(
+      "  " +
+        theme.border(glyphs.vert) +
+        " " +
+        leftMid +
+        " " +
+        theme.border(glyphs.teeLeft + glyphs.horiz.repeat(rightWidth + 1)) +
+        theme.border(glyphs.teeRight)
+    );
+
+    // Bottom section
+    const botRows = Math.max(leftCol.length - topMaxRows - 1, rightColBottom.length);
+    for (let i = 0; i < botRows; i++) {
+      const leftPart = padRight(leftCol[topMaxRows + 1 + i] || "", leftWidth);
+      const rightPart = padRight(rightColBottom[i] || "", rightWidth);
+      cardLines.push(
+        "  " +
+          theme.border(glyphs.vert) +
+          " " +
+          leftPart +
+          " " +
+          theme.border(glyphs.vert) +
+          " " +
+          rightPart +
+          " " +
+          theme.border(glyphs.vert)
+      );
+    }
+
+    // Footer border
+    cardLines.push(
+      "  " +
+        theme.cardBorder(
+          glyphs.bl +
+            glyphs.horiz.repeat(leftWidth + 2) +
+            glyphs.teeBottom +
+            glyphs.horiz.repeat(rightWidth + 2) +
+            glyphs.br
+        )
+    );
 
     console.log(cardLines.join("\n") + "\n");
   }
 
   /**
-   * Ready status checks inspired by DeepAgents (Image 2).
+   * Ready status checks.
    */
   public static printReadyChecks(sessionId: string): void {
+    const theme = ThemeManager.get();
     const threadId = sessionId.split("_").pop() || "main";
-    console.log(`  ${c.green("[✓]")} Recode engine: ${c.bold("ready")}`);
-    console.log(`  ${c.green("[✓]")} Thread: ${c.cyan(threadId)}`);
-    console.log(`  ${c.green("[✓]")} Loaded autonomous tools: ${c.dim("read, write, edit, exec, grep, search")}`);
-    console.log(`\n  ${c.bold("Ready to code! What would you like to build?")}`);
-    console.log(`  ${c.dim("Enter send  •  Ctrl+J newline  •  @ files  •  / commands")}\n`);
+    const activeTheme = theme.theme.name;
+
+    console.log(`  ${theme.success("[✓]")} Recode engine: ${theme.bold("ready")}`);
+    console.log(`  ${theme.success("[✓]")} Active theme : ${theme.accent(activeTheme)} ${theme.dim("(synced with Recode IDE)")}`);
+    console.log(`  ${theme.success("[✓]")} Session thread: ${theme.muted(threadId)}`);
+    console.log(`  ${theme.success("[✓]")} Autonomous tools: ${theme.dim("read_file, edit_file, write_file, exec, grep, search")}`);
+    console.log(`\n  ${theme.bold(theme.text("Ready to code! What would you like to build?"))}`);
+    console.log(`  ${theme.dim("Enter send  •  Shift+Tab mode  •  @ files  •  / commands")}\n`);
   }
 
   /**
-   * Full Hero Header: Banner + Philosophy + Dashboard + Status Checks.
+   * Full Hero Header: Boxed Pill + Dashboard + Status Checks.
    */
   public static printHeader(
     status: AuthStatus,
     workspaceDir: string,
     currentModel: string,
     mode: "build" | "plan" = "build",
-    version = "1.30.2",
+    version = "1.30.3",
     sessionId = "session_main"
   ): void {
-    this.printPill(`Welcome to Recode Terminal Coding Agent! [v${version}]`);
-    this.printBanner(version);
-    this.printPhilosophy();
+    this.printBoxedPill(`Recode Autonomous Coding Terminal [v${version}]`);
+    console.log();
     this.printDashboard(status, workspaceDir, currentModel, mode, version);
     this.printReadyChecks(sessionId);
   }
 
   /**
-   * Message Container for User Turn (Image 2 & user request).
-   * Uses clear vertical bar or rounded box with ZERO emojis.
+   * User message container.
    */
   public static printUserMessage(prompt: string): void {
-    console.log(`\n  ${c.cyan("│")} ${c.bold("> " + prompt)}\n`);
+    const theme = ThemeManager.get();
+    console.log(`\n  ${theme.accent("│")} ${theme.bold(theme.text("> " + prompt))}\n`);
   }
 
   /**
-   * Assistant Response Container Header (ZERO emojis).
+   * Assistant container header.
    */
   public static printAssistantStart(): void {
-    console.log(`  ${c.cyan("╭─ [recode]")}`);
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+    console.log(`  ${theme.accent(glyphs.tl + glyphs.horiz + " [recode]")}`);
   }
 
   public static printAssistantEnd(): void {
-    console.log(`  ${c.cyan("╰──────────────────────────────────────────────────")}\n`);
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(50))}\n`);
   }
 
   /**
-   * Live Thinking Container / Simmering block (Image 4 & user request).
-   * Displays live elapsed seconds or structured reasoning.
+   * Thinking block.
    */
   public static printThinkingSummary(durationSeconds: number): void {
-    console.log(`  ${c.dim(`[✓] Thought for ${durationSeconds.toFixed(1)}s`)}\n`);
+    const theme = ThemeManager.get();
+    console.log(`  ${theme.dim(`[✓] Thought for ${durationSeconds.toFixed(1)}s`)}\n`);
   }
 
   public static printThinkingBlock(reasoning: string, durationSeconds?: number): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
     const durStr = durationSeconds !== undefined ? ` · ${durationSeconds.toFixed(1)}s` : "";
+
     const lines = [
-      c.yellow(`  ╭─ [think] (Reasoning${durStr}) ───────────────────────`),
+      theme.warning(`  ${glyphs.tl}${glyphs.horiz} [think] (Reasoning${durStr}) ───────────────────────`),
       ...reasoning
         .trim()
         .split("\n")
-        .map((l) => c.yellow("  │ ") + c.dim(l)),
-      c.yellow(`  ╰──────────────────────────────────────────────────`),
+        .map((l) => theme.warning(`  ${glyphs.vert} `) + theme.dim(l)),
+      theme.warning(`  ${glyphs.bl}${glyphs.horiz.repeat(50)}`),
     ];
     console.log(lines.join("\n"));
   }
 
   /**
-   * Tool Execution Card (ZERO emojis).
+   * Compact tool completion tile.
    */
-  public static printToolStart(toolName: string, args: Record<string, unknown>): void {
-    let detail = "";
-    if (args.path) detail = String(args.path);
-    else if (args.command) detail = String(args.command);
-    else if (args.query) detail = String(args.query);
-    else if (args.pattern) detail = String(args.pattern);
-
-    console.log(
-      `\n  ${c.yellow("╭─ [tool]")} ${c.bold(toolName)} ` +
-        (detail ? c.dim(`(${detail})`) : "")
-    );
-  }
-
   public static printToolEnd(
     toolName: string,
     success: boolean,
@@ -216,189 +311,240 @@ export class UI {
     error?: string,
     durationMs?: number
   ): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
     const timeStr = durationMs !== undefined ? ` (${durationMs}ms)` : "";
+
     if (success) {
       const lineCount = output ? output.split("\n").length : 0;
-      const preview = output.slice(0, 250).replace(/\r?\n/g, " ").trim();
+      const preview = output.slice(0, 160).replace(/\r?\n/g, " ").trim();
       const summary =
         lineCount > 1
-          ? `${lineCount} lines: ${preview.slice(0, 70)}...`
+          ? `${lineCount} lines: ${preview.slice(0, 60)}...`
           : preview || "Success";
 
-      console.log(`  ${c.yellow("│")}   ${c.dim(summary)}`);
-      console.log(`  ${c.yellow("╰─")} ${c.green(`[✓] Completed successfully${timeStr}`)}\n`);
+      console.log(`  ${theme.border(glyphs.tl + glyphs.horiz + " [tool]")} ${theme.bold(theme.text(toolName))}`);
+      console.log(`  ${theme.border(glyphs.vert)}   ${theme.dim(summary)}`);
+      console.log(`  ${theme.border(glyphs.bl + glyphs.horiz)} ${theme.success(`[✓] Completed successfully${timeStr}`)}\n`);
     } else {
-      console.log(`  ${c.yellow("│")}   ${c.red(error || "Execution failed")}`);
-      console.log(`  ${c.yellow("╰─")} ${c.red(`[x] Failed${timeStr}`)}\n`);
+      console.log(`  ${theme.border(glyphs.tl + glyphs.horiz + " [tool]")} ${theme.bold(theme.text(toolName))}`);
+      console.log(`  ${theme.border(glyphs.vert)}   ${theme.error(error || "Execution failed")}`);
+      console.log(`  ${theme.border(glyphs.bl + glyphs.horiz)} ${theme.error(`[x] Failed${timeStr}`)}\n`);
     }
   }
 
   /**
-   * Bottom Status Dock (Image 2 inspired).
-   * Spans bottom dock with mode, workspace, token counter, and active model.
+   * Theme Gallery Card (/theme).
+   * Displays all themes with live color swatches.
    */
-  public static printStatusDock(
-    mode: "build" | "plan",
-    workspaceDir: string,
-    tokens: number,
-    modelName: string
-  ): void {
-    const relPath = path.basename(workspaceDir) || workspaceDir;
-    const modeBadge = mode === "build" ? c.green(c.bold("[BUILD]")) : c.magenta(c.bold("[PLAN]"));
-    const tokenStr = `${(tokens / 1000).toFixed(1)}k tokens`;
+  public static printThemeGallery(): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+    const currentId = theme.theme.id;
 
-    const dock = `  ${modeBadge} ${c.dim("[shift+tab: mode]")}  ${c.white(relPath)}  ${c.gray("│")}  ${c.dim(tokenStr)}  ${c.gray("│")}  ${c.cyan(modelName)}`;
-    console.log(c.dim("─".repeat(72)));
-    console.log(dock);
-    console.log(c.dim("─".repeat(72)) + "\n");
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Recode Theme Gallery"))} ${theme.accent(glyphs.horiz.repeat(40) + glyphs.tr)}`);
+
+    for (const [id, def] of Object.entries(BUILTIN_THEMES)) {
+      const isCurrent = id === currentId;
+      const marker = isCurrent ? theme.accent("[*]") : theme.dim("[ ]");
+
+      // Generate visual color swatch
+      const c1 = theme.bg(def.palette.accent)("  ");
+      const c2 = theme.bg(def.palette.secondary)("  ");
+      const c3 = theme.bg(def.palette.success)("  ");
+      const c4 = theme.bg(def.palette.error)("  ");
+      const swatch = `${c1}${c2}${c3}${c4}`;
+
+      const namePadded = padRight(def.name, 18);
+      const appBadge = def.appearance === "dark" ? theme.dim("dark") : theme.accent("light");
+      const currentLabel = isCurrent ? theme.accent(" (Active)") : "";
+
+      console.log(`  ${theme.border(glyphs.vert)}  ${marker} ${theme.bold(theme.text(namePadded))} ${swatch}  ${appBadge}${currentLabel}`);
+      console.log(`  ${theme.border(glyphs.vert)}      ${theme.muted(def.description)}`);
+    }
+
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Switch theme :"))} ${theme.accent("/theme <name>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Sync with IDE:"))} ${theme.accent("/theme ide")}`);
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
   }
 
   /**
-   * AI Provider Onboarding Card (ZERO emojis).
+   * Font & Styling Menu (/font).
+   */
+  public static printFontMenu(): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Recode Typography & Border Styles"))} ${theme.accent(glyphs.horiz.repeat(30) + glyphs.tr)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Border Styles:"))}`);
+
+    for (const style of ["dotted", "rounded", "sharp", "double", "minimal"] as BorderStyleType[]) {
+      const g = BORDER_STYLES[style];
+      const isCur = font.currentBorderStyle === style;
+      const sample = `${g.tl}${g.horiz}${g.horiz}${g.tr}  ${g.vert}  ${g.bl}${g.horiz}${g.horiz}${g.br}`;
+      const marker = isCur ? theme.accent("[*]") : theme.dim("[ ]");
+      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${padRight(style, 10)} ${theme.accent(sample)}${isCur ? theme.accent(" (Active)") : ""}`);
+    }
+
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Mascot Styles:"))}`);
+    for (const m of ["retro", "robot", "mini", "off"] as MascotStyleType[]) {
+      const isCur = font.currentMascotStyle === m;
+      const marker = isCur ? theme.accent("[*]") : theme.dim("[ ]");
+      console.log(`  ${theme.border(glyphs.vert)}    ${marker} ${padRight(m, 10)}${isCur ? theme.accent(" (Active)") : ""}`);
+    }
+
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change border style:"))} ${theme.accent("/font style <dotted|rounded|sharp|double>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Change mascot art  :"))} ${theme.accent("/font mascot <retro|robot|mini|off>")}`);
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
+  }
+
+  /**
+   * Color Palette Inspector (/color).
+   */
+  public static printColorPalette(): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+    const p = theme.palette;
+
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Active Theme Palette (" + theme.theme.name + ")"))} ${theme.accent(glyphs.horiz.repeat(28) + glyphs.tr)}`);
+
+    const items = [
+      { name: "Background", hex: p.bg },
+      { name: "Foreground", hex: p.fg },
+      { name: "Accent (Main)", hex: p.accent },
+      { name: "Secondary", hex: p.secondary },
+      { name: "Border", hex: p.border },
+      { name: "Mascot", hex: p.mascot },
+      { name: "Success", hex: p.success },
+      { name: "Warning", hex: p.warning },
+      { name: "Error", hex: p.error },
+    ];
+
+    for (const item of items) {
+      const swatch = theme.bg(item.hex)("      ");
+      console.log(`  ${theme.border(glyphs.vert)}  ${padRight(item.name, 16)} ${swatch}  ${theme.muted(item.hex)}`);
+    }
+
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Customize accent :"))} ${theme.accent("/color accent <#hex or name>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Reset palette    :"))} ${theme.accent("/color reset")}`);
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
+  }
+
+  /**
+   * Command help table.
+   */
+  public static printHelp(): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Recode Terminal Assistant Commands"))} ${theme.accent(glyphs.horiz.repeat(30) + glyphs.tr)}`);
+
+    const cmds = [
+      { cmd: "/welcome", desc: "Show the onboarding welcome & security preview splash" },
+      { cmd: "/theme [name]", desc: "Browse or switch themes (matches Recode IDE)" },
+      { cmd: "/theme ide", desc: "Sync theme directly from Recode IDE settings.json" },
+      { cmd: "/font [style|mascot]", desc: "Configure border styles (dotted/rounded) & mascot" },
+      { cmd: "/color [accent|reset]", desc: "Inspect theme color palette or set custom accent" },
+      { cmd: "/mode [build|plan]", desc: "Toggle between Build (read/write/exec) and Plan (read-only)" },
+      { cmd: "/model [name]", desc: "Switch AI model (e.g. gemini-2.5-flash, claude-3-7-sonnet)" },
+      { cmd: "/models", desc: "List all supported models across all providers" },
+      { cmd: "/connect [provider] [key]", desc: "Set API keys (Gemini, OpenAI, Claude, DeepSeek, Groq)" },
+      { cmd: "/status", desc: "Show Git status in current workspace" },
+      { cmd: "/diff", desc: "Show pending Git diff changes" },
+      { cmd: "/clear", desc: "Clear screen and reset conversation history" },
+      { cmd: "@<path>", desc: "Attach file context into prompt (e.g. @src/index.ts)" },
+      { cmd: "!<command>", desc: "Execute shell command directly (e.g. !cargo test)" },
+      { cmd: "Shift+Tab", desc: "Instant hotkey to toggle Build vs Plan mode" },
+      { cmd: "/exit", desc: "Quit Recode terminal assistant" },
+    ];
+
+    for (const c of cmds) {
+      console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(padRight(c.cmd, 24))} ${theme.dim(c.desc)}`);
+    }
+
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
+  }
+
+  /**
+   * AI Provider Onboarding Card.
    */
   public static printConnectMenu(): void {
-    const lines = [
-      c.bold("Connect an AI Provider (BYOK — Bring Your Own Key)"),
-      c.dim("Recode is 100% provider-agnostic. Connect your preferred key:"),
-      "",
-      `  ${c.cyan(c.bold("[1] Google Gemini"))}     ${c.dim("gemini-2.5-flash, gemini-2.5-pro (Generous free tier, 1M ctx)")}`,
-      `  ${c.cyan(c.bold("[2] OpenAI"))}            ${c.dim("gpt-4o, gpt-4o-mini, o3-mini")}`,
-      `  ${c.cyan(c.bold("[3] Anthropic Claude"))}  ${c.dim("claude-3-7-sonnet, claude-3-5-sonnet")}`,
-      `  ${c.cyan(c.bold("[4] DeepSeek"))}          ${c.dim("deepseek-chat (V3), deepseek-reasoner (R1)")}`,
-      `  ${c.cyan(c.bold("[5] Groq"))}              ${c.dim("llama-3.3-70b (Ultra-fast LPUs)")}`,
-      `  ${c.cyan(c.bold("[6] Ollama (Local)"))}    ${c.dim("100% private & offline models on your machine")}`,
-      "",
-      `Run interactive setup : ${c.cyan(c.bold("/connect"))}`,
-      `Or direct connection  : ${c.cyan("/connect <provider> <api_key>")}`,
-      `Or set environment var: ${c.dim("GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY...")}`,
-    ];
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
 
-    console.log(
-      renderBox(lines, c.yellow("[connect] AI Provider Setup"), {
-        borderColor: c.yellow,
-        rounded: true,
-      })
-    );
-    console.log();
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Connect an AI Provider (BYOK — Bring Your Own Key)"))} ${theme.accent(glyphs.horiz.repeat(20) + glyphs.tr)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("Recode is 100% provider-agnostic. Connect your preferred key:")}`);
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[1] Google Gemini"))}     ${theme.dim("gemini-2.5-flash, gemini-2.5-pro (Generous free tier, 1M ctx)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[2] OpenAI"))}            ${theme.dim("gpt-4o, gpt-4o-mini, o3-mini")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[3] Anthropic Claude"))}  ${theme.dim("claude-3-7-sonnet, claude-3-5-sonnet")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[4] DeepSeek"))}          ${theme.dim("deepseek-chat (V3), deepseek-reasoner (R1)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[5] Groq"))}              ${theme.dim("llama-3.3-70b (Ultra-fast LPUs)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[6] Ollama (Local)"))}    ${theme.dim("100% private & offline models on your machine")}`);
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  Run setup      : ${theme.accent("/connect")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  Direct connect : ${theme.accent("/connect <provider> <api_key>")}`);
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
   }
 
   /**
-   * GitHub Device Authorization Card (ZERO emojis).
-   */
-  public static printDeviceAuthCard(userCode: string, verificationUri: string): void {
-    const lines = [
-      c.bold("GitHub OAuth Device Flow (No email or password needed)"),
-      "",
-      `  ${c.bold("1. Verification URL :")} ${c.underline(c.cyan(verificationUri))}`,
-      `  ${c.bold("2. One-Time Code    :")} ${c.bold(c.green(userCode))}  ${c.dim("(Copied to clipboard)")}`,
-      "",
-      c.dim("Browser launched automatically. Approve the code to sign in instantly."),
-      c.dim("Waiting for authorization..."),
-    ];
-
-    console.log();
-    console.log(
-      renderBox(lines, c.green("[auth] GitHub Device Authentication"), {
-        borderColor: c.green,
-        rounded: true,
-      })
-    );
-    console.log();
-  }
-
-  public static printDeviceAuthSuccess(username: string): void {
-    console.log(c.green(`\n[✓] Successfully authenticated as @${username}!\n`));
-  }
-
-  /**
-   * Model catalog table (ZERO emojis).
+   * Model Catalog.
    */
   public static printModelCatalog(
     models: Record<string, ModelInfo>,
-    activeModelId?: string,
-    providersStatus?: Record<string, { configured: boolean }>
+    activeModel: string,
+    providers: Record<string, { configured: boolean }>
   ): void {
-    console.log(`\n  ${c.bold("Available Models in Recode:")}\n`);
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
 
-    const colP = 12;
-    const colA = 20;
-    const colC = 10;
-    const colS = 14;
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Available Recode AI Models"))} ${theme.accent(glyphs.horiz.repeat(36) + glyphs.tr)}`);
 
-    const header =
-      "  " +
-      padRight("Provider", colP) +
-      padRight("Alias / Model", colA) +
-      padRight("Context", colC) +
-      padRight("Status", colS) +
-      "Description";
+    for (const [id, m] of Object.entries(models)) {
+      const isActive = id === activeModel;
+      const isConfigured = Boolean(providers[m.provider]?.configured);
+      const marker = isActive ? theme.accent("[*]") : theme.dim("[ ]");
+      const statusPill = isConfigured
+        ? theme.success("[Ready]")
+        : theme.warning("[Key Required]");
 
-    console.log(c.dim(header));
-    console.log(c.dim("  " + "─".repeat(header.length + 20)));
-
-    for (const [alias, m] of Object.entries(models)) {
-      const isConfigured = providersStatus?.[m.provider]?.configured ?? false;
-      const isActive =
-        alias === activeModelId ||
-        m.id === activeModelId ||
-        (activeModelId && activeModelId.includes(alias));
-
-      let statusStr = isConfigured ? c.green("[✓] Connected") : c.dim("[ ] No key");
-      if (isActive) {
-        statusStr = c.cyan(c.bold("[*] Active"));
-      }
-
-      const ctxStr = `${Math.round(m.contextWindow / 1000)}k`;
-      const row =
-        "  " +
-        padRight(m.provider.toUpperCase(), colP) +
-        padRight(alias, colA) +
-        padRight(ctxStr, colC) +
-        padRight(statusStr, colS) +
-        c.dim(m.description || "");
-
-      console.log(row);
+      console.log(`  ${theme.border(glyphs.vert)}  ${marker} ${theme.bold(theme.text(padRight(id, 22)))} ${statusPill} ${theme.muted(m.provider)}`);
+      console.log(`  ${theme.border(glyphs.vert)}      ${theme.dim(`${m.description} (${(m.contextWindow / 1000).toFixed(0)}k context)`)}`);
     }
 
-    console.log(
-      `\n  ${c.dim("Switch model:")} ${c.cyan("/model <name>")}  ${c.dim("Example:")} ${c.cyan("/model gemini-2.5-flash")}\n`
-    );
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
   }
 
   /**
-   * Help dialog (ZERO emojis).
+   * GitHub Device Authorization Card.
    */
-  public static printHelp(): void {
-    const lines = [
-      c.bold("Recode Terminal — Commands & Shortcuts"),
-      "",
-      `  ${c.cyan(c.bold("/connect"))}           Interactive provider setup (Gemini, OpenAI, Claude, DeepSeek...)`,
-      `  ${c.cyan(c.bold("/connect <p> <key>"))} Connect provider with key (e.g. /connect gemini <key>)`,
-      `  ${c.cyan(c.bold("/models"))}            List available AI models and their context windows`,
-      `  ${c.cyan(c.bold("/model <name>"))}      Switch active model (e.g. /model gemini-2.5-flash)`,
-      `  ${c.cyan(c.bold("/mode [build|plan]"))} Toggle mode (Build = autonomous edits, Plan = analysis only)`,
-      `  ${c.cyan(c.bold("/login"))}             Sign in with GitHub (Zero Email Device Flow)`,
-      `  ${c.cyan(c.bold("/logout"))}            Sign out of GitHub`,
-      `  ${c.cyan(c.bold("/status"))}            Show auth, git & connection status`,
-      `  ${c.cyan(c.bold("/diff"))}              Show git diff in working directory`,
-      `  ${c.cyan(c.bold("/clear"))}             Clear the conversation history & screen`,
-      `  ${c.cyan(c.bold("/exit"))}              Exit Recode Terminal`,
-      "",
-      c.bold("Context Tags & Inline Shell:"),
-      `  ${c.yellow("@<filepath>")}              Attach file to context (e.g. "explain @src/index.ts")`,
-      `  ${c.yellow("!<command>")}               Execute shell command inline (e.g. "!git status")`,
-      "",
-      c.bold("Keyboard Shortcuts:"),
-      `  ${c.dim("Shift+Tab")}                   Cycle between Build and Plan modes`,
-      `  ${c.dim("Ctrl+C")}                      Interrupt active agent turn`,
-    ];
+  public static printDeviceAuthCard(userCode: string, verificationUri: string): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
 
-    console.log(
-      renderBox(lines, c.cyan("[help] Recode Command Reference"), {
-        borderColor: c.cyan,
-        rounded: true,
-      })
-    );
-    console.log();
+    console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("GitHub OAuth Device Flow"))} ${theme.accent(glyphs.horiz.repeat(38) + glyphs.tr)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("1. Verification URL :"))} ${theme.underline(theme.accent(verificationUri))}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("2. One-Time Code    :"))} ${theme.success(theme.bold(userCode))}  ${theme.dim("(Copied to clipboard)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("Browser launched automatically. Approve the code to sign in.")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("Waiting for authorization...")}`);
+    console.log(`  ${theme.accent(glyphs.bl + glyphs.horiz.repeat(64) + glyphs.br)}\n`);
+  }
+
+  public static printDeviceAuthSuccess(username: string): void {
+    const theme = ThemeManager.get();
+    console.log(`\n  ${theme.success("[✓]")} Successfully authenticated as ${theme.bold(theme.accent(`@${username}`))}!\n`);
   }
 }

@@ -14,7 +14,10 @@ import {
   PROVIDER_DEFAULT_MODELS,
 } from "@recode-dev/sdk";
 import { UI } from "./ui.js";
-import { c } from "./colors.js";
+import { ThemeManager, BUILTIN_THEMES } from "./theme.js";
+import { FontManager, BorderStyleType, MascotStyleType } from "./font.js";
+import { LiveActionIndicator } from "./action_state.js";
+import { NativeInputBox } from "./input.js";
 
 export type AgentMode = "build" | "plan";
 
@@ -22,6 +25,7 @@ export interface ReplOptions {
   model?: string;
   workspaceDir?: string;
   mode?: AgentMode;
+  showWelcome?: boolean;
 }
 
 export class Repl {
@@ -32,10 +36,21 @@ export class Repl {
   private mode: AgentMode = "build";
   private running = true;
   private cumulativeTokens = 1240;
+  private inputBox: NativeInputBox;
+  private indicator: LiveActionIndicator;
+  private theme: ThemeManager;
+  private font: FontManager;
+  private shouldShowWelcome: boolean;
 
   constructor(options: ReplOptions = {}) {
     this.workspaceDir = options.workspaceDir || process.cwd();
     this.mode = options.mode || "build";
+    this.shouldShowWelcome = Boolean(options.showWelcome);
+    this.theme = ThemeManager.get();
+    this.font = FontManager.get();
+    this.indicator = LiveActionIndicator.get();
+    this.inputBox = new NativeInputBox();
+
     const status = RecodeAuth.status();
 
     // Determine initial model: options.model -> status.defaultModel -> best available configured key -> "(unconfigured)"
@@ -68,11 +83,14 @@ export class Repl {
   }
 
   public async start(): Promise<void> {
-    const rl = readline.createInterface({ input, output });
+    const cfg = ThemeManager.loadConfig();
+    if (this.shouldShowWelcome || !cfg.theme) {
+      await this.showWelcomeSplash();
+    }
 
     console.clear();
     const status = this.recode.status();
-    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
+    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
 
     // If no provider key is configured, show onboarding connect card right away
     const hasAnyKey = Object.values(status.providers).some((p) => p.configured);
@@ -83,13 +101,18 @@ export class Repl {
     while (this.running) {
       let line = "";
       try {
-        const modeBadge =
-          this.mode === "build"
-            ? c.green("[build]")
-            : c.magenta("[plan]");
-        const promptSymbol =
-          c.bold("rec ") + modeBadge + c.cyan(c.bold(" > "));
-        line = await rl.question(promptSymbol);
+        line = await this.inputBox.prompt(
+          {
+            mode: this.mode,
+            workspaceDir: this.workspaceDir,
+            currentModel: this.currentModel,
+            tokens: this.cumulativeTokens,
+          },
+          (newMode) => {
+            this.mode = newMode;
+            this.session = this.createConfiguredSession();
+          }
+        );
       } catch {
         break;
       }
@@ -109,7 +132,7 @@ export class Repl {
       // 2. Command normalization
       const parsed = this.parseCommand(line);
       if (parsed.isCommand) {
-        await this.handleCommand(parsed.cmd, parsed.args, rl);
+        await this.handleCommand(parsed.cmd, parsed.args);
         continue;
       }
 
@@ -117,17 +140,19 @@ export class Repl {
       if (!this.hasActiveKey()) {
         UI.printConnectMenu();
         console.log(
-          c.yellow("[!] Recode needs an AI provider connected before executing prompts.\n") +
-            c.dim("  Connect now: ") +
-            c.cyan("/connect") +
-            c.dim(" or ") +
-            c.cyan("/connect gemini <key>\n")
+          this.theme.warning("[!] Recode needs an AI provider connected before executing prompts.\n") +
+            this.theme.dim("  Connect now: ") +
+            this.theme.accent("/connect") +
+            this.theme.dim(" or ") +
+            this.theme.accent("/connect gemini <key>\n")
         );
+        const rl = readline.createInterface({ input, output });
         const ans = (
-          await rl.question(c.cyan("Would you like to connect a provider now? [y/N]: "))
+          await rl.question(this.theme.accent("Would you like to connect a provider now? [y/N]: "))
         ).trim().toLowerCase();
+        rl.close();
         if (ans === "y" || ans === "yes") {
-          await this.handleConnect([], rl);
+          await this.handleConnect([]);
         }
         continue;
       }
@@ -136,20 +161,27 @@ export class Repl {
       const { augmentedPrompt, attachedFiles } = this.extractFileReferences(line);
       if (attachedFiles.length > 0) {
         console.log(
-          c.dim(`[file] Loaded ${attachedFiles.length} file context(s): `) +
-            attachedFiles.map((f) => c.cyan(f)).join(", ")
+          this.theme.dim(`[file] Loaded ${attachedFiles.length} file context(s): `) +
+            attachedFiles.map((f) => this.theme.accent(f)).join(", ")
         );
       }
 
       // 5. Display prompt in user message container
       UI.printUserMessage(line);
 
-      // 6. Run agent turn with Thinking Container and Assistant Container
+      // 6. Run agent turn with real-time LiveActionIndicator
       await this.runTurn(augmentedPrompt);
     }
 
+    console.log(this.theme.dim("\nGoodbye from Recode Terminal."));
+  }
+
+  private async showWelcomeSplash(): Promise<void> {
+    UI.printWelcomeSplash("1.30.3");
+    const rl = readline.createInterface({ input, output });
+    await rl.question("");
     rl.close();
-    console.log(c.dim("\nGoodbye from Recode Terminal."));
+    ThemeManager.saveConfig({ theme: this.theme.theme.id });
   }
 
   private hasActiveKey(): boolean {
@@ -184,6 +216,11 @@ export class Repl {
     }
 
     const knownCommands = new Set([
+      "welcome",
+      "theme",
+      "themes",
+      "font",
+      "color",
       "help",
       "h",
       "?",
@@ -214,12 +251,34 @@ export class Repl {
     return { isCommand: false, cmd: "", args: [] };
   }
 
-  private async handleCommand(
-    cmd: string,
-    args: string[],
-    rl: readline.Interface
-  ): Promise<void> {
+  private async handleCommand(cmd: string, args: string[]): Promise<void> {
     switch (cmd) {
+      case "welcome":
+        await this.showWelcomeSplash();
+        console.clear();
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.3",
+          this.session.id
+        );
+        break;
+
+      case "theme":
+      case "themes":
+        await this.handleTheme(args);
+        break;
+
+      case "font":
+        await this.handleFont(args);
+        break;
+
+      case "color":
+        await this.handleColor(args);
+        break;
+
       case "help":
       case "h":
       case "?":
@@ -235,7 +294,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.2",
+          "1.30.3",
           this.session.id
         );
         break;
@@ -248,7 +307,7 @@ export class Repl {
 
       case "version":
       case "v":
-        console.log(`recode v1.30.2\n`);
+        console.log(`recode v1.30.3\n`);
         break;
 
       case "models": {
@@ -259,14 +318,14 @@ export class Repl {
 
       case "model":
         if (args.length === 0) {
-          console.log(`  Current active model: ${c.cyan(c.bold(this.currentModel))}\n`);
+          console.log(`  Current active model: ${this.theme.accent(this.theme.bold(this.currentModel))}\n`);
         } else {
           const modelName = args[0];
           const info = resolveModel(modelName);
           this.currentModel = info.id;
           this.session = this.createConfiguredSession();
           console.log(
-            `  ${c.green("[✓]")} Switched model to ${c.cyan(c.bold(info.name))} ${c.dim(`(${info.id})`)}\n`
+            `  ${this.theme.success("[✓]")} Switched model to ${this.theme.accent(this.theme.bold(info.name))} ${this.theme.dim(`(${info.id})`)}\n`
           );
         }
         break;
@@ -280,10 +339,10 @@ export class Repl {
         }
         this.session = this.createConfiguredSession();
         console.log(
-          `  ${c.green("[✓]")} Mode switched to ${
+          `  ${this.theme.success("[✓]")} Mode switched to ${
             this.mode === "build"
-              ? c.green(c.bold("[BUILD] (read/write/exec)"))
-              : c.magenta(c.bold("[PLAN] (read-only analysis)"))
+              ? this.theme.fg(this.theme.palette.success)(this.theme.bold("[BUILD] (read/write/exec)"))
+              : this.theme.fg(this.theme.palette.secondary)(this.theme.bold("[PLAN] (read-only analysis)"))
           }\n`
         );
         break;
@@ -292,22 +351,22 @@ export class Repl {
       case "connect":
       case "key":
       case "set-key":
-        await this.handleConnect(args, rl);
+        await this.handleConnect(args);
         break;
 
       case "login":
-        await this.handleLogin(rl);
+        await this.handleLogin();
         break;
 
       case "logout":
         RecodeAuth.logoutGitHub();
-        console.log(c.green("  [✓] Logged out of GitHub.\n"));
+        console.log(this.theme.success("  [✓] Logged out of GitHub.\n"));
         UI.printHeader(
           this.recode.status(),
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.2",
+          "1.30.3",
           this.session.id
         );
         break;
@@ -323,10 +382,10 @@ export class Repl {
             encoding: "utf-8",
           });
           console.log(
-            `\n  ${c.bold("Git Diff Summary:")}\n${diff ? "  " + diff.replace(/\n/g, "\n  ") : "  No changes in working tree."}\n`
+            `\n  ${this.theme.bold(this.theme.text("Git Diff Summary:"))}\n${diff ? "  " + diff.replace(/\n/g, "\n  ") : "  No changes in working tree."}\n`
           );
         } catch {
-          console.log(c.yellow("  Git diff unavailable (not inside a Git repository).\n"));
+          console.log(this.theme.warning("  Git diff unavailable (not inside a Git repository).\n"));
         }
         break;
 
@@ -336,9 +395,9 @@ export class Repl {
             cwd: this.workspaceDir,
             encoding: "utf-8",
           });
-          console.log(`\n  ${c.bold("Git Status:")}\n${st ? "  " + st.replace(/\n/g, "\n  ") : "  Working tree clean."}\n`);
+          console.log(`\n  ${this.theme.bold(this.theme.text("Git Status:"))}\n${st ? "  " + st.replace(/\n/g, "\n  ") : "  Working tree clean."}\n`);
         } catch {
-          console.log(c.yellow("  Git status unavailable.\n"));
+          console.log(this.theme.warning("  Git status unavailable.\n"));
         }
         break;
 
@@ -347,26 +406,187 @@ export class Repl {
         break;
 
       default:
-        console.log(c.yellow(`  Unknown command "${cmd}". Type /help for available commands.\n`));
+        console.log(this.theme.warning(`  Unknown command "${cmd}". Type /help for available commands.\n`));
     }
   }
 
-  private async handleConnect(args: string[], rl: readline.Interface): Promise<void> {
+  private async handleTheme(args: string[]): Promise<void> {
+    const sub = args[0]?.toLowerCase();
+
+    // /theme list or /theme with no arguments -> show gallery
+    if (!sub || sub === "list" || sub === "gallery") {
+      UI.printThemeGallery();
+      return;
+    }
+
+    // /theme ide -> sync directly from Recode IDE settings.json
+    if (sub === "ide" || sub === "sync") {
+      const ideTheme = ThemeManager.detectIdeTheme();
+      if (ideTheme) {
+        this.theme.setTheme(ideTheme, { syncIde: false });
+        console.log(
+          this.theme.success(`\n  [✓] Synchronized theme with Recode IDE: `) +
+            this.theme.accent(this.theme.bold(this.theme.theme.name)) +
+            "\n"
+        );
+        console.clear();
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.3",
+          this.session.id
+        );
+      } else {
+        console.log(this.theme.warning("\n  [!] Could not detect active Recode IDE theme in settings.json.\n"));
+      }
+      return;
+    }
+
+    // /theme <name> -> switch to theme
+    const success = this.theme.setTheme(sub, { syncIde: true });
+    if (success) {
+      console.log(
+        this.theme.success(`\n  [✓] Switched theme to `) +
+          this.theme.accent(this.theme.bold(this.theme.theme.name)) +
+          this.theme.dim(" (saved and synchronized with Recode IDE)") +
+          "\n"
+      );
+      console.clear();
+      UI.printHeader(
+        this.recode.status(),
+        this.workspaceDir,
+        this.currentModel,
+        this.mode,
+        "1.30.3",
+        this.session.id
+      );
+    } else {
+      console.log(this.theme.error(`\n  [x] Unknown theme "${sub}". Run /theme to see available themes.\n`));
+    }
+  }
+
+  private async handleFont(args: string[]): Promise<void> {
+    const sub = args[0]?.toLowerCase();
+    const val = args[1]?.toLowerCase();
+
+    if (!sub) {
+      UI.printFontMenu();
+      return;
+    }
+
+    if (sub === "style" && val) {
+      const validStyles: BorderStyleType[] = ["dotted", "rounded", "sharp", "double", "minimal"];
+      if (validStyles.includes(val as BorderStyleType)) {
+        this.font.setBorderStyle(val as BorderStyleType);
+        console.log(this.theme.success(`\n  [✓] Border style updated to "${val}".\n`));
+        console.clear();
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.3",
+          this.session.id
+        );
+        return;
+      }
+    }
+
+    if (sub === "mascot" && val) {
+      const validMascots: MascotStyleType[] = ["retro", "robot", "mini", "off"];
+      if (validMascots.includes(val as MascotStyleType)) {
+        this.font.setMascotStyle(val as MascotStyleType);
+        console.log(this.theme.success(`\n  [✓] Mascot style updated to "${val}".\n`));
+        console.clear();
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.3",
+          this.session.id
+        );
+        return;
+      }
+    }
+
+    UI.printFontMenu();
+  }
+
+  private async handleColor(args: string[]): Promise<void> {
+    const sub = args[0]?.toLowerCase();
+    const val = args[1]?.toLowerCase();
+
+    if (!sub) {
+      UI.printColorPalette();
+      return;
+    }
+
+    if (sub === "reset") {
+      this.theme.setCustomAccent(null);
+      console.log(this.theme.success(`\n  [✓] Accent color reset to theme default.\n`));
+      console.clear();
+      UI.printHeader(
+        this.recode.status(),
+        this.workspaceDir,
+        this.currentModel,
+        this.mode,
+        "1.30.3",
+        this.session.id
+      );
+      return;
+    }
+
+    if (sub === "accent" && val) {
+      const colorMap: Record<string, string> = {
+        cyan: "#00f0ff",
+        blue: "#5ac1fe",
+        orange: "#fe8019",
+        coral: "#e06c53",
+        green: "#7fd962",
+        emerald: "#10b981",
+        magenta: "#ec4899",
+        purple: "#bd93f9",
+        amber: "#ffb454",
+        yellow: "#fabd2f",
+      };
+      const hex = colorMap[val] || (val.startsWith("#") ? val : `#${val}`);
+      this.theme.setCustomAccent(hex);
+      console.log(this.theme.success(`\n  [✓] Custom accent set to ${val} (${hex}).\n`));
+      console.clear();
+      UI.printHeader(
+        this.recode.status(),
+        this.workspaceDir,
+        this.currentModel,
+        this.mode,
+        "1.30.3",
+        this.session.id
+      );
+      return;
+    }
+
+    UI.printColorPalette();
+  }
+
+  private async handleConnect(args: string[]): Promise<void> {
     let provider = args[0]?.toLowerCase();
     let key = args.slice(1).join(" ").trim();
+    const rl = readline.createInterface({ input, output });
 
     // If no provider given, present an interactive choice
     if (!provider) {
-      console.log(`\n  ${c.bold("Select an AI Provider to connect:")}`);
-      console.log(`  [1] Google Gemini   ${c.dim("(Generous free tier, 1M context — Recommended)")}`);
-      console.log(`  [2] OpenAI          ${c.dim("(GPT-4o, o3-mini)")}`);
-      console.log(`  [3] Anthropic       ${c.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
-      console.log(`  [4] DeepSeek        ${c.dim("(DeepSeek V3, DeepSeek R1)")}`);
-      console.log(`  [5] Groq            ${c.dim("(Llama 3.3 70B - ultra fast)")}`);
-      console.log(`  [6] Local Ollama    ${c.dim("(100% Free & offline local AI)")}`);
+      console.log(`\n  ${this.theme.bold(this.theme.text("Select an AI Provider to connect:"))}`);
+      console.log(`  [1] Google Gemini   ${this.theme.dim("(Generous free tier, 1M context — Recommended)")}`);
+      console.log(`  [2] OpenAI          ${this.theme.dim("(GPT-4o, o3-mini)")}`);
+      console.log(`  [3] Anthropic       ${this.theme.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
+      console.log(`  [4] DeepSeek        ${this.theme.dim("(DeepSeek V3, DeepSeek R1)")}`);
+      console.log(`  [5] Groq            ${this.theme.dim("(Llama 3.3 70B - ultra fast)")}`);
+      console.log(`  [6] Local Ollama    ${this.theme.dim("(100% Free & offline local AI)")}`);
       console.log(`  [0] Cancel\n`);
 
-      const choice = (await rl.question(c.cyan("  Select [1-6]: "))).trim();
+      const choice = (await rl.question(this.theme.accent("  Select [1-6]: "))).trim();
       const choiceMap: Record<string, string> = {
         "1": "gemini",
         "2": "openai",
@@ -378,28 +598,33 @@ export class Repl {
 
       provider = choiceMap[choice];
       if (!provider) {
-        console.log(c.yellow("  Connect cancelled.\n"));
+        rl.close();
+        console.log(this.theme.warning("  Connect cancelled.\n"));
         return;
       }
     }
 
     if (provider === "ollama") {
+      rl.close();
       this.currentModel = "ollama-local";
       this.session = this.createConfiguredSession();
-      console.log(c.green(`\n  [✓] Configured local Ollama! Active model set to ollama-local.\n`));
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
+      console.log(this.theme.success(`\n  [✓] Configured local Ollama! Active model set to ollama-local.\n`));
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
       return;
     }
 
     // Prompt for key if not passed inline
     if (!key) {
       key = (
-        await rl.question(c.cyan(`  Enter API key for ${provider.toUpperCase()}: `))
+        await rl.question(this.theme.accent(`  Enter API key for ${provider.toUpperCase()}: `))
       ).trim();
+      rl.close();
       if (!key) {
-        console.log(c.yellow("  No key entered. Cancelled.\n"));
+        console.log(this.theme.warning("  No key entered. Cancelled.\n"));
         return;
       }
+    } else {
+      rl.close();
     }
 
     RecodeAuth.setApiKey(provider, key);
@@ -407,15 +632,15 @@ export class Repl {
     this.currentModel = targetModel;
     this.session = this.createConfiguredSession();
 
-    console.log(c.green(`\n  [✓] Stored API key for ${provider.toUpperCase()}!`));
+    console.log(this.theme.success(`\n  [✓] Stored API key for ${provider.toUpperCase()}!`));
     console.log(
-      c.green(`  [✓] Active model automatically set to ${c.bold(this.currentModel)}.\n`)
+      this.theme.success(`  [✓] Active model automatically set to ${this.theme.bold(this.currentModel)}.\n`)
     );
-    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
+    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
   }
 
-  private async handleLogin(rl: readline.Interface): Promise<void> {
-    console.log(c.dim("\n  Initiating GitHub Device Authorization..."));
+  private async handleLogin(): Promise<void> {
+    console.log(this.theme.dim("\n  Initiating GitHub Device Authorization..."));
 
     try {
       const auth = await RecodeAuth.loginWithGitHubDeviceCode(
@@ -449,46 +674,46 @@ export class Repl {
           UI.printDeviceAuthCard(deviceAuth.user_code, deviceAuth.verification_uri);
         },
         () => {
-          process.stdout.write(c.dim("."));
+          process.stdout.write(this.theme.dim("."));
         }
       );
 
       UI.printDeviceAuthSuccess(auth.user.login);
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.2", this.session.id);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
     } catch (err: any) {
-      console.log(c.red(`\n  [x] GitHub Login Failed: ${err.message}\n`));
+      console.log(this.theme.error(`\n  [x] GitHub Login Failed: ${err.message}\n`));
     }
   }
 
   private printAuthStatus(): void {
     const status = this.recode.status();
-    console.log(`\n  ${c.bold("Authentication Status:")}`);
+    console.log(`\n  ${this.theme.bold(this.theme.text("Authentication Status:"))}`);
     if (status.github) {
-      console.log(`  ${c.green("GitHub:")} @${status.github.username} (connected)`);
+      console.log(`  ${this.theme.success("GitHub:")} @${status.github.username} (connected)`);
     } else {
-      console.log(`  ${c.yellow("GitHub:")} Not connected (run /login to connect)`);
+      console.log(`  ${this.theme.warning("GitHub:")} Not connected (run /login to connect)`);
     }
 
-    console.log(`\n  ${c.bold("Configured Provider Keys:")}`);
+    console.log(`\n  ${this.theme.bold(this.theme.text("Configured Provider Keys:"))}`);
     for (const [p, info] of Object.entries(status.providers)) {
-      const mark = info.configured ? c.green("[✓] Configured") : c.dim("Not set");
-      console.log(`  ${p.padEnd(14)}: ${mark} ${c.dim(`(${info.maskedKey})`)}`);
+      const mark = info.configured ? this.theme.success("[✓] Configured") : this.theme.dim("Not set");
+      console.log(`  ${p.padEnd(14)}: ${mark} ${this.theme.dim(`(${info.maskedKey})`)}`);
     }
-    console.log(`\n  Default Model: ${c.cyan(c.bold(this.currentModel))}\n`);
+    console.log(`\n  Default Model: ${this.theme.accent(this.theme.bold(this.currentModel))}\n`);
   }
 
   private handleCollab(args: string[]): void {
-    console.log(`\n  ${c.bold("Recode Collaboration Service:")}`);
-    console.log(`  Server: ${c.cyan("wss://recode-collab.fly.dev")}`);
-    console.log(`  Status: ${c.green("[✓] Online")}`);
+    console.log(`\n  ${this.theme.bold(this.theme.text("Recode Collaboration Service:"))}`);
+    console.log(`  Server: ${this.theme.accent("wss://recode-collab.fly.dev")}`);
+    console.log(`  Status: ${this.theme.success("[✓] Online")}`);
     if (args[0]) {
-      console.log(`  Room  : ${c.bold(args[0])}`);
+      console.log(`  Room  : ${this.theme.bold(args[0])}`);
     }
-    console.log(`  ${c.dim("Real-time CRDT room channels active on Fly.io.")}\n`);
+    console.log(`  ${this.theme.dim("Real-time CRDT room channels active on Fly.io.")}\n`);
   }
 
   private executeShellCommand(cmd: string): void {
-    console.log(c.dim(`\n  $ ${cmd}`));
+    console.log(this.theme.dim(`\n  $ ${cmd}`));
     try {
       const out = execSync(cmd, {
         cwd: this.workspaceDir,
@@ -496,11 +721,11 @@ export class Repl {
         stdio: ["inherit", "pipe", "pipe"],
       });
       if (out) process.stdout.write(out);
-      console.log(c.green(`  [✓] Completed\n`));
+      console.log(this.theme.success(`  [✓] Completed\n`));
     } catch (err: any) {
       if (err.stdout) process.stdout.write(err.stdout);
       if (err.stderr) process.stderr.write(err.stderr);
-      console.log(c.red(`  [x] Process exited with code ${err.status ?? 1}\n`));
+      console.log(this.theme.error(`  [x] Process exited with code ${err.status ?? 1}\n`));
     }
   }
 
@@ -536,13 +761,14 @@ export class Repl {
   }
 
   /**
-   * Run turn with Thinking Container, Assistant Container, and Bottom Status Dock.
+   * Run turn with real-time LiveActionIndicator.
    */
   private async runTurn(userPrompt: string): Promise<void> {
     const abortController = new AbortController();
 
     const onSigInt = () => {
-      console.log(c.yellow("\n  [Interrupted by user]"));
+      this.indicator.clear();
+      console.log(this.theme.warning("\n  [Interrupted by user]"));
       abortController.abort();
     };
 
@@ -553,8 +779,8 @@ export class Repl {
     let inAssistantResponse = false;
     let turnTokens = Math.ceil(userPrompt.length / 4);
 
-    // Initial Simmering / Thinking indicator (Image 4)
-    process.stdout.write(c.yellow("  * Simmering...\r"));
+    // Initial Simmering action state
+    this.indicator.startSimmering();
 
     try {
       for await (const event of this.session.prompt(userPrompt, {
@@ -562,14 +788,12 @@ export class Repl {
       })) {
         if (event.type === "thinking" && event.content) {
           thinkingText += event.content;
-          const elapsed = (Date.now() - startTime) / 1000;
-          process.stdout.write(
-            `\r  ${c.yellow("*")} ${c.yellow(c.bold("Thinking..."))} ${c.dim(`[${elapsed.toFixed(1)}s]`)}    `
-          );
+          this.indicator.startThinking("Reasoning");
+          this.indicator.updateThinking(event.content);
         } else if (event.type === "token" && event.content) {
           if (!inAssistantResponse) {
             inAssistantResponse = true;
-            process.stdout.write("\r" + " ".repeat(40) + "\r"); // clear thinking line
+            this.indicator.clear();
             const durationSec = (Date.now() - startTime) / 1000;
             if (thinkingText.trim()) {
               UI.printThinkingBlock(thinkingText, durationSec);
@@ -584,11 +808,11 @@ export class Repl {
           if (inAssistantResponse) {
             UI.printAssistantEnd();
             inAssistantResponse = false;
-          } else {
-            process.stdout.write("\r" + " ".repeat(40) + "\r");
           }
-          UI.printToolStart(event.toolCall.name, event.toolCall.arguments);
+          // Real-time tool action state indicator
+          this.indicator.startTool(event.toolCall.name, event.toolCall.arguments);
         } else if (event.type === "tool_end" && event.toolCall && event.toolResult) {
+          this.indicator.clear();
           UI.printToolEnd(
             event.toolCall.name,
             event.toolResult.success,
@@ -596,26 +820,27 @@ export class Repl {
             event.toolResult.error
           );
         } else if (event.type === "error") {
+          this.indicator.clear();
           if (inAssistantResponse) {
             UI.printAssistantEnd();
             inAssistantResponse = false;
           }
-          console.log(`\n  ${c.red("[x] Error:")} ${event.error}\n`);
+          console.log(`\n  ${this.theme.error("[x] Error:")} ${event.error}\n`);
         }
       }
 
+      this.indicator.clear();
       if (inAssistantResponse) {
         UI.printAssistantEnd();
-      } else {
-        process.stdout.write("\r" + " ".repeat(40) + "\r");
       }
 
       // Update token dock
       this.cumulativeTokens += turnTokens;
-      UI.printStatusDock(this.mode, this.workspaceDir, this.cumulativeTokens, this.currentModel);
     } catch (err: any) {
-      console.log(`\n  ${c.red("[x] Execution error:")} ${err.message}\n`);
+      this.indicator.clear();
+      console.log(`\n  ${this.theme.error("[x] Execution error:")} ${err.message}\n`);
     } finally {
+      this.indicator.clear();
       process.removeListener("SIGINT", onSigInt);
     }
   }
