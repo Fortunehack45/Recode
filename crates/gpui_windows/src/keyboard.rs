@@ -5,7 +5,7 @@ use windows::Win32::UI::{
         GetKeyboardLayoutNameW, MAPVK_VK_TO_CHAR, MAPVK_VK_TO_VSC, MapVirtualKeyW, ToUnicode,
         VIRTUAL_KEY, VK_0, VK_1, VK_2, VK_3, VK_4, VK_5, VK_6, VK_7, VK_8, VK_9, VK_ABNT_C1,
         VK_CONTROL, VK_MENU, VK_OEM_1, VK_OEM_2, VK_OEM_3, VK_OEM_4, VK_OEM_5, VK_OEM_6, VK_OEM_7,
-        VK_OEM_8, VK_OEM_102, VK_OEM_COMMA, VK_OEM_MINUS, VK_OEM_PERIOD, VK_OEM_PLUS, VK_SHIFT,
+        VK_OEM_8, VK_OEM_102, VK_OEM_COMMA, VK_OEM_MINUS, VK_OEM_PERIOD, VK_OEM_PLUS, VK_SHIFT, VK_SUBTRACT, VK_ADD, VK_MULTIPLY, VK_DIVIDE, VK_DECIMAL,
     },
     WindowsAndMessaging::KL_NAMELENGTH,
 };
@@ -55,11 +55,15 @@ impl PlatformKeyboardMapper for WindowsKeyboardMapper {
         let shift = shifted_key || keystroke.modifiers.shift;
         keystroke.modifiers.shift = false;
 
-        let Some(key) = self.vkey_to_key.get(&vkey).cloned() else {
-            log::error!(
-                "Failed to map key equivalent '{:?}' to a valid key",
-                keystroke
-            );
+        let key = if let Some(key) = self.vkey_to_key.get(&vkey).cloned() {
+            key
+        } else if let Some((fallback_vkey, _)) = self.key_to_vkey.get(&keystroke.key) {
+            if let Some(key) = self.vkey_to_key.get(fallback_vkey).cloned() {
+                key
+            } else {
+                return KeybindingKeystroke::from_keystroke(keystroke);
+            }
+        } else {
             return KeybindingKeystroke::from_keystroke(keystroke);
         };
 
@@ -283,6 +287,11 @@ fn get_vkey_from_key_with_us_layout(key: &str) -> Option<(u16, bool)> {
         ">" => Some((VK_OEM_PERIOD.0, true)),
         "/" => Some((VK_OEM_2.0, false)),
         "?" => Some((VK_OEM_2.0, true)),
+        "numpad_subtract" => Some((VK_SUBTRACT.0, false)),
+        "numpad_add" => Some((VK_ADD.0, false)),
+        "numpad_multiply" => Some((VK_MULTIPLY.0, false)),
+        "numpad_divide" => Some((VK_DIVIDE.0, false)),
+        "numpad_decimal" => Some((VK_DECIMAL.0, false)),
         _ => None,
     }
 }
@@ -312,6 +321,11 @@ const CANDIDATE_VKEYS: &[VIRTUAL_KEY] = &[
     VK_7,
     VK_8,
     VK_9,
+    VK_SUBTRACT,
+    VK_ADD,
+    VK_MULTIPLY,
+    VK_DIVIDE,
+    VK_DECIMAL,
 ];
 
 #[cfg(test)]

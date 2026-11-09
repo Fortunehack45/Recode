@@ -203,6 +203,12 @@ impl Keystroke {
                 // are accepted case insensitively and stored how we expect so they are matched properly
                 key_str.make_ascii_lowercase()
             }
+            let key_str = match key_str.as_str() {
+                "minus" => "-".to_string(),
+                "plus" => "+".to_string(),
+                "equal" => "=".to_string(),
+                _ => key_str,
+            };
             key = Some(key_str);
         }
 
