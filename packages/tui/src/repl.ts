@@ -120,12 +120,31 @@ export class Repl {
       line = line.trim();
       if (!line) continue;
 
-      // 1. Inline Shell Command execution (!<cmd>)
+      // 1. Inline Shell Command execution (!<cmd>) or direct CLI commands
+      const firstWord = line.split(/\s+/)[0]?.toLowerCase();
+      const shellTools = new Set([
+        "pnpm",
+        "npm",
+        "yarn",
+        "npx",
+        "cargo",
+        "git",
+        "dir",
+        "ls",
+        "cd",
+        "pwd",
+      ]);
+
       if (line.startsWith("!")) {
         const shellCmd = line.substring(1).trim();
         if (shellCmd) {
           this.executeShellCommand(shellCmd);
         }
+        continue;
+      }
+
+      if (firstWord && shellTools.has(firstWord)) {
+        this.executeShellCommand(line);
         continue;
       }
 
