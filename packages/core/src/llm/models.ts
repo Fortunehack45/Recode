@@ -122,15 +122,45 @@ export const DEFAULT_MODELS: Record<string, ModelInfo> = {
   },
 };
 
-export function resolveModel(modelAliasOrId?: string, defaultProvider: ProviderName = "anthropic"): ModelInfo {
+export const PROVIDER_DEFAULT_MODELS: Record<string, string> = {
+  gemini: "gemini-2.5-flash",
+  openai: "gpt-4o",
+  anthropic: "claude-3-7-sonnet",
+  deepseek: "deepseek-chat",
+  groq: "llama-3.3-70b",
+  ollama: "ollama-local",
+  openrouter: "claude-3-5-sonnet",
+};
+
+export function getBestAvailableModel(providers?: Record<string, string | undefined>): ModelInfo | undefined {
+  const check = (p: string) => {
+    const envKey = `${p.toUpperCase()}_API_KEY`;
+    return Boolean(providers?.[p] || process.env[envKey]);
+  };
+
+  if (check("gemini")) return DEFAULT_MODELS["gemini-2.5-flash"];
+  if (check("openai")) return DEFAULT_MODELS["gpt-4o"];
+  if (check("anthropic")) return DEFAULT_MODELS["claude-3-7-sonnet"];
+  if (check("deepseek")) return DEFAULT_MODELS["deepseek-chat"];
+  if (check("groq")) return DEFAULT_MODELS["llama-3.3-70b"];
+  if (check("openrouter")) return DEFAULT_MODELS["claude-3-5-sonnet"];
+  if (providers?.["ollama_base_url"] || process.env.OLLAMA_HOST) return DEFAULT_MODELS["ollama-local"];
+
+  return undefined;
+}
+
+export function resolveModel(
+  modelAliasOrId?: string,
+  defaultProvider?: ProviderName,
+  configuredProviders?: Record<string, string | undefined>
+): ModelInfo {
   if (!modelAliasOrId) {
-    if (defaultProvider === "anthropic") return DEFAULT_MODELS["claude-3-7-sonnet"];
-    if (defaultProvider === "openai") return DEFAULT_MODELS["gpt-4o"];
-    if (defaultProvider === "gemini") return DEFAULT_MODELS["gemini-2.5-flash"];
-    if (defaultProvider === "deepseek") return DEFAULT_MODELS["deepseek-chat"];
-    if (defaultProvider === "groq") return DEFAULT_MODELS["llama-3.3-70b"];
-    if (defaultProvider === "ollama") return DEFAULT_MODELS["ollama-local"];
-    return DEFAULT_MODELS["claude-3-7-sonnet"];
+    if (defaultProvider && PROVIDER_DEFAULT_MODELS[defaultProvider]) {
+      return DEFAULT_MODELS[PROVIDER_DEFAULT_MODELS[defaultProvider]];
+    }
+    const best = getBestAvailableModel(configuredProviders);
+    if (best) return best;
+    return DEFAULT_MODELS["gemini-2.5-flash"] || DEFAULT_MODELS["claude-3-7-sonnet"];
   }
 
   // Exact match on alias key
@@ -164,7 +194,7 @@ export function resolveModel(modelAliasOrId?: string, defaultProvider: ProviderN
   return {
     id: modelAliasOrId,
     name: modelAliasOrId,
-    provider: defaultProvider,
+    provider: defaultProvider || "gemini",
     contextWindow: 128000,
     supportsTools: true,
     supportsStreaming: true,

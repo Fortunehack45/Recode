@@ -17,6 +17,9 @@ export {
   DeviceCodeResponse,
   GitHubAuth,
   GitHubUser,
+  GitHubAuthClient,
   DEFAULT_MODELS,
   resolveModel,
+  getBestAvailableModel,
+  PROVIDER_DEFAULT_MODELS,
 } from "@recode/core";

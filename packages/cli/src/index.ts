@@ -55,6 +55,29 @@ async function main(): Promise<void> {
 
   const subCommand = positional[0]?.toLowerCase();
 
+  // Direct subcommands
+  if (subCommand === "login") {
+    await runAuthLogin();
+    return;
+  }
+  if (subCommand === "logout") {
+    RecodeAuth.logoutGitHub();
+    console.log(c.green("✓ Successfully logged out of GitHub."));
+    return;
+  }
+  if (subCommand === "connect" || subCommand === "key") {
+    const provider = positional[1];
+    const key = positional.slice(2).join(" ").trim();
+    if (!provider || !key) {
+      console.log(c.yellow("Usage: recode connect <provider> <api_key>"));
+      console.log(c.dim("Example: recode connect gemini AIzaSy..."));
+      process.exit(1);
+    }
+    RecodeAuth.setApiKey(provider, key);
+    console.log(c.green(`✓ Stored API key for ${provider.toUpperCase()}.`));
+    return;
+  }
+
   // 1. Auth subcommands
   if (subCommand === "auth") {
     const action = positional[1]?.toLowerCase();
@@ -67,9 +90,9 @@ async function main(): Promise<void> {
       console.log(c.green("Successfully logged out of GitHub."));
       return;
     }
-    if (action === "set-key") {
+    if (action === "set-key" || action === "connect") {
       const provider = positional[2];
-      const key = positional[3];
+      const key = positional.slice(3).join(" ").trim();
       if (!provider || !key) {
         console.log(c.red("Usage: recode auth set-key <provider> <api_key>"));
         process.exit(1);

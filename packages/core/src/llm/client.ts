@@ -19,8 +19,11 @@ export class LLMClient {
     options: LLMRequestOptions = {}
   ): AsyncGenerator<LLMStreamChunk, void, unknown> {
     const auth = AuthStore.load();
-    const defaultProvider = (auth.default_provider as any) || "anthropic";
-    const modelInfo: ModelInfo = resolveModel(options.model || auth.default_model, defaultProvider);
+    const modelInfo: ModelInfo = resolveModel(
+      options.model || auth.default_model,
+      auth.default_provider as any,
+      this.providers
+    );
 
     if (modelInfo.provider === "anthropic") {
       yield* this.streamAnthropic(messages, modelInfo, options);
@@ -37,7 +40,7 @@ export class LLMClient {
     const apiKey = this.getApiKey("anthropic");
     if (!apiKey) {
       throw new Error(
-        `Anthropic API key not configured. Run "recode auth login" or export ANTHROPIC_API_KEY.`
+        `Anthropic API key not configured. Type /connect to choose a provider, or run "/connect anthropic <key>".`
       );
     }
 
@@ -218,7 +221,8 @@ export class LLMClient {
 
     if (!apiKey && provider !== "ollama") {
       throw new Error(
-        `${provider.toUpperCase()} API key not configured. Run "recode auth login" or export ${provider.toUpperCase()}_API_KEY.`
+        `No API key configured for ${provider.toUpperCase()}.\n` +
+        `Type /connect to choose a provider, or run "/connect ${provider} <key>".`
       );
     }
 

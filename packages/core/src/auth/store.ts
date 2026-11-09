@@ -101,11 +101,38 @@ export class AuthStore {
       };
     }
 
+    // Determine active provider dynamically if not explicitly locked in
+    let default_provider = data.default_provider;
+    let default_model = data.default_model;
+
+    if (!default_provider) {
+      if (providers.gemini) default_provider = "gemini";
+      else if (providers.openai) default_provider = "openai";
+      else if (providers.anthropic) default_provider = "anthropic";
+      else if (providers.deepseek) default_provider = "deepseek";
+      else if (providers.groq) default_provider = "groq";
+      else if (providers.openrouter) default_provider = "openrouter";
+      else default_provider = undefined;
+    }
+
+    if (!default_model && default_provider) {
+      const canonicalMap: Record<string, string> = {
+        gemini: "gemini-2.5-flash",
+        openai: "gpt-4o",
+        anthropic: "claude-3-7-sonnet",
+        deepseek: "deepseek-chat",
+        groq: "llama-3.3-70b",
+        openrouter: "claude-3-5-sonnet",
+        ollama: "ollama-local",
+      };
+      default_model = canonicalMap[default_provider];
+    }
+
     return {
       github,
       providers,
-      default_provider: data.default_provider || "anthropic",
-      default_model: data.default_model || "claude-3-7-sonnet",
+      default_provider,
+      default_model,
       collab: {
         server_url: process.env.RECODE_COLLAB_URL || data.collab?.server_url || "wss://recode-collab.fly.dev",
         token: data.collab?.token,
@@ -138,8 +165,25 @@ export class AuthStore {
 
   public static setProviderKey(provider: string, key: string): void {
     const config = this.load();
-    config.providers[provider.toLowerCase()] = key;
+    const p = provider.toLowerCase();
+    config.providers[p] = key;
+    config.default_provider = p;
+    const canonicalMap: Record<string, string> = {
+      gemini: "gemini-2.5-flash",
+      openai: "gpt-4o",
+      anthropic: "claude-3-7-sonnet",
+      deepseek: "deepseek-chat",
+      groq: "llama-3.3-70b",
+      openrouter: "claude-3-5-sonnet",
+      ollama: "ollama-local",
+    };
+    config.default_model = canonicalMap[p] || config.default_model || "gemini-2.5-flash";
     this.save(config);
+  }
+
+  public static hasConfiguredProvider(): boolean {
+    const config = this.load();
+    return Object.entries(config.providers).some(([k, v]) => k !== "ollama_base_url" && Boolean(v));
   }
 
   public static removeProviderKey(provider: string): void {

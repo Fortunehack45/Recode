@@ -4,7 +4,7 @@ export { GitHubAuthClient, DeviceCodeResponse } from "./auth/github.js";
 
 // LLM
 export { LLMClient } from "./llm/client.js";
-export { DEFAULT_MODELS, resolveModel } from "./llm/models.js";
+export { DEFAULT_MODELS, resolveModel, getBestAvailableModel, PROVIDER_DEFAULT_MODELS } from "./llm/models.js";
 export {
   ChatMessage,
   LLMRequestOptions,
