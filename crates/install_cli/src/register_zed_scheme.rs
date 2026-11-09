@@ -13,6 +13,6 @@ pub async fn register_zed_scheme(cx: &AsyncApp) -> anyhow::Result<()> {
     cx.update(|cx| {
         cx.register_url_scheme("recode");
         cx.register_url_scheme(ZED_URL_SCHEME);
-    }).await;
+    })?;
     Ok(())
 }
