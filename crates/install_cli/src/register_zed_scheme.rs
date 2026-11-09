@@ -10,9 +10,13 @@ actions!(
 );
 
 pub async fn register_zed_scheme(cx: &AsyncApp) -> anyhow::Result<()> {
-    cx.update(|cx| {
-        cx.register_url_scheme("recode");
-        cx.register_url_scheme(ZED_URL_SCHEME);
+    let (task1, task2) = cx.update(|cx| {
+        (
+            cx.register_url_scheme("recode"),
+            cx.register_url_scheme(ZED_URL_SCHEME),
+        )
     });
+    let _ = task1.await;
+    let _ = task2.await;
     Ok(())
 }
