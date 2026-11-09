@@ -33,35 +33,48 @@ jobs:
           cache-on-failure: true
 
       - name: Pre-fetch WebRTC Prebuilt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
           $targetDir = "$PWD/.webrtc"
           $triple = "win-x64-release"
-          $url = "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-$triple.zip"
           if (-not (Test-Path "$targetDir/$triple/webrtc.ninja")) {
             New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-            Write-Host "Downloading WebRTC prebuilt ($url)..."
-            $zipPath = "$targetDir/webrtc.zip"
             $downloadSuccess = $false
-            for ($attempt = 1; $attempt -le 5; $attempt++) {
-              Write-Host "Download attempt $attempt..."
-              curl.exe -fL --retry 3 --retry-delay 3 -o $zipPath $url
-              if ($LASTEXITCODE -eq 0 -and (Test-Path $zipPath) -and (Get-Item $zipPath).Length -gt 10000000) {
+            $zipPath = ""
+            Write-Host "Attempting download via GitHub CLI..."
+            try {
+              gh release download webrtc-0001d84-4 -R zed-industries/livekit-rust-sdks -p "webrtc-$triple.zip" --dir $targetDir --clobber
+              $candidate = "$targetDir/webrtc-$triple.zip"
+              if ((Test-Path $candidate) -and (Get-Item $candidate).Length -gt 10000000) {
                 $downloadSuccess = $true
-                break
+                $zipPath = $candidate
+                Write-Host "Successfully downloaded via gh CLI ($((Get-Item $candidate).Length) bytes)"
               }
-              Write-Warning "Attempt $attempt failed or file too small, retrying in 5s..."
-              Start-Sleep -Seconds 5
+            } catch {
+              Write-Warning "gh release download failed: $_"
             }
             if (-not $downloadSuccess) {
-              throw "Failed to download complete WebRTC prebuilt from $url"
+              $url = "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-$triple.zip"
+              $candidate = "$targetDir/webrtc.zip"
+              for ($attempt = 1; $attempt -le 5; $attempt++) {
+                Write-Host "Curl download attempt $attempt ($url)..."
+                curl.exe -fL --retry 3 --retry-delay 3 -o $candidate $url
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $candidate) -and (Get-Item $candidate).Length -gt 10000000) {
+                  $downloadSuccess = $true
+                  $zipPath = $candidate
+                  break
+                }
+                Write-Warning "Attempt $attempt failed or file too small, retrying in 5s..."
+                Start-Sleep -Seconds 5
+              }
             }
-            Write-Host "Extracting WebRTC prebuilt..."
-            if (Get-Command 7z.exe -ErrorAction SilentlyContinue) {
-              7z.exe x $zipPath -o"$targetDir" -y | Out-Null
-            } else {
-              Expand-Archive -LiteralPath $zipPath -DestinationPath $targetDir -Force
+            if (-not $downloadSuccess) {
+              throw "Failed to download complete WebRTC prebuilt for $triple"
             }
+            Write-Host "Extracting WebRTC prebuilt from $zipPath..."
+            tar -xf $zipPath -C $targetDir
             Remove-Item $zipPath -Force
           }
           $webrtcPath = (Resolve-Path "$targetDir/$triple").Path
@@ -135,16 +148,23 @@ jobs:
           cache-on-failure: true
 
       - name: Pre-fetch WebRTC Prebuilt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TARGET_DIR="$PWD/.webrtc"
           TRIPLE="linux-x64-release"
-          URL="https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-${TRIPLE}.zip"
           if [ ! -f "$TARGET_DIR/$TRIPLE/webrtc.ninja" ]; then
             mkdir -p "$TARGET_DIR"
-            echo "Downloading WebRTC prebuilt with retry..."
-            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "$URL"
-            unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
-            rm -f "$TARGET_DIR/webrtc.zip"
+            echo "Downloading WebRTC prebuilt via GitHub CLI / curl..."
+            gh release download webrtc-0001d84-4 -R zed-industries/livekit-rust-sdks -p "webrtc-${TRIPLE}.zip" --dir "$TARGET_DIR" --clobber || \
+            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-${TRIPLE}.zip"
+            if [ -f "$TARGET_DIR/webrtc-${TRIPLE}.zip" ]; then
+              unzip -q -o "$TARGET_DIR/webrtc-${TRIPLE}.zip" -d "$TARGET_DIR"
+              rm -f "$TARGET_DIR/webrtc-${TRIPLE}.zip"
+            elif [ -f "$TARGET_DIR/webrtc.zip" ]; then
+              unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
+              rm -f "$TARGET_DIR/webrtc.zip"
+            fi
           fi
           WEBRTC_PATH="$TARGET_DIR/$TRIPLE"
           echo "LK_CUSTOM_WEBRTC=$WEBRTC_PATH" >> "$GITHUB_ENV"
@@ -191,16 +211,23 @@ jobs:
           cache-on-failure: true
 
       - name: Pre-fetch WebRTC Prebuilt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TARGET_DIR="$PWD/.webrtc"
           TRIPLE="mac-arm64-release"
-          URL="https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-${TRIPLE}.zip"
           if [ ! -f "$TARGET_DIR/$TRIPLE/webrtc.ninja" ]; then
             mkdir -p "$TARGET_DIR"
-            echo "Downloading WebRTC prebuilt with retry..."
-            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "$URL"
-            unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
-            rm -f "$TARGET_DIR/webrtc.zip"
+            echo "Downloading WebRTC prebuilt via GitHub CLI / curl..."
+            gh release download webrtc-0001d84-4 -R zed-industries/livekit-rust-sdks -p "webrtc-${TRIPLE}.zip" --dir "$TARGET_DIR" --clobber || \
+            curl -fL --retry 5 --retry-delay 5 -o "$TARGET_DIR/webrtc.zip" "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-${TRIPLE}.zip"
+            if [ -f "$TARGET_DIR/webrtc-${TRIPLE}.zip" ]; then
+              unzip -q -o "$TARGET_DIR/webrtc-${TRIPLE}.zip" -d "$TARGET_DIR"
+              rm -f "$TARGET_DIR/webrtc-${TRIPLE}.zip"
+            elif [ -f "$TARGET_DIR/webrtc.zip" ]; then
+              unzip -q -o "$TARGET_DIR/webrtc.zip" -d "$TARGET_DIR"
+              rm -f "$TARGET_DIR/webrtc.zip"
+            fi
           fi
           WEBRTC_PATH="$TARGET_DIR/$TRIPLE"
           echo "LK_CUSTOM_WEBRTC=$WEBRTC_PATH" >> "$GITHUB_ENV"

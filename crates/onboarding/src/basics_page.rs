@@ -1,10 +1,9 @@
 use std::sync::Arc;
-use std::time::Duration;
 
-use client::{Client, TelemetrySettings, UserStore, zed_urls};
+use client::{TelemetrySettings, UserStore};
 use collections::HashMap;
 use fs::Fs;
-use gpui::{Action, Animation, AnimationExt, App, Entity, IntoElement, TaskExt, pulsating_between};
+use gpui::{Action, App, Entity, IntoElement};
 use project::agent_server_store::AllAgentServersSettings;
 use project::project_settings::ProjectSettings;
 use project::{AgentRegistryStore, RegistryAgent};

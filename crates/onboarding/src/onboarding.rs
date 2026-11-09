@@ -222,7 +222,6 @@ impl Onboarding {
             .clone();
         let client = Client::global(cx);
         let status = *client.status().borrow();
-        let plan = workspace.user_store().read(cx).plan();
         let zed_agent_state = if status.is_signed_out()
             || matches!(
                 status,
@@ -232,14 +231,7 @@ impl Onboarding {
         } else if status.is_signing_in() {
             "signing_in"
         } else {
-            match plan {
-                Some(Plan::ZedPro) => "pro",
-                Some(Plan::ZedProTrial) => "trial",
-                Some(Plan::ZedBusiness) => "business",
-                Some(Plan::ZedVip) => "vip",
-                Some(Plan::ZedStudent) => "student",
-                Some(Plan::ZedFree) | None => "free",
-            }
+            "free"
         };
         let agents_installed = basics_page::FEATURED_AGENT_IDS
             .iter()
