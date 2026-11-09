@@ -1527,7 +1527,7 @@ impl Client {
             cx.update(move |cx| {
                 cx.write_to_clipboard(gpui::ClipboardItem::new_string(user_code_for_clip));
                 cx.open_url(&uri_for_browser);
-            })?;
+            });
 
             #[derive(Serialize)]
             struct AccessTokenRequest<'a> {
@@ -1640,54 +1640,18 @@ impl Client {
                 access_token,
             };
 
-            cx.update(|cx| cx.activate(true))?;
+            cx.update(|cx| cx.activate(true));
             Ok(credentials)
         })
     }
 
     async fn authenticate_as_admin(
         self: &Arc<Self>,
-        http: Arc<HttpClientWithUrl>,
-        login: String,
-        api_token: String,
+        _http: Arc<HttpClientWithUrl>,
+        _login: String,
+        _api_token: String,
     ) -> Result<Credentials> {
-        #[derive(Serialize)]
-        struct ImpersonateUserBody {
-            github_login: String,
-        }
-
-        #[derive(Deserialize)]
-        struct ImpersonateUserResponse {
-            user_id: u64,
-            access_token: String,
-        }
-
         anyhow::bail!("impersonate not supported");
-        let request = Request::post(url.as_str())
-            .header("Content-Type", "application/json")
-            .header("Authorization", format!("Bearer {api_token}"))
-            .body(
-                serde_json::to_string(&ImpersonateUserBody {
-                    github_login: login,
-                })?
-                .into(),
-            )?;
-
-        let mut response = http.send(request).await?;
-        let mut body = String::new();
-        response.body_mut().read_to_string(&mut body).await?;
-        anyhow::ensure!(
-            response.status().is_success(),
-            "admin user request failed {} - {}",
-            response.status().as_u16(),
-            body,
-        );
-        let response: ImpersonateUserResponse = serde_json::from_str(&body)?;
-
-        Ok(Credentials {
-            user_id: response.user_id,
-            access_token: response.access_token,
-        })
     }
 
     pub async fn cached_llm_token(

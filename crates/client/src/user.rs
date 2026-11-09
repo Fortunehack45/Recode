@@ -292,12 +292,11 @@ impl UserStore {
                                         this.update(cx, |this, cx| {
                                             this.users.insert(user_id, user);
                                             if let Some(response) = response {
-                                                this.update_authenticated_user(response, cx)?;
+                                                this.update_authenticated_user(response, cx);
                                             }
-                                            anyhow::Ok(())
                                         })
                                     } else {
-                                        anyhow::Ok(())
+                                        Ok(())
                                     }
                                 })?;
 
@@ -840,22 +839,11 @@ impl UserStore {
     }
 
     pub fn subscription_period(&self) -> Option<(DateTime<Utc>, DateTime<Utc>)> {
-        self.plan_info
-            .as_ref()
-            .and_then(|plan| plan.subscription_period)
-            .map(|subscription_period| {
-                (
-                    subscription_period.started_at.0,
-                    subscription_period.ended_at.0,
-                )
-            })
+        None
     }
 
     pub fn trial_started_at(&self) -> Option<DateTime<Utc>> {
-        self.plan_info
-            .as_ref()
-            .and_then(|plan| plan.trial_started_at)
-            .map(|trial_started_at| trial_started_at.0)
+        None
     }
 
     /// Returns whether the user's account is too new to use the service.
@@ -960,8 +948,8 @@ impl UserStore {
             response.configuration_by_organization.into_iter().collect();
 
         self.edit_prediction_usage = Some(EditPredictionUsage(RequestUsage {
-            limit: response.plan.usage.edit_predictions.limit,
-            amount: response.plan.usage.edit_predictions.used as i32,
+            limit: UsageLimit::Unlimited,
+            amount: 0,
         }));
         self.plan_info = Some(response.plan);
         cx.emit(Event::PrivateUserInfoUpdated);
