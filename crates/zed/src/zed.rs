@@ -119,37 +119,52 @@ pub struct CrashHandler(pub Arc<crashes::Client>);
 impl gpui::Global for CrashHandler {}
 
 actions!(
-    zed,
+    recode,
     [
         /// Opens the element inspector for debugging UI.
+        #[action(deprecated_aliases = ["zed::DebugElements"])]
         DebugElements,
         /// Hides the application window.
+        #[action(deprecated_aliases = ["zed::Hide"])]
         Hide,
         /// Hides all other application windows.
+        #[action(deprecated_aliases = ["zed::HideOthers"])]
         HideOthers,
         /// Minimizes the current window.
+        #[action(deprecated_aliases = ["zed::Minimize"])]
         Minimize,
         /// Opens the default settings file.
+        #[action(deprecated_aliases = ["zed::OpenDefaultSettings"])]
         OpenDefaultSettings,
         /// Opens project-specific settings file.
+        #[action(deprecated_aliases = ["zed::OpenProjectSettingsFile"])]
         OpenProjectSettingsFile,
         /// Opens the tasks panel.
+        #[action(deprecated_aliases = ["zed::OpenTasks"])]
         OpenTasks,
         /// Opens debug tasks configuration.
+        #[action(deprecated_aliases = ["zed::OpenDebugTasks"])]
         OpenDebugTasks,
         /// Shows the default semantic token rules (read-only).
+        #[action(deprecated_aliases = ["zed::ShowDefaultSemanticTokenRules"])]
         ShowDefaultSemanticTokenRules,
         /// Resets the application database.
+        #[action(deprecated_aliases = ["zed::ResetDatabase"])]
         ResetDatabase,
         /// Shows all hidden windows.
+        #[action(deprecated_aliases = ["zed::ShowAll"])]
         ShowAll,
         /// Toggles fullscreen mode.
+        #[action(deprecated_aliases = ["zed::ToggleFullScreen"])]
         ToggleFullScreen,
         /// Zooms the window.
+        #[action(deprecated_aliases = ["zed::Zoom"])]
         Zoom,
         /// Triggers a test panic for debugging.
+        #[action(deprecated_aliases = ["zed::TestPanic"])]
         TestPanic,
         /// Triggers a hard crash for debugging.
+        #[action(deprecated_aliases = ["zed::TestCrash"])]
         TestCrash,
     ]
 );
