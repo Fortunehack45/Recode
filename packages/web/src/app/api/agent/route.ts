@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LLMClient, DEFAULT_MODELS, resolveModel, ProviderKeys } from "@recode/core";
+import { LLMClient, DEFAULT_MODELS, resolveModel, ProviderKeys } from "@recode-dev/core";
 
 export const runtime = "nodejs";
 

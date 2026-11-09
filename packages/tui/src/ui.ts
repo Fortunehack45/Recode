@@ -1,7 +1,7 @@
 import path from "node:path";
 import { c } from "./colors.js";
 import { renderBox, padRight, visibleWidth } from "./text.js";
-import { AuthStatus, ModelInfo } from "@recode/sdk";
+import { AuthStatus, ModelInfo } from "@recode-dev/sdk";
 
 export class UI {
   /**

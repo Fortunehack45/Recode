@@ -12,7 +12,7 @@ import {
   resolveModel,
   getBestAvailableModel,
   PROVIDER_DEFAULT_MODELS,
-} from "@recode/sdk";
+} from "@recode-dev/sdk";
 import { UI } from "./ui.js";
 import { c } from "./colors.js";
 

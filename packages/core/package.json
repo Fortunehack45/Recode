@@ -1,5 +1,5 @@
 {
-  "name": "@recode/core",
+  "name": "@recode-dev/core",
   "version": "1.30.2",
   "description": "Core engine, agentic loop, tools, and auth for Recode Terminal and SDK",
   "main": "./dist/index.js",

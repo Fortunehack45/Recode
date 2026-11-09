@@ -1,5 +1,5 @@
 {
-  "name": "@recode/cli",
+  "name": "@recode-dev/cli",
   "version": "1.30.2",
   "description": "Terminal coding assistant and CLI for Recode",
   "bin": {
@@ -17,9 +17,9 @@
     "test": "node ./bin/recode.cjs --version"
   },
   "dependencies": {
-    "@recode/core": "workspace:*",
-    "@recode/sdk": "workspace:*",
-    "@recode/tui": "workspace:*"
+    "@recode-dev/core": "workspace:*",
+    "@recode-dev/sdk": "workspace:*",
+    "@recode-dev/tui": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -22,4 +22,4 @@ export {
   resolveModel,
   getBestAvailableModel,
   PROVIDER_DEFAULT_MODELS,
-} from "@recode/core";
+} from "@recode-dev/core";

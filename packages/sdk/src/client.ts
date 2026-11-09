@@ -1,4 +1,4 @@
-import { AuthStore, ProviderKeys, Tool } from "@recode/core";
+import { AuthStore, ProviderKeys, Tool } from "@recode-dev/core";
 import { Session, SessionOptions } from "./session.js";
 import { RecodeAuth, AuthStatus } from "./auth.js";
 

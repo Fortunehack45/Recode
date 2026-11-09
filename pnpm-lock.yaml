@@ -168,13 +168,13 @@ importers:
 
   packages/cli:
     dependencies:
-      '@recode/core':
+      '@recode-dev/core':
         specifier: workspace:*
         version: link:../core
-      '@recode/sdk':
+      '@recode-dev/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@recode/tui':
+      '@recode-dev/tui':
         specifier: workspace:*
         version: link:../tui
     devDependencies:
@@ -203,7 +203,7 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@recode/core':
+      '@recode-dev/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -216,10 +216,10 @@ importers:
 
   packages/tui:
     dependencies:
-      '@recode/core':
+      '@recode-dev/core':
         specifier: workspace:*
         version: link:../core
-      '@recode/sdk':
+      '@recode-dev/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
@@ -232,10 +232,10 @@ importers:
 
   packages/web:
     dependencies:
-      '@recode/core':
+      '@recode-dev/core':
         specifier: workspace:*
         version: link:../core
-      '@recode/sdk':
+      '@recode-dev/sdk':
         specifier: workspace:*
         version: link:../sdk
       next:

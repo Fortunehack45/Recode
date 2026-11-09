@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    name: Publish Packages (@recode/core, @recode/sdk, @recode/cli, @recode/tui)
+    name: Publish Packages (@recode-dev/core, @recode-dev/sdk, @recode-dev/cli, @recode-dev/tui)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

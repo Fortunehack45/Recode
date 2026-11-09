@@ -1,5 +1,5 @@
 {
-  "name": "@recode/tui",
+  "name": "@recode-dev/tui",
   "version": "1.30.2",
   "description": "Interactive terminal user interface for Recode coding assistant",
   "main": "./dist/index.js",
@@ -12,8 +12,8 @@
     "test": "node -e \"console.log('TUI passed')\""
   },
   "dependencies": {
-    "@recode/core": "workspace:*",
-    "@recode/sdk": "workspace:*"
+    "@recode-dev/core": "workspace:*",
+    "@recode-dev/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

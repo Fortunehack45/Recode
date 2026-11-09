@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { Recode, RecodeAuth, Tool } from "./index.js";
-import { AuthStore } from "@recode/core";
+import { AuthStore } from "@recode-dev/core";
 
 test("Recode SDK initializes, creates sessions, and registers tools", async () => {
   const tmpConfig = path.join(os.tmpdir(), `recode_test_sdk_${Date.now()}`);

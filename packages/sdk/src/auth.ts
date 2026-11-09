@@ -3,7 +3,7 @@ import {
   GitHubAuthClient,
   DeviceCodeResponse,
   GitHubAuth,
-} from "@recode/core";
+} from "@recode-dev/core";
 
 export interface AuthStatus {
   authenticated: boolean;

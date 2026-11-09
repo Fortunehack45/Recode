@@ -1,4 +1,4 @@
-import { Agent, AgentEvent, ChatMessage, Tool } from "@recode/core";
+import { Agent, AgentEvent, ChatMessage, Tool } from "@recode-dev/core";
 
 export interface SessionOptions {
   model?: string;
