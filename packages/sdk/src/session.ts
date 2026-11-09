@@ -19,6 +19,14 @@ export class Session {
     this.agent = new Agent(options);
   }
 
+  public get model(): string | undefined {
+    return this.agent.getModel();
+  }
+
+  public get tools(): Tool[] {
+    return this.agent.getTools();
+  }
+
   public getMessages(): ChatMessage[] {
     return this.agent.getMessages();
   }

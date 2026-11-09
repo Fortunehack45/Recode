@@ -80,6 +80,14 @@ export class Agent {
     return [...this.messages];
   }
 
+  public getTools(): Tool[] {
+    return Array.from(this.tools.values());
+  }
+
+  public getModel(): string | undefined {
+    return this.model;
+  }
+
   public clearHistory(): void {
     this.messages = [
       {
