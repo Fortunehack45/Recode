@@ -25,49 +25,54 @@ export class UI {
   }
 
   /**
-   * Iconic Recode Giant Double-Stroke ASCII Banner.
+   * Iconic 3D Isometric ASCII Banner matching Claude Code (Image 2),
+   * styled with Recode's high-contrast monochrome theme.
    */
   public static printBanner(version = "1.30.3"): void {
     const theme = ThemeManager.get();
     const bannerLines = [
-      " ██████╗ ███████╗ ██████╗ ██████╗ ██████╗ ███████╗",
-      " ██╔══██╗██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝",
-      " ██████╔╝█████╗  ██║     ██║   ██║██║  ██║█████╗  ",
-      " ██╔══██╗██╔══╝  ██║     ██║   ██║██║  ██║██╔══╝  ",
-      " ██║  ██║███████╗╚██████╗╚██████╔╝██████╔╝███████╗",
-      " ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
+      "  ██████╗ ███████╗ ██████╗  ██████╗ ██████╗  ███████╗",
+      "  ██╔══██╗██╔════╝██╔════╝ ██╔═══██╗██╔══██╗ ██╔════╝",
+      "  ██████╔╝█████╗  ██║      ██║   ██║██║  ██║ █████╗  ",
+      "  ██╔══██╗██╔══╝  ██║      ██║   ██║██║  ██║ ██╔══╝  ",
+      "  ██║  ██║███████╗╚██████╗ ╚██████╔╝██████╔╝ ███████╗",
+      "  ╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═════╝  ╚══════╝",
     ];
 
     console.log();
     for (const line of bannerLines) {
-      console.log(theme.accent(theme.bold(line)));
+      let rendered = "";
+      for (const ch of line) {
+        if (ch === "█") {
+          rendered += theme.fg(theme.palette.accent)(theme.bold(ch));
+        } else if ("╔═╗╚╝║".includes(ch)) {
+          rendered += theme.fg("#6e7681")(ch);
+        } else {
+          rendered += ch;
+        }
+      }
+      console.log(rendered);
     }
-    console.log(
-      `  ${theme.muted("Autonomous AI Software Engineering Terminal")} ${theme.border("·")} ${theme.bold(theme.text(`v${version}`))}\n`
-    );
+    console.log();
   }
 
   /**
-   * Welcome Splash Screen.
-   * Uses the iconic Recode logo banner, security notes, and interactive prompt.
+   * Welcome Splash Screen matching Image 2 exactly.
+   * Pill + 3D Isometric ASCII RECODE Banner + Security Notes + Interactive Prompt.
    */
   public static printWelcomeSplash(version = "1.30.3"): void {
     const theme = ThemeManager.get();
     console.clear();
     console.log();
-    this.printBoxedPill(`Welcome to Recode research preview! [v${version}]`);
-    console.log();
+    this.printBoxedPill("Welcome to Recode research preview!");
     this.printBanner(version);
-    console.log();
-    this.printBoxedPill(`Welcome to Recode research preview!`);
-    console.log();
     console.log(`  ${theme.bold(theme.text("Security notes:"))}\n`);
     console.log(`  ${theme.text("1. Recode is currently in research preview")}`);
-    console.log(`     ${theme.muted("This version integrates autonomous coding tools with direct terminal execution.")}`);
+    console.log(`     ${theme.muted("This beta version may have limitations or unexpected behaviors.")}`);
     console.log(`     ${theme.muted("Run /help at any time to inspect available commands.")}\n`);
     console.log(`  ${theme.text("2. Recode can make mistakes")}`);
     console.log(`     ${theme.muted("You should always review Recode's responses, especially when")}`);
-    console.log(`     ${theme.muted("running code or executing shell commands.")}\n`);
+    console.log(`     ${theme.muted("running code.")}\n`);
     console.log(`  ${theme.text("3. Due to prompt injection risks, only use it with code you trust")}`);
     console.log(`     ${theme.muted("For more details see:")}`);
     console.log(`     ${theme.accent("https://github.com/Fortunehack45/Recode#security")}\n`);
@@ -227,21 +232,23 @@ export class UI {
   /**
    * Ready status checks.
    */
-  public static printReadyChecks(sessionId: string): void {
+  public static printReadyChecks(
+    sessionId: string,
+    model = "gemini-2.5-flash",
+    mode: "build" | "plan" = "build"
+  ): void {
     const theme = ThemeManager.get();
-    const threadId = sessionId.split("_").pop() || "main";
-    const activeTheme = theme.theme.name;
+    const modeBadge =
+      mode === "build"
+        ? theme.fg(theme.palette.success)(theme.bold("[BUILD]"))
+        : theme.fg(theme.palette.secondary)(theme.bold("[PLAN]"));
 
-    console.log(`  ${theme.success("[✓]")} Recode engine: ${theme.bold("ready")}`);
-    console.log(`  ${theme.success("[✓]")} Active theme : ${theme.accent(activeTheme)}`);
-    console.log(`  ${theme.success("[✓]")} Session thread: ${theme.muted(threadId)}`);
-    console.log(`  ${theme.success("[✓]")} Autonomous tools: ${theme.dim("read_file, edit_file, write_file, exec, grep, search")}`);
-    console.log(`\n  ${theme.bold(theme.text("Ready to code! What would you like to build?"))}`);
-    console.log(`  ${theme.dim("Enter send  •  Shift+Tab mode  •  @ files  •  / commands")}\n`);
+    console.log(`  ${theme.success("[✓]")} Recode engine: ${theme.bold("ready")}  ${theme.border("·")}  ${theme.accent(model)}  ${theme.border("·")}  ${modeBadge}`);
+    console.log(`  ${theme.dim("Tips: /help commands  •  @file context  •  Shift+Tab mode  •  /dashboard")}\n`);
   }
 
   /**
-   * Full Hero Header.
+   * Clean, professional session header.
    */
   public static printHeader(
     status: AuthStatus,
@@ -251,10 +258,9 @@ export class UI {
     version = "1.30.3",
     sessionId = "session_main"
   ): void {
-    this.printBoxedPill(`Recode Autonomous Coding Terminal [v${version}]`);
+    this.printBoxedPill("Welcome to Recode research preview!");
     console.log();
-    this.printDashboard(status, workspaceDir, currentModel, mode, version);
-    this.printReadyChecks(sessionId);
+    this.printReadyChecks(sessionId, currentModel, mode);
   }
 
   /**

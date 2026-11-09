@@ -33,6 +33,7 @@ export interface TerminalConfig {
   fontSize?: number;
   customAccent?: string;
   syncWithIde?: boolean;
+  hasSeenWelcome?: boolean;
 }
 
 export const BUILTIN_THEMES: Record<string, ThemeDefinition> = {

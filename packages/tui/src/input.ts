@@ -223,6 +223,7 @@ export class NativeInputBox {
           if (buffer.startsWith("/")) {
             const commands = [
               "/welcome",
+              "/dashboard",
               "/theme",
               "/font",
               "/color",

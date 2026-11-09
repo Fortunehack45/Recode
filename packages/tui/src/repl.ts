@@ -84,8 +84,11 @@ export class Repl {
 
   public async start(): Promise<void> {
     const cfg = ThemeManager.loadConfig();
-    if (this.shouldShowWelcome || !cfg.theme) {
+    const shouldShow = this.shouldShowWelcome || !cfg.hasSeenWelcome;
+
+    if (shouldShow) {
       await this.showWelcomeSplash();
+      ThemeManager.saveConfig({ hasSeenWelcome: true });
     }
 
     console.clear();
@@ -236,6 +239,7 @@ export class Repl {
 
     const knownCommands = new Set([
       "welcome",
+      "dashboard",
       "theme",
       "themes",
       "font",
@@ -282,6 +286,17 @@ export class Repl {
           this.mode,
           "1.30.3",
           this.session.id
+        );
+        break;
+
+      case "dashboard":
+        console.clear();
+        UI.printDashboard(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          "1.30.3"
         );
         break;
 
