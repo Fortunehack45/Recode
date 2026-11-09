@@ -323,14 +323,7 @@ export class Repl {
       case "cls":
         console.clear();
         this.session.reset();
-        UI.printHeader(
-          this.recode.status(),
-          this.workspaceDir,
-          this.currentModel,
-          this.mode,
-          "1.30.3",
-          this.session.id
-        );
+        UI.printHeader();
         break;
 
       case "exit":

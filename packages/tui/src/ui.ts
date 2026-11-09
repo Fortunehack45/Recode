@@ -248,19 +248,20 @@ export class UI {
   }
 
   /**
-   * Clean, professional session header.
+   * Main welcome page header.
+   * Pill + 3D Isometric RECODE Banner. Clean, iconic, zero list clutter.
    */
   public static printHeader(
-    status: AuthStatus,
-    workspaceDir: string,
-    currentModel: string,
-    mode: "build" | "plan" = "build",
-    version = "1.30.3",
-    sessionId = "session_main"
+    _status?: AuthStatus,
+    _workspaceDir?: string,
+    _currentModel?: string,
+    _mode: "build" | "plan" = "build",
+    _version = "1.30.3",
+    _sessionId = "session_main"
   ): void {
-    this.printBoxedPill("Welcome to Recode research preview!");
     console.log();
-    this.printReadyChecks(sessionId, currentModel, mode);
+    this.printBoxedPill("Welcome to Recode research preview!");
+    this.printBanner();
   }
 
   /**
