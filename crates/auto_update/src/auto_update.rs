@@ -705,13 +705,18 @@ impl AutoUpdater {
         let http_client = client.http_client();
 
         let env_updates_url = std::env::var("RECODE_UPDATES_URL").ok();
-        let primary_url = env_updates_url
-            .as_deref()
-            .unwrap_or("https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json");
-        let fallback_url = "https://raw.githubusercontent.com/Fortunehack45/Recode/main/releases/latest.json";
-        let mut response = match http_client.get(primary_url, Default::default(), true).await {
+        let raw_url = "https://raw.githubusercontent.com/Fortunehack45/Recode/main/releases/latest.json";
+        let gh_url = "https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json";
+
+        let (first_url, second_url) = if let Some(custom) = env_updates_url.as_deref() {
+            (custom, raw_url)
+        } else {
+            (raw_url, gh_url)
+        };
+
+        let mut response = match http_client.get(first_url, Default::default(), true).await {
             Ok(resp) if resp.status().is_success() => resp,
-            _ => http_client.get(fallback_url, Default::default(), true).await?,
+            _ => http_client.get(second_url, Default::default(), true).await?,
         };
         let mut body = Vec::new();
         response.body_mut().read_to_end(&mut body).await?;
@@ -1072,51 +1077,81 @@ async fn download_release(
     client: Arc<HttpClientWithUrl>,
     mut on_progress: impl FnMut(Option<f32>),
 ) -> Result<()> {
-    let mut target_file = File::create(&target_path).await?;
+    let mut last_err = None;
 
-    let mut response = client.get(&release.url, Default::default(), true).await?;
-    anyhow::ensure!(
-        response.status().is_success(),
-        "failed to download update: {:?}",
-        response.status()
-    );
-
-    let total_bytes = response
-        .headers()
-        .get(http_client::http::header::CONTENT_LENGTH)
-        .and_then(|value| value.to_str().ok())
-        .and_then(|value| value.parse::<u64>().ok())
-        .filter(|total_bytes| *total_bytes > 0);
-
-    let mut downloaded_bytes: u64 = 0;
-    let mut last_reported_percent: Option<u8> = None;
-    let mut buffer = [0u8; 8192];
-    let body = response.body_mut();
-    loop {
-        let bytes_read = body.read(&mut buffer).await?;
-        if bytes_read == 0 {
-            break;
+    for attempt in 1..=3 {
+        if attempt > 1 {
+            log::warn!("Auto Update: retry attempt {attempt} for {}", release.url);
+            smol::Timer::after(std::time::Duration::from_secs(2)).await;
         }
-        target_file.write_all(&buffer[..bytes_read]).await?;
-        downloaded_bytes += bytes_read as u64;
 
-        if let Some(total_bytes) = total_bytes {
-            let fraction = (downloaded_bytes as f32 / total_bytes as f32).clamp(0.0, 1.0);
-            // Only report when the whole-number percentage changes to avoid notifying the UI on every chunk.
-            let percent = (fraction * 100.0) as u8;
-            if last_reported_percent != Some(percent) {
-                last_reported_percent = Some(percent);
-                on_progress(Some(fraction));
+        let mut response = match client.get(&release.url, Default::default(), true).await {
+            Ok(resp) if resp.status().is_success() => resp,
+            Ok(resp) => {
+                last_err = Some(anyhow::anyhow!("failed to download update: HTTP status {:?}", resp.status()));
+                continue;
+            }
+            Err(e) => {
+                last_err = Some(anyhow::anyhow!("failed to connect for update download: {e}"));
+                continue;
+            }
+        };
+
+        let mut target_file = File::create(&target_path).await?;
+        let total_bytes = response
+            .headers()
+            .get(http_client::http::header::CONTENT_LENGTH)
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.parse::<u64>().ok())
+            .filter(|total_bytes| *total_bytes > 0);
+
+        let mut downloaded_bytes: u64 = 0;
+        let mut last_reported_percent: Option<u8> = None;
+        let mut buffer = [0u8; 8192];
+        let body = response.body_mut();
+        let mut stream_err = None;
+
+        loop {
+            match body.read(&mut buffer).await {
+                Ok(0) => break,
+                Ok(bytes_read) => {
+                    if let Err(e) = target_file.write_all(&buffer[..bytes_read]).await {
+                        stream_err = Some(anyhow::anyhow!("file write error: {e}"));
+                        break;
+                    }
+                    downloaded_bytes += bytes_read as u64;
+
+                    if let Some(total_bytes) = total_bytes {
+                        let fraction = (downloaded_bytes as f32 / total_bytes as f32).clamp(0.0, 1.0);
+                        let percent = (fraction * 100.0) as u8;
+                        if last_reported_percent != Some(percent) {
+                            last_reported_percent = Some(percent);
+                            on_progress(Some(fraction));
+                        }
+                    }
+                }
+                Err(e) => {
+                    stream_err = Some(anyhow::anyhow!("stream read error: {e}"));
+                    break;
+                }
             }
         }
-    }
-    target_file.flush().await?;
-    if total_bytes.is_some() && last_reported_percent != Some(100) {
-        on_progress(Some(1.0));
-    }
-    log::info!("downloaded update. path:{:?}", target_path);
 
-    Ok(())
+        if let Some(err) = stream_err {
+            last_err = Some(err);
+            continue;
+        }
+
+        target_file.flush().await?;
+        if total_bytes.is_some() && last_reported_percent != Some(100) {
+            on_progress(Some(1.0));
+        }
+        log::info!("downloaded update. path:{:?}", target_path);
+
+        return Ok(());
+    }
+
+    Err(last_err.unwrap_or_else(|| anyhow::anyhow!("failed to download update after 3 attempts")))
 }
 
 async fn install_release_linux(
