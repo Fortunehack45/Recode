@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "start": "node ./bin/recode.cjs"
+    "start": "node ./bin/recode.cjs",
+    "test": "node ./bin/recode.cjs --version"
   },
   "dependencies": {
     "@recode/core": "workspace:*",

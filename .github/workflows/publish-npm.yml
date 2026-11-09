@@ -36,6 +36,11 @@ jobs:
       - name: Run Tests
         run: pnpm -r test
 
+      - name: Configure NPM Authentication
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "${{ secrets.NPM_TOKEN }}"
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+
       - name: Publish to NPM
         run: pnpm -r publish --access public --no-git-checks --tag ${{ github.event.inputs.tag }}
         env:
