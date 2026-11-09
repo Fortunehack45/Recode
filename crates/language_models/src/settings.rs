@@ -5,13 +5,18 @@ use settings::RegisterSetting;
 
 use crate::provider::{
     anthropic, anthropic::AnthropicSettings, anthropic_compatible::AnthropicCompatibleSettings,
-    bedrock, bedrock::AmazonBedrockSettings, cloud::ZedDotDevSettings, deepseek::DeepSeekSettings,
+    bedrock, bedrock::AmazonBedrockSettings, deepseek::DeepSeekSettings,
     google::GoogleSettings, llama_cpp::LlamaCppSettings, lmstudio::LmStudioSettings, mistral,
     mistral::MistralSettings, ollama::OllamaSettings, open_ai::OpenAiSettings,
     open_ai_compatible::OpenAiCompatibleSettings, open_router, open_router::OpenRouterSettings,
     opencode, opencode::OpenCodeSettings, resolve_custom_headers,
     vercel_ai_gateway::VercelAiGatewaySettings, x_ai::XAiSettings,
 };
+
+#[derive(Default, Clone, Debug, PartialEq)]
+pub struct ZedDotDevSettings {
+    pub available_models: Vec<settings::ZedDotDevAvailableModel>,
+}
 
 #[derive(Debug, RegisterSetting)]
 pub struct AllLanguageModelSettings {
