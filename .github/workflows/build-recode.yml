@@ -40,13 +40,32 @@ jobs:
           $url = "https://github.com/zed-industries/livekit-rust-sdks/releases/download/webrtc-0001d84-4/webrtc-$triple.zip"
           if (-not (Test-Path "$targetDir/$triple/webrtc.ninja")) {
             New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-            Write-Host "Downloading WebRTC prebuilt with retry..."
-            curl.exe -fL --retry 5 --retry-delay 5 -o "$targetDir/webrtc.zip" $url
-            tar -xf "$targetDir/webrtc.zip" -C $targetDir
-            Remove-Item "$targetDir/webrtc.zip" -Force
+            Write-Host "Downloading WebRTC prebuilt ($url)..."
+            $zipPath = "$targetDir/webrtc.zip"
+            $downloadSuccess = $false
+            for ($attempt = 1; $attempt -le 5; $attempt++) {
+              Write-Host "Download attempt $attempt..."
+              curl.exe -fL --retry 3 --retry-delay 3 -o $zipPath $url
+              if ($LASTEXITCODE -eq 0 -and (Test-Path $zipPath) -and (Get-Item $zipPath).Length -gt 10000000) {
+                $downloadSuccess = $true
+                break
+              }
+              Write-Warning "Attempt $attempt failed or file too small, retrying in 5s..."
+              Start-Sleep -Seconds 5
+            }
+            if (-not $downloadSuccess) {
+              throw "Failed to download complete WebRTC prebuilt from $url"
+            }
+            Write-Host "Extracting WebRTC prebuilt..."
+            if (Get-Command 7z.exe -ErrorAction SilentlyContinue) {
+              7z.exe x $zipPath -o"$targetDir" -y | Out-Null
+            } else {
+              Expand-Archive -LiteralPath $zipPath -DestinationPath $targetDir -Force
+            }
+            Remove-Item $zipPath -Force
           }
-          $webrtcPath = "$targetDir/$triple"
-          echo "LK_CUSTOM_WEBRTC=$webrtcPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $webrtcPath = (Resolve-Path "$targetDir/$triple").Path
+          "LK_CUSTOM_WEBRTC=$webrtcPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "Configured LK_CUSTOM_WEBRTC=$webrtcPath"
 
       - name: Build Recode Binaries
