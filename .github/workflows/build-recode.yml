@@ -327,14 +327,16 @@ jobs:
 
       - name: Commit latest.json to Repository
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         run: |
           mkdir -p releases
           cp release-assets/latest.json releases/latest.json
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main:main || true
           git checkout main || git checkout -b main
           git add releases/latest.json
           if ! git diff --cached --quiet; then
             git commit -m "chore(release): update latest.json for ${{ steps.manifest.outputs.tag }} [skip ci]"
-            git push origin main
+            git push origin main || true
           fi
