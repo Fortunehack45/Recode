@@ -6,6 +6,7 @@ use futures::channel::mpsc::unbounded;
 use futures::stream::SplitStream;
 use futures::{FutureExt as _, StreamExt as _, TryStreamExt as _};
 use gpui::{App, Task};
+use http_client::Url;
 use yawc::WebSocket;
 
 use super::{MessageStream, forward_frame};
@@ -53,9 +54,11 @@ impl CloudApiClient {
         let client = self.clone();
         let executor = cx.background_executor().clone();
         Ok(cx.spawn(async move |_cx| {
-            let mut connect_url = client
+            let url_str = client
                 .http_client
-                .build_url("/client/users/connect")?;
+                .build_url("/client/users/connect");
+            let mut connect_url = Url::parse(&url_str)
+                .map_err(|e| anyhow!("failed to parse websocket connect url: {e}"))?;
             connect_url
                 .set_scheme(match connect_url.scheme() {
                     "https" => "wss",

@@ -8,6 +8,7 @@ use futures::stream::{SplitSink, SplitStream};
 use futures::{FutureExt as _, SinkExt as _, StreamExt as _, TryStreamExt as _};
 use futures_lite::future::yield_now;
 use gpui::{App, AppContext, Task};
+use http_client::Url;
 use http_client::http::request;
 use tokio_rustls::TlsConnector;
 use yawc::frame::Frame;
@@ -66,9 +67,11 @@ impl Connection {
 
 impl CloudApiClient {
     pub fn connect(self: &std::sync::Arc<Self>, cx: &App) -> Result<Task<Result<Connection>>> {
-        let mut connect_url = self
+        let url_str = self
             .http_client
-            .build_url("/client/users/connect")?;
+            .build_url("/client/users/connect");
+        let mut connect_url = Url::parse(&url_str)
+            .map_err(|e| anyhow!("failed to parse websocket connect url: {e}"))?;
         connect_url
             .set_scheme(match connect_url.scheme() {
                 "https" => "wss",

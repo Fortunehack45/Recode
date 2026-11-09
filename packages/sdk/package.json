@@ -1,0 +1,18 @@
+{
+  "name": "@recode/sdk",
+  "version": "1.30.0",
+  "description": "Official TypeScript & JavaScript SDK for Recode AI coding agent",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@recode/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

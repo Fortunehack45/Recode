@@ -73,6 +73,94 @@ Official pre-built binary packages are published for every release:
 
 ---
 
+## 💻 Recode Terminal & Recode SDK
+
+In addition to the GPU-accelerated desktop editor, Recode includes **Recode Terminal** (`@recode/cli`) and the **Recode SDK** (`@recode/sdk`), inspired by modern agentic architectures.
+
+```
+  ____                     _      
+ |  _ \ ___  ___ ___   __| | ___ 
+ | |_) / _ \/ __/ _ \ / _` |/ _ \
+ |  _ <  __/ (_| (_) | (_| |  __/
+ |_| \_\___|\___\___/ \__,_|\___|  v1.30.0
+ Autonomous AI Software Engineering Terminal
+```
+
+### 1. Recode Terminal CLI (`@recode/cli`)
+
+Run an autonomous coding agent directly inside your terminal with real-time streaming, interactive slash commands, and file diffing.
+
+```bash
+# Run immediately without installation
+npx @recode/cli
+
+# Or install globally with pnpm/npm
+pnpm add -g @recode/cli
+# or: npm install -g @recode/cli
+
+# Launch interactive terminal assistant
+recode
+
+# Headless command execution (for scripts and CI/CD)
+recode run "Inspect auth module, add unit tests, and run test suite"
+
+# Check authentication and model providers
+recode auth status
+
+# Authenticate with GitHub (Device Flow - zero passwords, zero email)
+recode auth login
+
+# List available models
+recode models
+```
+
+#### Pure Developer Authentication (Zero Email)
+Recode Terminal strictly avoids Gmail, passwords, or magic links. It uses:
+- **GitHub Device Code Flow**: Instant one-click browser approval (`recode auth login`)
+- **GitHub Personal Access Tokens (PAT)**: For headless server/container environments
+- **BYOK Provider API Keys**: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`, or local Ollama.
+
+---
+
+### 2. Recode SDK (`@recode/sdk`)
+
+Programmatically orchestrate Recode's autonomous coding agent in your TypeScript/JavaScript projects, bots, or CI automations:
+
+```bash
+pnpm add @recode/sdk
+```
+
+```typescript
+import { Recode, RecodeAuth } from "@recode/sdk";
+
+// Initialize Recode client
+const recode = new Recode({
+  provider: "anthropic",
+  model: "claude-3-7-sonnet",
+  workspaceDir: process.cwd(),
+});
+
+// Create an interactive session
+const session = recode.createSession();
+
+// Stream autonomous reasoning, file operations, and token chunks
+for await (const event of session.prompt("Refactor database schema to support vector embeddings")) {
+  if (event.type === "token") {
+    process.stdout.write(event.content);
+  } else if (event.type === "tool_start") {
+    console.log(`\n[Tool Executing] ${event.toolCall.name}`);
+  } else if (event.type === "tool_end") {
+    console.log(`[Tool Complete] Success: ${event.toolResult.success}`);
+  }
+}
+
+// Or execute a prompt headlessly to completion:
+const result = await recode.run("Run linting and fix format errors");
+console.log(result);
+```
+
+---
+
 ## ⚙️ Configuration & Customization
 
 Recode stores user settings in standard JSON format located at `~/.config/recode/settings.json` (or `%APPDATA%\Recode\settings.json` on Windows).

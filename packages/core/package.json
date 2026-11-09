@@ -1,0 +1,19 @@
+{
+  "name": "@recode/core",
+  "version": "1.30.0",
+  "description": "Core engine, agentic loop, tools, and auth for Recode Terminal and SDK",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "diff": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/diff": "^7.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
