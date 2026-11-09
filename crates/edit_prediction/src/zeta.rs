@@ -10,10 +10,10 @@ use crate::{
 };
 use anyhow::{Context as _, Result};
 use cloud_llm_client::{
-    AcceptEditPredictionBody, EditPredictionRejectReason, predict_edits_v3::RawCompletionRequest,
+    EditPredictionRejectReason, predict_edits_v3::RawCompletionRequest,
 };
 use edit_prediction_types::PredictedCursorPosition;
-use gpui::{App, AppContext as _, Entity, Task, TaskExt, WeakEntity, prelude::*};
+use gpui::{App, AppContext as _, Entity, Task, WeakEntity, prelude::*};
 use language::{
     Buffer, BufferSnapshot, DiagnosticSeverity, EditPredictionPromptFormat, OffsetRangeExt as _,
     ToOffset as _, ZetaVersion, language_settings::all_language_settings, text_diff,
