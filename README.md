@@ -77,29 +77,36 @@ Official pre-built binary packages are published for every release:
 
 In addition to the GPU-accelerated desktop editor, Recode includes **Recode Terminal** (`@recode/cli`) and the **Recode SDK** (`@recode/sdk`), inspired by modern agentic architectures.
 
-```
-  ____                     _      
- |  _ \ ___  ___ ___   __| | ___ 
- | |_) / _ \/ __/ _ \ / _` |/ _ \
- |  _ <  __/ (_| (_) | (_| |  __/
- |_| \_\___|\___\___/ \__,_|\___|  v1.30.0
- Autonomous AI Software Engineering Terminal
+```text
+╭─ ◆ Recode Terminal v1.30.0 ──────────────────────────────────────────╮
+│  Autonomous AI Software Engineering Terminal                         │
+│                                                                      │
+│  📁 Workspace:  Ai ide (C:\Users\USER PC\Desktop\Ai ide)             │
+│  ⚡ Model:      gemini-2.5-flash                                      │
+│  🛡 Mode:       ⚡ Build (full read, write, and command execution)    │
+│  👤 Account:    ○ Not signed in (run /login)                         │
+│  🌐 Collab:     ● Connected wss://recode-collab.fly.dev/rpc          │
+│                                                                      │
+│  Commands:   /connect  /models  /login  /mode  /clear  /help  /exit  │
+╰──────────────────────────────────────────────────────────────────────╯
 ```
 
 ### 1. Recode Terminal CLI (`@recode/cli`)
 
-Run an autonomous coding agent directly inside your terminal with real-time streaming, interactive slash commands, and file diffing.
+Run an autonomous coding agent directly inside your terminal with real-time streaming, interactive multi-provider setup, `@file` context tagging, inline shell execution (`!cmd`), and file diffing.
 
 ```bash
 # Run immediately without installation
 npx @recode/cli
 
 # Or install globally with pnpm/npm
-pnpm add -g @recode/cli
-# or: npm install -g @recode/cli
+npm install -g @recode/cli
 
 # Launch interactive terminal assistant
 recode
+
+# Connect your preferred AI key (Gemini free tier, OpenAI, Claude, DeepSeek, Groq, or Ollama)
+recode /connect
 
 # Headless command execution (for scripts and CI/CD)
 recode run "Inspect auth module, add unit tests, and run test suite"
@@ -113,6 +120,13 @@ recode auth login
 # List available models
 recode models
 ```
+
+#### Interactive Terminal Features (OpenCode Architecture)
+- **`/connect`**: Multi-provider interactive setup card. Zero vendor lock-in: use Google Gemini (free tier), OpenAI, Anthropic, DeepSeek, Groq, or local offline Ollama.
+- **`/mode`**: Toggle between **Build** mode (autonomous file edits & command execution) and **Plan** mode (read-only architectural planning).
+- **`@<path>`**: Attach any file or folder context directly into your prompt.
+- **`!<cmd>`**: Execute inline terminal shell commands (e.g. `!git status` or `!cargo test`).
+- **`/login`**: Pure developer GitHub Device Flow authentication (no email or password requirements).
 
 #### Pure Developer Authentication (Zero Email)
 Recode Terminal strictly avoids Gmail, passwords, or magic links. It uses:
