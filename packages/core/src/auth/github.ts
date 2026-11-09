@@ -1,6 +1,6 @@
 import { GitHubAuth, GitHubUser } from "./store.js";
 
-export const DEFAULT_RECODE_GITHUB_CLIENT_ID = "Ov23liRecodeIDEApp";
+export const DEFAULT_RECODE_GITHUB_CLIENT_ID = "178c6fc778ccc68e1d6a";
 
 export interface DeviceCodeResponse {
   device_code: string;
