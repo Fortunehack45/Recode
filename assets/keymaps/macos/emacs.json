@@ -1,6 +1,6 @@
-// documentation: https://zed.dev/docs/key-bindings
+// documentation: https://github.com/Fortunehack45/Recode#readme
 //
-// To see the default key bindings run `zed: open default keymap`
+// To see the default key bindings run `open default keymap`
 // from the command palette.
 [
   {
@@ -173,7 +173,7 @@
     "context": "Terminal",
     "bindings": {
       // If you want to perfect your emacs-in-zed setup, also consider the following.
-      // You may need to enable "option_as_meta" from the Zed settings for "alt-x" to work.
+      // You may need to enable "option_as_meta" from the Recode settings for "alt-x" to work.
       // "alt-x": ["terminal::SendKeystroke", "alt-x"],
       // "ctrl-x": ["terminal::SendKeystroke", "ctrl-x"],
       // "ctrl-n": ["terminal::SendKeystroke", "ctrl-n"],

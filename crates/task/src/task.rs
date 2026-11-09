@@ -215,7 +215,10 @@ impl FromStr for VariableName {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let without_prefix = s.strip_prefix(ZED_VARIABLE_NAME_PREFIX).ok_or(())?;
+        let without_prefix = s
+            .strip_prefix(RECODE_VARIABLE_NAME_PREFIX)
+            .or_else(|| s.strip_prefix(ZED_VARIABLE_NAME_PREFIX))
+            .ok_or(())?;
         let value = match without_prefix {
             "FILE" => Self::File,
             "FILENAME" => Self::Filename,
@@ -252,6 +255,7 @@ impl FromStr for VariableName {
 
 /// A prefix that all [`VariableName`] variants are prefixed with when used in environment variables and similar template contexts.
 pub const ZED_VARIABLE_NAME_PREFIX: &str = "ZED_";
+pub const RECODE_VARIABLE_NAME_PREFIX: &str = "RECODE_";
 const ZED_CUSTOM_VARIABLE_NAME_PREFIX: &str = "CUSTOM_";
 
 impl std::fmt::Display for VariableName {

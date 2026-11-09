@@ -2542,7 +2542,7 @@ impl RemoteServerProjects {
                                             )
                                             .on_click(|_, _, cx| {
                                                 cx.open_url(
-                                                    "https://zed.dev/docs/remote-development",
+                                                    "https://github.com/Fortunehack45/Recode#readme",
                                                 );
                                             }),
                                     ),

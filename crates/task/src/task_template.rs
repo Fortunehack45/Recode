@@ -10,7 +10,7 @@ use util::{ResultExt, truncate_and_remove_front};
 
 use crate::{
     AttachRequest, ResolvedTask, RevealTarget, Shell, SpawnInTerminal, TaskContext, TaskId,
-    VariableName, ZED_VARIABLE_NAME_PREFIX, serde_helpers::non_empty_string_vec,
+    RECODE_VARIABLE_NAME_PREFIX, VariableName, ZED_VARIABLE_NAME_PREFIX, serde_helpers::non_empty_string_vec,
 };
 
 /// A template definition of a Zed task to run.
@@ -166,18 +166,18 @@ impl TaskTemplate {
 
         let mut variable_names = HashMap::default();
         let mut substituted_variables = HashSet::default();
-        let task_variables = cx
-            .task_variables
-            .0
-            .iter()
-            .map(|(key, value)| {
-                let key_string = key.to_string();
-                if !variable_names.contains_key(&key_string) {
-                    variable_names.insert(key_string.clone(), key.clone());
-                }
-                (key_string, value.as_str())
-            })
-            .collect::<HashMap<_, _>>();
+        let mut task_variables = HashMap::default();
+        for (key, value) in &cx.task_variables.0 {
+            let key_string = key.to_string();
+            variable_names.insert(key_string.clone(), key.clone());
+            task_variables.insert(key_string.clone(), value.as_str());
+
+            if let Some(suffix) = key_string.strip_prefix("ZED_") {
+                let recode_key = format!("RECODE_{suffix}");
+                variable_names.insert(recode_key.clone(), key.clone());
+                task_variables.insert(recode_key, value.as_str());
+            }
+        }
         let truncated_variables = truncate_variables(&task_variables);
         let cwd = match self.cwd.as_deref() {
             Some(cwd) => {
@@ -338,8 +338,14 @@ impl TaskTemplate {
             let colon_position = variable.find(':').unwrap_or(variable.len());
             let variable_name = &variable[..colon_position];
 
-            if variable_name.starts_with(ZED_VARIABLE_NAME_PREFIX)
-                && let without_prefix = &variable_name[ZED_VARIABLE_NAME_PREFIX.len()..]
+            let has_prefix = variable_name.starts_with(RECODE_VARIABLE_NAME_PREFIX) || variable_name.starts_with(ZED_VARIABLE_NAME_PREFIX);
+            let prefix_len = if variable_name.starts_with(RECODE_VARIABLE_NAME_PREFIX) {
+                RECODE_VARIABLE_NAME_PREFIX.len()
+            } else {
+                ZED_VARIABLE_NAME_PREFIX.len()
+            };
+            if has_prefix
+                && let without_prefix = &variable_name[prefix_len..]
                 && !without_prefix.starts_with("CUSTOM_")
                 && variable_name.parse::<VariableName>().is_err()
             {

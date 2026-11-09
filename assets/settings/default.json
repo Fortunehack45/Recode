@@ -1,5 +1,5 @@
 {
-  "$schema": "zed://schemas/settings",
+  "$schema": "recode://schemas/settings",
   // The name of the Recode theme to use for the UI.
   //
   // `mode` is one of:
@@ -15,7 +15,7 @@
   // The name of a base set of key bindings to use.
   // This setting can take the following values:
   //
-  // 1. "Zed"
+  // 1. "Recode"
   // 2. "VSCode"
   // 3. "Atom"
   // 4. "JetBrains"
@@ -24,7 +24,7 @@
   // 7. "Emacs"
   // 8. "Cursor"
   // 9. "None"
-  "base_keymap": "Zed",
+  "base_keymap": "Recode",
   // The name of a font to use for rendering text in the editor
   // ".RecodeMono" currently aliases to Lilex
   // but this may change in the future.
@@ -608,7 +608,7 @@
   },
   // Whether to allow windows to tab together based on the user's tabbing preference (macOS only).
   "use_system_window_tabs": false,
-  // Which fullscreen mode the `zed::ToggleFullScreen` action enters (macOS only).
+  // Which fullscreen mode the `ToggleFullScreen` action enters (macOS only).
   //
   // 1. Use macOS's native fullscreen, which moves the window into its own Mission Control space.
   //     "native"
@@ -1920,15 +1920,15 @@
     // When the resolved directory is outside the project root, the
     // project's directory name is automatically appended so that
     // sibling repos don't collide. For example, with the default
-    // "../worktrees" and a project at ~/code/zed, worktrees are
-    // created under ~/code/worktrees/zed/.
+    // "../worktrees" and a project at ~/code/recode, worktrees are
+    // created under ~/code/worktrees/recode/.
     //
     // When the resolved directory is inside the project root, no
     // extra component is added (it's already project-scoped).
     //
     // Examples:
     //   "../worktrees" — ~/code/worktrees/<project>/ (default)
-    //   ".git/zed-worktrees" — <project>/.git/zed-worktrees/
+    //   ".git/recode-worktrees" — <project>/.git/recode-worktrees/
     //   "my-worktrees" — <project>/my-worktrees/
     //
     // Trailing slashes are ignored.
@@ -1962,7 +1962,7 @@
     // Whether to show the edit prediction button in the status bar.
     "button": true,
     // Which edit prediction provider to use.
-    "provider": "zed",
+    "provider": "copilot",
     // Disable edit predictions for files matching these glob patterns.
     //
     // Use `"..."` to add patterns without repeating Recode's defaults. In project
@@ -1985,8 +1985,11 @@
       "**/*.crt",
       "**/.dev.vars",
       "**/secrets.yml",
-      "**/.zed/settings.json", // zed project settings
-      "/**/zed/settings.json", // zed user settings
+      "**/.recode/settings.json",
+      "/**/recode/settings.json",
+      "/**/recode/keymap.json",
+      "**/.zed/settings.json",
+      "/**/zed/settings.json",
       "/**/zed/keymap.json",
     ],
     // When to show edit predictions previews in buffer.
@@ -2029,6 +2032,9 @@
       "model": "",
       "prompt_format": "infer",
       "max_output_tokens": 64,
+      "prediction_debounce": 0,
+    },
+    "recode": {
       "prediction_debounce": 0,
     },
     "zed": {
@@ -2123,7 +2129,7 @@
     //    this platform's home directory  (if we can find it)
     //      "working_directory": {
     //        "always": {
-    //          "directory": "~/zed/projects/"
+    //          "directory": "~/recode/projects/"
     //        }
     //      }
     "working_directory": "current_project_directory",
@@ -2364,9 +2370,10 @@
   //
   "file_types": {
     "JSONC": [
+      "**/.recode/*.json",
       "**/.zed/*.json",
       "**/.vscode/**/*.json",
-      "**/{zed,Zed}/{settings,keymap,tasks,debug}.json",
+      "**/{recode,Recode,zed,Zed}/{settings,keymap,tasks,debug}.json",
       "tsconfig*.json",
     ],
     "Markdown": [".rules", ".cursorrules", ".windsurfrules", ".clinerules"],
@@ -2921,8 +2928,8 @@
     "delay_ms": 1000,
   },
   // The server to connect to. If the environment variable
-  // ZED_SERVER_URL is set, it will override this setting.
-  "server_url": "https://zed.dev",
+  // RECODE_SERVER_URL is set, it will override this setting.
+  "server_url": "wss://recode-collab.fly.dev",
   // Settings overrides to use when using Recode Preview.
   // Mostly useful for developers who are managing multiple instances of Recode.
   "preview": {
@@ -3003,7 +3010,7 @@
   //     // "port": 22, "username": "test", "args": ["-i", "/home/user/.ssh/id_rsa"]
   //     "projects": [
   //       {
-  //         "paths": ["/home/user/code/zed"]
+  //         "paths": ["/home/user/code/recode"]
   //       }
   //     ]
   //   }

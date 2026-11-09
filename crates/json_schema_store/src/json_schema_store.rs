@@ -143,7 +143,11 @@ pub fn handle_schema_request(
     uri: String,
     cx: &mut AsyncApp,
 ) -> Task<Result<String>> {
-    let path = match uri.strip_prefix(SCHEMA_URI_PREFIX) {
+    let path = match uri
+        .strip_prefix(SCHEMA_URI_PREFIX)
+        .or_else(|| uri.strip_prefix("recode://schemas/"))
+        .or_else(|| uri.strip_prefix("zed://schemas/"))
+    {
         Some(path) => path,
         None => return Task::ready(Err(anyhow::anyhow!("Invalid schema URI: {}", uri))),
     };

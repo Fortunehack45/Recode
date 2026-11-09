@@ -1,10 +1,10 @@
 // Recode settings
 //
 // For information on how to configure Recode, see the Recode
-// documentation: https://zed.dev/docs/configuring-zed
+// documentation: https://github.com/Fortunehack45/Recode#readme
 //
 // To see all of Recode's default settings without changing your
-// custom settings, run `zed: open default settings` from the
+// custom settings, run `open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
   "ui_font_size": 16,

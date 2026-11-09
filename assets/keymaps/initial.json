@@ -1,9 +1,9 @@
 // Recode keymap
 //
 // For information on binding keys, see the Recode
-// documentation: https://zed.dev/docs/key-bindings
+// documentation: https://github.com/Fortunehack45/Recode#readme
 //
-// To see the default key bindings run `zed: open default keymap`
+// To see the default key bindings run `open default keymap`
 // from the command palette.
 [
   {
