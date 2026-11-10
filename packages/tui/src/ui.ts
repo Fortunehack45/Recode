@@ -2,9 +2,19 @@ import path from "node:path";
 import { ThemeManager, BUILTIN_THEMES, ThemeDefinition } from "./theme.js";
 import { FontManager, BORDER_STYLES, BorderStyleType, MascotStyleType } from "./font.js";
 import { fitCell, visibleWidth } from "./text.js";
-import { AuthStatus, ModelInfo } from "@recode-dev/sdk";
+import { AuthStatus, ModelInfo, ChatMessage, ChatMetadata } from "@recode-dev/sdk";
 
 export class UI {
+  /**
+   * True terminal clearing: wipes visible screen and scrollback buffer.
+   */
+  public static clearScreen(): void {
+    process.stdout.write("\x1b[2J\x1b[3J\x1b[H");
+    try {
+      console.clear();
+    } catch {}
+  }
+
   /**
    * Boxed Pill Badge with rounded border and asterisk bullet.
    */
@@ -25,7 +35,7 @@ export class UI {
   }
 
   /**
-   * Iconic 3D Isometric ASCII Banner matching Claude Code (Image 2),
+   * Iconic 3D Isometric ASCII Banner matching Claude Code,
    * styled with Recode's high-contrast monochrome theme.
    */
   public static printBanner(version = "1.30.4"): void {
@@ -57,12 +67,13 @@ export class UI {
   }
 
   /**
-   * Welcome Splash Screen matching Image 2 exactly.
-   * Pill + 3D Isometric ASCII RECODE Banner + Security Notes + Interactive Prompt.
+   * Welcome Splash Screen.
+   * Pill + 3D Isometric ASCII RECODE Banner + Security Notes.
+   * Clears entire scrollback buffer and leaves welcome screen cleanly on display.
    */
-  public static printWelcomeSplash(version = "1.30.4"): void {
+  public static printWelcomeSplash(version = "1.30.4", showPrompt = false): void {
     const theme = ThemeManager.get();
-    console.clear();
+    this.clearScreen();
     console.log();
     this.printBoxedPill("Welcome to Recode research preview!");
     this.printBanner(version);
@@ -76,7 +87,9 @@ export class UI {
     console.log(`  ${theme.text("3. Due to prompt injection risks, only use it with code you trust")}`);
     console.log(`     ${theme.muted("For more details see:")}`);
     console.log(`     ${theme.accent("https://github.com/Fortunehack45/Recode#security")}\n`);
-    console.log(`  ${theme.bold(theme.accent("Press Enter to continue..."))}`);
+    if (showPrompt) {
+      console.log(`  ${theme.bold(theme.accent("Press Enter to continue..."))}`);
+    }
   }
 
   /**
@@ -277,13 +290,9 @@ export class UI {
     const title = " You ";
     const topBorder =
       "  " +
-      theme.accent(
-        glyphs.tl +
-          glyphs.horiz +
-          title +
-          glyphs.horiz.repeat(Math.max(0, innerW - 1 - title.length)) +
-          glyphs.tr
-      );
+      theme.border(glyphs.tl + glyphs.horiz) +
+      theme.bold(theme.accent(title)) +
+      theme.border(glyphs.horiz.repeat(Math.max(0, innerW - 1 - visibleWidth(title))) + glyphs.tr);
 
     // Word wrap prompt to lines of at most 65 characters
     const words = prompt.trim().split(/\s+/);
@@ -306,16 +315,16 @@ export class UI {
     const contentLines = wrappedLines.map(
       (line) =>
         "  " +
-        theme.accent(glyphs.vert) +
+        theme.border(glyphs.vert) +
         " " +
         fitCell(theme.bold(theme.text(line)), 67) +
         " " +
-        theme.accent(glyphs.vert)
+        theme.border(glyphs.vert)
     );
 
     const botBorder =
       "  " +
-      theme.accent(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
+      theme.border(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
 
     console.log();
     console.log(topBorder);
@@ -327,12 +336,162 @@ export class UI {
   /**
    * Assistant container header.
    */
-  public static printAssistantStart(): void {
+  public static printAssistantStart(model?: string): void {
     const theme = ThemeManager.get();
-    console.log(`  ${theme.accent("●")} ${theme.bold(theme.text("Recode"))}\n`);
+    const modelBadge = model ? `  ${theme.dim("·")}  ${theme.dim(model)}` : "";
+    console.log(`  ${theme.accent("◆")} ${theme.bold(theme.text("Recode"))}${modelBadge}\n`);
   }
 
   public static printAssistantEnd(): void {
+    console.log();
+  }
+
+  /**
+   * Conversation History Viewer (/history).
+   */
+  public static printHistory(messages: ChatMessage[]): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    const visibleMsgs = messages.filter((m) => m.role !== "system");
+    if (visibleMsgs.length === 0) {
+      console.log(`\n  ${theme.dim("No conversation history in this session yet.")}\n`);
+      return;
+    }
+
+    const title = ` History (${visibleMsgs.length} messages) `;
+    const innerW = 69;
+    const topBorder =
+      "  " +
+      theme.accent(glyphs.tl + glyphs.horiz) +
+      theme.bold(theme.text(title)) +
+      theme.accent(glyphs.horiz.repeat(Math.max(0, innerW - 1 - visibleWidth(title))) + glyphs.tr);
+
+    console.log();
+    console.log(topBorder);
+
+    let turn = 1;
+    for (const msg of visibleMsgs) {
+      const isUser = msg.role === "user";
+      const roleLabel = isUser
+        ? theme.accent(theme.bold(`Turn #${turn++} [You]`))
+        : theme.fg(theme.palette.success)(theme.bold(`Turn #${turn++} [Recode]`));
+
+      console.log(`  ${theme.border(glyphs.vert)}  ${roleLabel}`);
+
+      const content = msg.content || "";
+      const lines = content.split(/\r?\n/).slice(0, 3);
+      for (const l of lines) {
+        const truncated = l.length > 63 ? l.slice(0, 60) + "..." : l;
+        console.log(`  ${theme.border(glyphs.vert)}    ${theme.text(fitCell(truncated, 63))}`);
+      }
+      if (content.split(/\r?\n/).length > 3) {
+        console.log(`  ${theme.border(glyphs.vert)}    ${theme.dim("...")}`);
+      }
+      if (msg.tool_calls && msg.tool_calls.length > 0) {
+        const toolNames = msg.tool_calls
+          .map((t) => (t as any).name || (t as any).function?.name || "tool")
+          .join(", ");
+        console.log(`  ${theme.border(glyphs.vert)}    ${theme.dim(`Tools: ${toolNames}`)}`);
+      }
+      console.log(`  ${theme.border(glyphs.vert)}`);
+    }
+
+    const botBorder =
+      "  " + theme.accent(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
+    console.log(botBorder);
+    console.log();
+  }
+
+  /**
+   * Saved Chat Sessions List (/chats).
+   */
+  public static printChatList(chats: ChatMetadata[], activeId?: string): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    const innerW = 69;
+    const title = ` Saved Chat Sessions (${chats.length}) `;
+    const topBorder =
+      "  " +
+      theme.accent(glyphs.tl + glyphs.horiz) +
+      theme.bold(theme.text(title)) +
+      theme.accent(glyphs.horiz.repeat(Math.max(0, innerW - 1 - visibleWidth(title))) + glyphs.tr);
+
+    console.log();
+    console.log(topBorder);
+
+    if (chats.length === 0) {
+      console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("No saved chat sessions found.")}`);
+    } else {
+      for (let i = 0; i < chats.length; i++) {
+        const c = chats[i];
+        const isActive = c.id === activeId;
+        const marker = isActive ? theme.accent("[*]") : theme.dim(`[${i + 1}]`);
+        const titleSnippet = c.title.length > 28 ? c.title.slice(0, 25) + "..." : c.title;
+        const turns = `${c.messageCount} msg${c.messageCount === 1 ? "" : "s"}`;
+        const activeLabel = isActive ? theme.accent(" (Active)") : "";
+
+        console.log(
+          `  ${theme.border(glyphs.vert)}  ${marker} ${theme.bold(theme.text(fitCell(titleSnippet, 28)))} ` +
+            `${theme.dim(fitCell(turns, 8))} ${theme.muted(fitCell(c.id.slice(0, 16), 16))}${activeLabel}`
+        );
+      }
+    }
+
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Start new chat :"))} ${theme.accent("/new")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Resume a chat  :"))} ${theme.accent("/chat <id | #number>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Compact turns  :"))} ${theme.accent("/compact")}`);
+
+    const botBorder =
+      "  " + theme.accent(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
+    console.log(botBorder);
+    console.log();
+  }
+
+  /**
+   * Collaboration Channels Card (/channel).
+   */
+  public static printChannelCard(status: {
+    connected: boolean;
+    roomId: string | null;
+    serverUrl: string;
+  }): void {
+    const theme = ThemeManager.get();
+    const font = FontManager.get();
+    const glyphs = font.glyphs;
+
+    const innerW = 69;
+    const title = " Recode Real-Time Collaboration ";
+    const topBorder =
+      "  " +
+      theme.accent(glyphs.tl + glyphs.horiz) +
+      theme.bold(theme.text(title)) +
+      theme.accent(glyphs.horiz.repeat(Math.max(0, innerW - 1 - visibleWidth(title))) + glyphs.tr);
+
+    console.log();
+    console.log(topBorder);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Server :"))} ${theme.accent(status.serverUrl)}`);
+    const statusPill = status.connected
+      ? theme.success("[✓] Online (Connected)")
+      : theme.dim("[○] Standby (Fly.io Global Edge)");
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Status :"))} ${statusPill}`);
+    console.log(
+      `  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Room   :"))} ${
+        status.roomId ? theme.accent(theme.bold(status.roomId)) : theme.dim("None (solo mode)")
+      }`
+    );
+    console.log(`  ${theme.border(glyphs.vert)}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Join room      :"))} ${theme.accent("/channel join <room_name>")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Leave room     :"))} ${theme.accent("/channel leave")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.bold(theme.text("Channel status :"))} ${theme.accent("/channel status")}`);
+
+    const botBorder =
+      "  " + theme.accent(glyphs.bl + glyphs.horiz.repeat(innerW) + glyphs.br);
+    console.log(botBorder);
     console.log();
   }
 
@@ -501,20 +660,25 @@ export class UI {
     console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Recode Terminal Assistant Commands"))} ${theme.accent(glyphs.horiz.repeat(30) + glyphs.tr)}`);
 
     const cmds = [
-      { cmd: "/welcome", desc: "Show the onboarding welcome & security preview splash" },
-      { cmd: "/theme [name]", desc: "Browse or switch themes (matches Recode IDE)" },
-      { cmd: "/theme ide", desc: "Sync theme directly from Recode IDE settings.json" },
-      { cmd: "/font [style|mascot]", desc: "Configure border styles (dotted/rounded) & mascot" },
-      { cmd: "/color [accent|reset]", desc: "Inspect theme color palette or set custom accent" },
-      { cmd: "/mode [build|plan]", desc: "Toggle between Build (read/write/exec) and Plan (read-only)" },
-      { cmd: "/model [name]", desc: "Switch AI model (e.g. gemini-2.5-flash, claude-3-7-sonnet)" },
+      { cmd: "/welcome", desc: "Show onboarding welcome & security preview splash" },
+      { cmd: "/clear", desc: "Clear terminal viewport & reset active conversation" },
+      { cmd: "/new", desc: "Start fresh chat session (auto-saves current session)" },
+      { cmd: "/history", desc: "View conversation turns for active session" },
+      { cmd: "/chats", desc: "List all saved chat sessions" },
+      { cmd: "/chat <id|#>", desc: "Resume saved chat session by ID or index" },
+      { cmd: "/compact", desc: "Prune and compact conversation context tokens" },
+      { cmd: "/channel [room]", desc: "Team collaboration channels (wss://recode-collab)" },
+      { cmd: "/model [name]", desc: "Switch AI model (e.g. opencode-zen, gemini-2.5-flash)" },
       { cmd: "/models", desc: "List all supported models across all providers" },
-      { cmd: "/connect [provider] [key]", desc: "Set API keys (OpenCode, Gemini, OpenAI, Claude, DeepSeek)" },
+      { cmd: "/connect [p] [k]", desc: "Set API keys (OpenCode, Gemini, OpenAI, Claude)" },
+      { cmd: "/mode [build|plan]", desc: "Toggle Build (read/write/exec) vs Plan (read-only)" },
+      { cmd: "/theme [name|ide]", desc: "Browse or switch themes (matches Recode IDE)" },
+      { cmd: "/font [style|mascot]", desc: "Configure border styles (dotted/rounded) & mascot" },
+      { cmd: "/color [accent|hex]", desc: "Inspect theme color palette or set custom accent" },
       { cmd: "/status", desc: "Show Git status in current workspace" },
       { cmd: "/diff", desc: "Show pending Git diff changes" },
-      { cmd: "/clear", desc: "Clear screen and reset conversation history" },
-      { cmd: "@<path>", desc: "Attach file context into prompt (e.g. @src/index.ts)" },
       { cmd: "!<command>", desc: "Execute shell command directly (e.g. !cargo test)" },
+      { cmd: "@<path>", desc: "Attach file context into prompt (e.g. @src/index.ts)" },
       { cmd: "Shift+Tab", desc: "Instant hotkey to toggle Build vs Plan mode" },
       { cmd: "Ctrl+V", desc: "Paste from system clipboard into input prompt" },
       { cmd: "/exit", desc: "Quit Recode terminal assistant" },

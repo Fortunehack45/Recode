@@ -12,6 +12,8 @@ import {
   resolveModel,
   getBestAvailableModel,
   PROVIDER_DEFAULT_MODELS,
+  ChatStore,
+  CollabClient,
 } from "@recode-dev/sdk";
 import { UI } from "./ui.js";
 import { ThemeManager, BUILTIN_THEMES } from "./theme.js";
@@ -42,6 +44,7 @@ export class Repl {
   private indicator: LiveActionIndicator;
   private theme: ThemeManager;
   private font: FontManager;
+  private collabClient: CollabClient;
   private shouldShowWelcome: boolean;
 
   constructor(options: ReplOptions = {}) {
@@ -52,6 +55,7 @@ export class Repl {
     this.font = FontManager.get();
     this.indicator = LiveActionIndicator.get();
     this.inputBox = new NativeInputBox();
+    this.collabClient = new CollabClient();
 
     const status = RecodeAuth.status();
 
@@ -125,21 +129,7 @@ export class Repl {
       line = line.trim();
       if (!line) continue;
 
-      // 1. Inline Shell Command execution (!<cmd>) or direct CLI commands
-      const firstWord = line.split(/\s+/)[0]?.toLowerCase();
-      const shellTools = new Set([
-        "pnpm",
-        "npm",
-        "yarn",
-        "npx",
-        "cargo",
-        "git",
-        "dir",
-        "ls",
-        "cd",
-        "pwd",
-      ]);
-
+      // 1. Inline Shell Command execution (!<cmd>)
       if (line.startsWith("!")) {
         const shellCmd = line.substring(1).trim();
         if (shellCmd) {
@@ -148,12 +138,8 @@ export class Repl {
         continue;
       }
 
-      if (firstWord && shellTools.has(firstWord)) {
-        this.executeShellCommand(line);
-        continue;
-      }
-
-      // 2. Command normalization
+      // 2. Strict Slash Command: all commands MUST start with "/"
+      // Any text entered without "/" is treated as a prompt to the AI agent
       const parsed = this.parseCommand(line);
       if (parsed.isCommand) {
         await this.handleCommand(parsed.cmd, parsed.args);
@@ -201,7 +187,7 @@ export class Repl {
   }
 
   private async showWelcomeSplash(): Promise<void> {
-    UI.printWelcomeSplash(RECODE_VERSION);
+    UI.printWelcomeSplash(RECODE_VERSION, true);
     const rl = readline.createInterface({ input, output });
     await rl.question("");
     rl.close();
@@ -214,73 +200,44 @@ export class Repl {
   }
 
   /**
-   * Normalize input and detect commands.
+   * Strictly parse slash commands.
+   * ALL commands MUST start with "/" (e.g. /help, /clear, /new, /history, /chat, etc.)
+   * Any input without a leading "/" is NOT a command and will be passed directly to the AI agent.
    */
   private parseCommand(raw: string): { isCommand: boolean; cmd: string; args: string[] } {
-    let text = raw.trim();
+    const text = raw.trim();
 
-    // Strip leading ".\recode ", "./recode ", or "recode "
-    text = text.replace(/^(\.[\\\/])?recode\s+/i, "");
-
-    // Strip leading "/"
-    if (text.startsWith("/")) {
-      text = text.substring(1).trim();
+    if (!text.startsWith("/")) {
+      return { isCommand: false, cmd: "", args: [] };
     }
 
-    const tokens = text.split(/\s+/);
-    const first = tokens[0]?.toLowerCase();
+    const withoutSlash = text.substring(1).trim();
+    const tokens = withoutSlash.split(/\s+/);
+    const first = tokens[0]?.toLowerCase() || "";
+    const args = tokens.slice(1);
 
-    // Handle "auth login", "auth logout", "auth status", "auth set-key"
+    // Handle /auth login, /auth logout, /auth set-key
     if (first === "auth") {
-      const action = tokens[1]?.toLowerCase();
-      if (action === "login") return { isCommand: true, cmd: "login", args: tokens.slice(2) };
-      if (action === "logout") return { isCommand: true, cmd: "logout", args: tokens.slice(2) };
-      if (action === "set-key") return { isCommand: true, cmd: "connect", args: tokens.slice(2) };
-      return { isCommand: true, cmd: "auth", args: tokens.slice(1) };
+      const action = args[0]?.toLowerCase();
+      if (action === "login") return { isCommand: true, cmd: "login", args: args.slice(1) };
+      if (action === "logout") return { isCommand: true, cmd: "logout", args: args.slice(1) };
+      if (action === "set-key") return { isCommand: true, cmd: "connect", args: args.slice(1) };
+      return { isCommand: true, cmd: "auth", args };
     }
 
-    const knownCommands = new Set([
-      "welcome",
-      "dashboard",
-      "theme",
-      "themes",
-      "font",
-      "color",
-      "help",
-      "h",
-      "?",
-      "login",
-      "logout",
-      "connect",
-      "key",
-      "set-key",
-      "model",
-      "models",
-      "mode",
-      "diff",
-      "status",
-      "clear",
-      "cls",
-      "collab",
-      "version",
-      "v",
-      "exit",
-      "quit",
-      "q",
-    ]);
-
-    if (first && knownCommands.has(first)) {
-      return { isCommand: true, cmd: first, args: tokens.slice(1) };
-    }
-
-    return { isCommand: false, cmd: "", args: [] };
+    return { isCommand: true, cmd: first, args };
   }
 
   private async handleCommand(cmd: string, args: string[]): Promise<void> {
     switch (cmd) {
       case "welcome":
-        await this.showWelcomeSplash();
-        console.clear();
+        UI.printWelcomeSplash(RECODE_VERSION, false);
+        break;
+
+      case "clear":
+      case "cls":
+        UI.clearScreen();
+        this.session.reset();
         UI.printHeader(
           this.recode.status(),
           this.workspaceDir,
@@ -289,6 +246,46 @@ export class Repl {
           RECODE_VERSION,
           this.session.id
         );
+        break;
+
+      case "new":
+        this.saveCurrentChat();
+        this.session = this.createConfiguredSession();
+        this.cumulativeTokens = 0;
+        UI.clearScreen();
+        UI.printHeader(
+          this.recode.status(),
+          this.workspaceDir,
+          this.currentModel,
+          this.mode,
+          RECODE_VERSION,
+          this.session.id
+        );
+        console.log(this.theme.success(`  [✓] Started new chat session (${this.session.id.slice(0, 16)}).\n`));
+        break;
+
+      case "history":
+        UI.printHistory(this.session.getMessages());
+        break;
+
+      case "chats":
+        UI.printChatList(ChatStore.listChats(), this.session.id);
+        break;
+
+      case "chat":
+        await this.handleChatCommand(args);
+        break;
+
+      case "compact": {
+        const pruned = this.session.compact();
+        console.log(this.theme.success(`\n  [✓] Compacted conversation history (pruned ${pruned} older turn(s)).\n`));
+        break;
+      }
+
+      case "channel":
+      case "channels":
+      case "collab":
+        await this.handleChannelCommand(args);
         break;
 
       case "dashboard":
@@ -320,13 +317,6 @@ export class Repl {
       case "h":
       case "?":
         UI.printHelp();
-        break;
-
-      case "clear":
-      case "cls":
-        console.clear();
-        this.session.reset();
-        UI.printHeader();
         break;
 
       case "exit":
@@ -431,12 +421,9 @@ export class Repl {
         }
         break;
 
-      case "collab":
-        this.handleCollab(args);
-        break;
-
       default:
-        console.log(this.theme.warning(`  Unknown command "${cmd}". Type /help for available commands.\n`));
+        console.log(this.theme.warning(`  [!] Unknown command "/${cmd}". Type /help for available commands.\n`));
+        break;
     }
   }
 
@@ -737,14 +724,131 @@ export class Repl {
     console.log(`\n  Default Model: ${this.theme.accent(this.theme.bold(this.currentModel))}\n`);
   }
 
-  private handleCollab(args: string[]): void {
-    console.log(`\n  ${this.theme.bold(this.theme.text("Recode Collaboration Service:"))}`);
-    console.log(`  Server: ${this.theme.accent("wss://recode-collab.fly.dev")}`);
-    console.log(`  Status: ${this.theme.success("[✓] Online")}`);
-    if (args[0]) {
-      console.log(`  Room  : ${this.theme.bold(args[0])}`);
+  private saveCurrentChat(): void {
+    const messages = this.session.getMessages();
+    if (messages.length === 0) return;
+    const firstUserMsg = messages.find((m) => m.role === "user");
+    const title = firstUserMsg?.content
+      ? firstUserMsg.content.trim().slice(0, 48)
+      : "Session";
+    ChatStore.saveChat({
+      id: this.session.id,
+      title,
+      createdAt: this.session.createdAt.toISOString(),
+      updatedAt: new Date().toISOString(),
+      model: this.currentModel,
+      mode: this.mode,
+      messages,
+    });
+  }
+
+  private async handleChatCommand(args: string[]): Promise<void> {
+    const sub = args[0]?.toLowerCase();
+
+    // /chat or /chat list -> show saved chats
+    if (!sub || sub === "list") {
+      const chats = ChatStore.listChats();
+      UI.printChatList(chats, this.session.id);
+      return;
     }
-    console.log(`  ${this.theme.dim("Real-time CRDT room channels active on Fly.io.")}\n`);
+
+    // /chat new -> start fresh chat
+    if (sub === "new") {
+      this.saveCurrentChat();
+      this.session = this.createConfiguredSession();
+      this.cumulativeTokens = 0;
+      UI.clearScreen();
+      UI.printHeader(
+        this.recode.status(),
+        this.workspaceDir,
+        this.currentModel,
+        this.mode,
+        RECODE_VERSION,
+        this.session.id
+      );
+      console.log(this.theme.success(`  [✓] Started new chat session (${this.session.id.slice(0, 16)}).\n`));
+      return;
+    }
+
+    // /chat <number> or /chat <id>
+    const chats = ChatStore.listChats();
+    let targetChatId = sub;
+    const num = parseInt(sub, 10);
+    if (!isNaN(num) && num >= 1 && num <= chats.length) {
+      targetChatId = chats[num - 1].id;
+    }
+
+    const saved = ChatStore.loadChat(targetChatId);
+    if (!saved) {
+      console.log(this.theme.error(`\n  [x] Chat session "${sub}" not found. Type /chats to see saved sessions.\n`));
+      return;
+    }
+
+    // Save active chat before switching
+    this.saveCurrentChat();
+
+    // Create session with restored messages
+    if (saved.model) this.currentModel = saved.model;
+    if (saved.mode === "build" || saved.mode === "plan") this.mode = saved.mode;
+
+    this.session = new Session({
+      id: saved.id,
+      model: this.currentModel === "(unconfigured)" ? undefined : this.currentModel,
+      workspaceDir: this.workspaceDir,
+      initialMessages: saved.messages,
+    });
+
+    UI.clearScreen();
+    UI.printHeader(
+      this.recode.status(),
+      this.workspaceDir,
+      this.currentModel,
+      this.mode,
+      RECODE_VERSION,
+      this.session.id
+    );
+    console.log(
+      this.theme.success(`  [✓] Resumed chat session: `) +
+        this.theme.accent(this.theme.bold(saved.title || saved.id)) +
+        this.theme.dim(` (${saved.messages.length} messages)\n`)
+    );
+  }
+
+  private async handleChannelCommand(args: string[]): Promise<void> {
+    const action = args[0]?.toLowerCase();
+
+    if (!action || action === "status") {
+      UI.printChannelCard(this.collabClient.getStatus());
+      return;
+    }
+
+    if (action === "join") {
+      const room = args[1];
+      if (!room) {
+        console.log(this.theme.warning("\n  [!] Usage: /channel join <room_name>\n"));
+        return;
+      }
+      console.log(this.theme.dim(`\n  Connecting to collaboration room "${room}"...`));
+      const ok = await this.collabClient.connect(room);
+      if (ok) {
+        console.log(
+          this.theme.success(`  [✓] Successfully joined collaboration room: `) +
+            this.theme.accent(this.theme.bold(room)) +
+            "\n"
+        );
+      } else {
+        console.log(this.theme.warning(`  [!] Could not connect to collaboration server (wss://recode-collab.fly.dev).\n`));
+      }
+      return;
+    }
+
+    if (action === "leave") {
+      this.collabClient.disconnect();
+      console.log(this.theme.success("\n  [✓] Disconnected from collaboration channel.\n"));
+      return;
+    }
+
+    UI.printChannelCard(this.collabClient.getStatus());
   }
 
   private executeShellCommand(cmd: string): void {
@@ -835,7 +939,7 @@ export class Repl {
             } else {
               UI.printThinkingSummary(durationSec);
             }
-            UI.printAssistantStart();
+            UI.printAssistantStart(this.currentModel);
           }
           turnTokens += Math.ceil(event.content.length / 4);
           process.stdout.write(event.content);
@@ -873,6 +977,9 @@ export class Repl {
       this.cumulativeTokens += turnTokens;
       const turnDuration = (Date.now() - startTime) / 1000;
       UI.printTurnSummary(turnDuration, turnTokens);
+
+      // Auto-save chat history after turn completes
+      this.saveCurrentChat();
     } catch (err: any) {
       this.indicator.clear();
       console.log(`\n  ${this.theme.error("[x] Execution error:")} ${err.message}\n`);

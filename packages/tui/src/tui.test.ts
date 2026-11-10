@@ -96,7 +96,7 @@ test("LiveActionIndicator tracks real-time action states", () => {
   indicator.clear();
 });
 
-test("UI renders welcome splash and dashboard cards cleanly", () => {
+test("UI renders welcome splash, dashboard, history, chats, and channel cards cleanly", () => {
   // Verify UI static methods run without error
   UI.printBoxedPill("Test Pill");
   UI.printBanner("1.30.4");
@@ -105,6 +105,24 @@ test("UI renders welcome splash and dashboard cards cleanly", () => {
   UI.printColorPalette();
   UI.printHelp();
   UI.printConnectMenu();
+  UI.printHistory([
+    { role: "user", content: "Create a rust project" },
+    { role: "assistant", content: "I will initialize cargo with cargo init", tool_calls: [{ id: "1", name: "exec", arguments: {} }] },
+  ]);
+  UI.printChatList([
+    {
+      id: "session_123",
+      title: "React bootstrap",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messageCount: 4,
+    },
+  ], "session_123");
+  UI.printChannelCard({
+    connected: true,
+    roomId: "team-alpha",
+    serverUrl: "wss://recode-collab.fly.dev",
+  });
   UI.printModelCatalog(
     {
       "opencode-zen": {

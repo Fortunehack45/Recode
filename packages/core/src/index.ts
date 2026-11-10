@@ -28,8 +28,9 @@ export {
   execTool,
 } from "./tools/builtin.js";
 
-// Agent
+// Agent & Chat
 export { Agent, AgentEvent, AgentEventType, AgentOptions } from "./agent/loop.js";
+export { ChatStore, SavedChat, ChatMetadata } from "./agent/chat_store.js";
 
 // Collab
 export { CollabClient, CollabMessage } from "./collab/client.js";

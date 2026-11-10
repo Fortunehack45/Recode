@@ -1,10 +1,12 @@
 import { Agent, AgentEvent, ChatMessage, Tool } from "@recode-dev/core";
 
 export interface SessionOptions {
+  id?: string;
   model?: string;
   workspaceDir?: string;
   maxTurns?: number;
   systemPrompt?: string;
+  initialMessages?: ChatMessage[];
   customTools?: Record<string, Tool>;
 }
 
@@ -14,7 +16,7 @@ export class Session {
   public readonly createdAt: Date;
 
   constructor(options: SessionOptions = {}) {
-    this.id = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    this.id = options.id || `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     this.createdAt = new Date();
     this.agent = new Agent(options);
   }
@@ -29,6 +31,14 @@ export class Session {
 
   public getMessages(): ChatMessage[] {
     return this.agent.getMessages();
+  }
+
+  public setMessages(messages: ChatMessage[]): void {
+    this.agent.setMessages(messages);
+  }
+
+  public compact(): number {
+    return this.agent.compactHistory();
   }
 
   public reset(): void {

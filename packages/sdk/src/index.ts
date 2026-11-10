@@ -1,6 +1,7 @@
 export { Recode, RecodeClientOptions } from "./client.js";
 export { Session, SessionOptions } from "./session.js";
 export { RecodeAuth, AuthStatus } from "./auth.js";
+export { ChatStore, SavedChat, ChatMetadata, CollabClient, CollabMessage } from "@recode-dev/core";
 
 // Re-export core types for developer convenience
 export {

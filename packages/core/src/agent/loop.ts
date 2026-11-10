@@ -29,6 +29,7 @@ export interface AgentOptions {
   maxTurns?: number;
   customTools?: Record<string, Tool>;
   systemPrompt?: string;
+  initialMessages?: ChatMessage[];
   signal?: AbortSignal;
 }
 
@@ -70,15 +71,67 @@ export class Agent {
       }
     }
 
-    // Initialize system message
-    this.messages.push({
-      role: "system",
-      content: this.systemPrompt,
-    });
+    // Initialize messages
+    if (options.initialMessages && options.initialMessages.length > 0) {
+      this.messages = [...options.initialMessages];
+    } else {
+      this.messages.push({
+        role: "system",
+        content: this.systemPrompt,
+      });
+    }
   }
 
   public getMessages(): ChatMessage[] {
     return [...this.messages];
+  }
+
+  public setMessages(messages: ChatMessage[]): void {
+    this.messages = [...messages];
+    if (this.messages.length === 0 || this.messages[0].role !== "system") {
+      this.messages.unshift({
+        role: "system",
+        content: this.systemPrompt,
+      });
+    }
+  }
+
+  public compactHistory(): number {
+    const originalCount = this.messages.length;
+    if (originalCount <= 4) return 0;
+
+    const systemMsg = this.messages.find((m) => m.role === "system") || {
+      role: "system" as const,
+      content: this.systemPrompt,
+    };
+
+    // Keep the most recent 4 non-system messages
+    const recent = this.messages.slice(-4);
+    const older = this.messages.slice(1, -4);
+
+    let summaryText = "[Summary of earlier conversation turns]\n";
+    for (const m of older) {
+      if (m.role === "user") {
+        summaryText += `- User asked: ${m.content.slice(0, 120)}\n`;
+      } else if (m.role === "assistant" && m.content) {
+        summaryText += `- Recode response: ${m.content.slice(0, 120)}...\n`;
+      }
+    }
+
+    this.messages = [
+      systemMsg,
+      {
+        role: "user",
+        content: summaryText,
+      },
+      {
+        role: "assistant",
+        content: "Understood. I have preserved context from our earlier turns.",
+      },
+      ...recent,
+    ];
+
+    return originalCount - this.messages.length;
   }
 
   public getTools(): Tool[] {
