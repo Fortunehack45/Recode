@@ -19,6 +19,8 @@ import { FontManager, BorderStyleType, MascotStyleType } from "./font.js";
 import { LiveActionIndicator } from "./action_state.js";
 import { NativeInputBox } from "./input.js";
 
+export const RECODE_VERSION = "1.30.4";
+
 export type AgentMode = "build" | "plan";
 
 export interface ReplOptions {
@@ -93,7 +95,7 @@ export class Repl {
 
     console.clear();
     const status = this.recode.status();
-    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
+    UI.printHeader(status, this.workspaceDir, this.currentModel, this.mode, RECODE_VERSION, this.session.id);
 
     // If no provider key is configured, show onboarding connect card right away
     const hasAnyKey = Object.values(status.providers).some((p) => p.configured);
@@ -199,7 +201,7 @@ export class Repl {
   }
 
   private async showWelcomeSplash(): Promise<void> {
-    UI.printWelcomeSplash("1.30.3");
+    UI.printWelcomeSplash(RECODE_VERSION);
     const rl = readline.createInterface({ input, output });
     await rl.question("");
     rl.close();
@@ -284,7 +286,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3",
+          RECODE_VERSION,
           this.session.id
         );
         break;
@@ -296,7 +298,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3"
+          RECODE_VERSION
         );
         break;
 
@@ -305,6 +307,7 @@ export class Repl {
         await this.handleTheme(args);
         break;
 
+      case "font":
       case "font":
         await this.handleFont(args);
         break;
@@ -334,7 +337,7 @@ export class Repl {
 
       case "version":
       case "v":
-        console.log(`recode v1.30.3\n`);
+        console.log(`recode v${RECODE_VERSION}\n`);
         break;
 
       case "models": {
@@ -393,7 +396,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3",
+          RECODE_VERSION,
           this.session.id
         );
         break;
@@ -462,7 +465,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3",
+          RECODE_VERSION,
           this.session.id
         );
       } else {
@@ -486,7 +489,7 @@ export class Repl {
         this.workspaceDir,
         this.currentModel,
         this.mode,
-        "1.30.3",
+        RECODE_VERSION,
         this.session.id
       );
     } else {
@@ -514,7 +517,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3",
+          RECODE_VERSION,
           this.session.id
         );
         return;
@@ -532,7 +535,7 @@ export class Repl {
           this.workspaceDir,
           this.currentModel,
           this.mode,
-          "1.30.3",
+          RECODE_VERSION,
           this.session.id
         );
         return;
@@ -560,7 +563,7 @@ export class Repl {
         this.workspaceDir,
         this.currentModel,
         this.mode,
-        "1.30.3",
+        RECODE_VERSION,
         this.session.id
       );
       return;
@@ -588,7 +591,7 @@ export class Repl {
         this.workspaceDir,
         this.currentModel,
         this.mode,
-        "1.30.3",
+        RECODE_VERSION,
         this.session.id
       );
       return;
@@ -641,7 +644,7 @@ export class Repl {
       this.currentModel = "ollama-local";
       this.session = this.createConfiguredSession();
       console.log(this.theme.success(`\n  [✓] Configured local Ollama! Active model set to ollama-local.\n`));
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, RECODE_VERSION, this.session.id);
       return;
     }
 
@@ -668,7 +671,7 @@ export class Repl {
     console.log(
       this.theme.success(`  [✓] Active model automatically set to ${this.theme.bold(this.currentModel)}.\n`)
     );
-    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
+    UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, RECODE_VERSION, this.session.id);
   }
 
   private async handleLogin(): Promise<void> {
@@ -711,7 +714,7 @@ export class Repl {
       );
 
       UI.printDeviceAuthSuccess(auth.user.login);
-      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, "1.30.3", this.session.id);
+      UI.printHeader(this.recode.status(), this.workspaceDir, this.currentModel, this.mode, RECODE_VERSION, this.session.id);
     } catch (err: any) {
       console.log(this.theme.error(`\n  [x] GitHub Login Failed: ${err.message}\n`));
     }
