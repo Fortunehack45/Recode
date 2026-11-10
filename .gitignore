@@ -3,6 +3,7 @@
 **/cargo-target
 **/target
 .webrtc-sys/
+temp_release_artifacts/
 **/venv
 **/.direnv
 *.wasm

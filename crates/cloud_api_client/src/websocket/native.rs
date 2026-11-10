@@ -74,8 +74,8 @@ impl CloudApiClient {
             .map_err(|e| anyhow!("failed to parse websocket connect url: {e}"))?;
         connect_url
             .set_scheme(match connect_url.scheme() {
-                "https" => "wss",
-                "http" => "ws",
+                "https" | "wss" => "wss",
+                "http" | "ws" => "ws",
                 scheme => Err(anyhow!("invalid URL scheme: {scheme}"))?,
             })
             .map_err(|_| anyhow!("failed to set URL scheme"))?;

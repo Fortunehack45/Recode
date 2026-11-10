@@ -232,7 +232,7 @@ impl UserStore {
                                     .cloud_client()
                                     .get_authenticated_user(system_id)
                                     .await
-                                    .log_err();
+                                    .ok();
 
                                 let current_user_and_response = if let Some(response) = response {
                                     let user = Arc::new(User {

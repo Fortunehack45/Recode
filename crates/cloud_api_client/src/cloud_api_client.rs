@@ -108,10 +108,13 @@ impl CloudApiClient {
         &self,
         system_id: Option<String>,
     ) -> Result<GetAuthenticatedUserResponse, ClientApiError> {
+        let Some(cloud_url) = std::env::var("RECODE_CLOUD_URL").ok() else {
+            return Err(ClientApiError::RequestBuildFailed(anyhow::anyhow!("cloud api disabled")));
+        };
         let request_builder = Request::builder()
             .method(Method::GET)
             .uri(
-                Ok::<_, anyhow::Error>(http_client::Url::parse("http://127.0.0.1").unwrap())
+                http_client::Url::parse(&format!("{}/client/users/me", cloud_url))
                     .map_err(ClientApiError::RequestBuildFailed)?
                     .as_ref(),
             )
