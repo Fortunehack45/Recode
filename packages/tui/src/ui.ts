@@ -509,7 +509,7 @@ export class UI {
       { cmd: "/mode [build|plan]", desc: "Toggle between Build (read/write/exec) and Plan (read-only)" },
       { cmd: "/model [name]", desc: "Switch AI model (e.g. gemini-2.5-flash, claude-3-7-sonnet)" },
       { cmd: "/models", desc: "List all supported models across all providers" },
-      { cmd: "/connect [provider] [key]", desc: "Set API keys (Gemini, OpenAI, Claude, DeepSeek, Groq)" },
+      { cmd: "/connect [provider] [key]", desc: "Set API keys (OpenCode, Gemini, OpenAI, Claude, DeepSeek)" },
       { cmd: "/status", desc: "Show Git status in current workspace" },
       { cmd: "/diff", desc: "Show pending Git diff changes" },
       { cmd: "/clear", desc: "Clear screen and reset conversation history" },
@@ -538,12 +538,13 @@ export class UI {
     console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Connect an AI Provider (BYOK — Bring Your Own Key)"))} ${theme.accent(glyphs.horiz.repeat(20) + glyphs.tr)}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("Recode is 100% provider-agnostic. Connect your preferred key:")}`);
     console.log(`  ${theme.border(glyphs.vert)}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[1] Google Gemini"))}     ${theme.dim("gemini-2.5-flash, gemini-2.5-pro (Generous free tier, 1M ctx)")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[2] OpenAI"))}            ${theme.dim("gpt-4o, gpt-4o-mini, o3-mini")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[3] Anthropic Claude"))}  ${theme.dim("claude-3-7-sonnet, claude-3-5-sonnet")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[4] DeepSeek"))}          ${theme.dim("deepseek-chat (V3), deepseek-reasoner (R1)")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[5] Groq"))}              ${theme.dim("llama-3.3-70b (Ultra-fast LPUs)")}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[6] Ollama (Local)"))}    ${theme.dim("100% private & offline models on your machine")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[1] OpenCode API"))}     ${theme.dim("opencode-zen, opencode-go, glm-5, deepseek, sonnet")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[2] Google Gemini"))}     ${theme.dim("gemini-2.5-flash, gemini-2.5-pro (Generous free tier, 1M ctx)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[3] OpenAI"))}            ${theme.dim("gpt-4o, gpt-4o-mini, o3-mini")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[4] Anthropic Claude"))}  ${theme.dim("claude-3-7-sonnet, claude-3-5-sonnet")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[5] DeepSeek"))}          ${theme.dim("deepseek-chat (V3), deepseek-reasoner (R1)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[6] Groq"))}              ${theme.dim("llama-3.3-70b (Ultra-fast LPUs)")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[7] Ollama (Local)"))}    ${theme.dim("100% private & offline models on your machine")}`);
     console.log(`  ${theme.border(glyphs.vert)}`);
     console.log(`  ${theme.border(glyphs.vert)}  Run setup      : ${theme.accent("/connect")}`);
     console.log(`  ${theme.border(glyphs.vert)}  Direct connect : ${theme.accent("/connect <provider> <api_key>")}`);

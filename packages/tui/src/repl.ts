@@ -599,28 +599,33 @@ export class Repl {
 
   private async handleConnect(args: string[]): Promise<void> {
     let provider = args[0]?.toLowerCase();
+    if (provider === "opencode-api" || provider === "opencodeai") {
+      provider = "opencode";
+    }
     let key = args.slice(1).join(" ").trim();
     const rl = readline.createInterface({ input, output });
 
     // If no provider given, present an interactive choice
     if (!provider) {
       console.log(`\n  ${this.theme.bold(this.theme.text("Select an AI Provider to connect:"))}`);
-      console.log(`  [1] Google Gemini   ${this.theme.dim("(Generous free tier, 1M context — Recommended)")}`);
-      console.log(`  [2] OpenAI          ${this.theme.dim("(GPT-4o, o3-mini)")}`);
-      console.log(`  [3] Anthropic       ${this.theme.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
-      console.log(`  [4] DeepSeek        ${this.theme.dim("(DeepSeek V3, DeepSeek R1)")}`);
-      console.log(`  [5] Groq            ${this.theme.dim("(Llama 3.3 70B - ultra fast)")}`);
-      console.log(`  [6] Local Ollama    ${this.theme.dim("(100% Free & offline local AI)")}`);
+      console.log(`  [1] OpenCode API    ${this.theme.dim("(OpenCode Zen, Go, GLM-5, DeepSeek, Sonnet — Fast)")}`);
+      console.log(`  [2] Google Gemini   ${this.theme.dim("(Generous free tier, 1M context — Recommended)")}`);
+      console.log(`  [3] OpenAI          ${this.theme.dim("(GPT-4o, o3-mini)")}`);
+      console.log(`  [4] Anthropic       ${this.theme.dim("(Claude 3.7 / 3.5 Sonnet)")}`);
+      console.log(`  [5] DeepSeek        ${this.theme.dim("(DeepSeek V3, DeepSeek R1)")}`);
+      console.log(`  [6] Groq            ${this.theme.dim("(Llama 3.3 70B - ultra fast)")}`);
+      console.log(`  [7] Local Ollama    ${this.theme.dim("(100% Free & offline local AI)")}`);
       console.log(`  [0] Cancel\n`);
 
-      const choice = (await rl.question(this.theme.accent("  Select [1-6]: "))).trim();
+      const choice = (await rl.question(this.theme.accent("  Select [1-7]: "))).trim();
       const choiceMap: Record<string, string> = {
-        "1": "gemini",
-        "2": "openai",
-        "3": "anthropic",
-        "4": "deepseek",
-        "5": "groq",
-        "6": "ollama",
+        "1": "opencode",
+        "2": "gemini",
+        "3": "openai",
+        "4": "anthropic",
+        "5": "deepseek",
+        "6": "groq",
+        "7": "ollama",
       };
 
       provider = choiceMap[choice];

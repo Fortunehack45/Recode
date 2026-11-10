@@ -104,4 +104,20 @@ test("UI renders welcome splash and dashboard cards cleanly", () => {
   UI.printFontMenu();
   UI.printColorPalette();
   UI.printHelp();
+  UI.printConnectMenu();
+  UI.printModelCatalog(
+    {
+      "opencode-zen": {
+        id: "zen",
+        name: "OpenCode Zen (Recode)",
+        provider: "opencode",
+        contextWindow: 200000,
+        supportsTools: true,
+        supportsStreaming: true,
+        description: "OpenCode flagship reasoning & agentic coding model.",
+      },
+    },
+    "opencode-zen",
+    { opencode: { configured: true } }
+  );
 });

@@ -120,10 +120,85 @@ export const DEFAULT_MODELS: Record<string, ModelInfo> = {
     supportsStreaming: true,
     description: "100% offline private local LLM running on your GPU/CPU.",
   },
+
+  // OpenCode API
+  "opencode-zen": {
+    id: "claude-sonnet-4-5",
+    name: "OpenCode Zen (Claude Sonnet 4.5)",
+    provider: "opencode",
+    contextWindow: 1000000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "OpenCode flagship reasoning & agentic coding model.",
+  },
+  "opencode-go": {
+    id: "deepseek-v4.1-flash",
+    name: "OpenCode Go (DeepSeek V4.1)",
+    provider: "opencode",
+    contextWindow: 1000000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "OpenCode high-throughput ultra-low latency coding model.",
+  },
+  "opencode-glm-5": {
+    id: "glm-5.2",
+    name: "OpenCode GLM 5.2",
+    provider: "opencode",
+    contextWindow: 1000000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "Open flagship GLM for long-horizon coding tasks via OpenCode.",
+  },
+  "opencode-deepseek": {
+    id: "deepseek-v4.1-flash",
+    name: "OpenCode DeepSeek V4.1",
+    provider: "opencode",
+    contextWindow: 1000000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "DeepSeek V4.1 Flash agentic coding model via OpenCode.",
+  },
+  "opencode-deepseek-free": {
+    id: "deepseek-v4.1-flash-free",
+    name: "OpenCode DeepSeek V4.1 Free",
+    provider: "opencode",
+    contextWindow: 200000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "Free-tier DeepSeek V4.1 Flash via OpenCode.",
+  },
+  "opencode-qwen-coder": {
+    id: "qwen3-coder",
+    name: "OpenCode Qwen 3 Coder",
+    provider: "opencode",
+    contextWindow: 262144,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "High-performance coding specialist model via OpenCode.",
+  },
+  "opencode-sonnet": {
+    id: "claude-sonnet-4-5",
+    name: "OpenCode Claude Sonnet 4.5",
+    provider: "opencode",
+    contextWindow: 1000000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "Claude Sonnet 4.5 routed through high-speed OpenCode inference.",
+  },
+  "opencode-gpt-5": {
+    id: "gpt-5.2",
+    name: "OpenCode GPT-5.2",
+    provider: "opencode",
+    contextWindow: 400000,
+    supportsTools: true,
+    supportsStreaming: true,
+    description: "OpenAI GPT-5.2 routed through OpenCode inference.",
+  },
 };
 
 export const PROVIDER_DEFAULT_MODELS: Record<string, string> = {
   gemini: "gemini-2.5-flash",
+  opencode: "opencode-zen",
   openai: "gpt-4o",
   anthropic: "claude-3-7-sonnet",
   deepseek: "deepseek-chat",
@@ -139,6 +214,7 @@ export function getBestAvailableModel(providers?: Record<string, string | undefi
   };
 
   if (check("gemini")) return DEFAULT_MODELS["gemini-2.5-flash"];
+  if (check("opencode")) return DEFAULT_MODELS["opencode-zen"];
   if (check("openai")) return DEFAULT_MODELS["gpt-4o"];
   if (check("anthropic")) return DEFAULT_MODELS["claude-3-7-sonnet"];
   if (check("deepseek")) return DEFAULT_MODELS["deepseek-chat"];
@@ -166,6 +242,38 @@ export function resolveModel(
   // Exact match on alias key
   if (DEFAULT_MODELS[modelAliasOrId]) {
     return DEFAULT_MODELS[modelAliasOrId];
+  }
+
+  // OpenCode aliases
+  const lower = modelAliasOrId.toLowerCase();
+  if (lower === "opencode" || lower === "zen" || lower === "recode") {
+    return DEFAULT_MODELS["opencode-zen"];
+  }
+  if (lower === "go" || lower === "opencode-go") {
+    return DEFAULT_MODELS["opencode-go"];
+  }
+
+  // OpenCode prefix support (e.g. "opencode/zen", "opencode/go", "opencode/glm-5.2", "opencode/claude-sonnet-4-5")
+  if (lower.startsWith("opencode/")) {
+    const rawId = modelAliasOrId.substring("opencode/".length);
+    for (const [alias, m] of Object.entries(DEFAULT_MODELS)) {
+      if (
+        m.provider === "opencode" &&
+        (m.id.toLowerCase() === rawId.toLowerCase() ||
+          alias.toLowerCase() === `opencode-${rawId.toLowerCase()}`)
+      ) {
+        return m;
+      }
+    }
+    return {
+      id: rawId,
+      name: `OpenCode (${rawId})`,
+      provider: "opencode",
+      contextWindow: 128000,
+      supportsTools: true,
+      supportsStreaming: true,
+      description: `OpenCode API model: ${rawId}`,
+    };
   }
 
   // Check by model ID

@@ -2,6 +2,7 @@ export type ProviderName =
   | "anthropic"
   | "openai"
   | "gemini"
+  | "opencode"
   | "openrouter"
   | "deepseek"
   | "groq"

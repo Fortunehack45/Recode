@@ -29,7 +29,7 @@ ${theme.bold(theme.text("Commands:"))}
   ${theme.accent("auth status")}                 Show current GitHub & API provider status
   ${theme.accent("auth login")}                  Authenticate with GitHub (Device Flow or PAT)
   ${theme.accent("auth logout")}                 Clear GitHub authentication
-  ${theme.accent("auth set-key <p> <key>")}      Store API key for provider (e.g. anthropic, gemini)
+  ${theme.accent("auth set-key <p> <key>")}      Store API key for provider (e.g. opencode, gemini, anthropic)
   ${theme.accent("models")}                      List available AI models
   ${theme.accent("version")}                     Print version (${VERSION})
 
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
     const key = positional.slice(2).join(" ").trim();
     if (!provider || !key) {
       console.log(c.yellow("Usage: recode connect <provider> <api_key>"));
-      console.log(c.dim("Example: recode connect gemini AIzaSy..."));
+      console.log(c.dim("Example: recode connect opencode <key> or recode connect gemini <key>"));
       process.exit(1);
     }
     RecodeAuth.setApiKey(provider, key);

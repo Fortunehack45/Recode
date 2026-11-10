@@ -11,7 +11,9 @@ export class LLMClient {
   }
 
   public getApiKey(provider: string): string | undefined {
-    return this.providers[provider.toLowerCase()];
+    const raw = this.providers[provider.toLowerCase()];
+    if (!raw) return undefined;
+    return raw.trim().replace(/[\r\n\t]/g, "").replace(/^['"]|['"]$/g, "").replace(/^Bearer\s+/i, "");
   }
 
   public async *streamChat(
@@ -215,6 +217,22 @@ export class LLMClient {
     } else if (provider === "gemini") {
       apiKey = this.getApiKey("gemini");
       endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+    } else if (provider === "opencode") {
+      apiKey = this.getApiKey("opencode") || process.env.OPENCODE_API_KEY;
+      const customBase = process.env.OPENCODE_API_URL || process.env.RECODE_OPENCODE_URL;
+      if (customBase) {
+        endpoint = customBase.endsWith("/chat/completions")
+          ? customBase
+          : `${customBase.replace(/\/v1\/?$/, "")}/v1/chat/completions`;
+      } else if (
+        modelInfo.id.startsWith("go/") ||
+        modelInfo.id === "go" ||
+        modelInfo.name.toLowerCase().includes("opencode go")
+      ) {
+        endpoint = "https://opencode.ai/inference/go/openai/v1/chat/completions";
+      } else {
+        endpoint = "https://opencode.ai/inference/openai/v1/chat/completions";
+      }
     } else if (provider === "ollama") {
       const baseUrl = this.providers.ollama_base_url || "http://localhost:11434";
       endpoint = `${baseUrl}/v1/chat/completions`;
@@ -236,6 +254,10 @@ export class LLMClient {
     if (provider === "openrouter") {
       headers["HTTP-Referer"] = "https://recode.dev";
       headers["X-Title"] = "Recode Terminal";
+    } else if (provider === "opencode") {
+      headers["HTTP-Referer"] = "https://recode.dev";
+      headers["X-Title"] = "Recode Terminal Agent";
+      headers["x-opencode-session"] = `recode-${Date.now()}`;
     }
 
     // Format tools for OpenAI
@@ -290,6 +312,13 @@ export class LLMClient {
 
     if (!response.ok) {
       const errText = await response.text();
+      if (response.status === 401 && provider === "opencode") {
+        throw new Error(
+          `OpenCode authentication failed (401: Invalid credential).\n` +
+          `  Sign in and retrieve your API key from the OpenCode Console: https://opencode.ai/auth\n` +
+          `  Then set your key in Recode: /connect opencode <key>`
+        );
+      }
       throw new Error(`${provider} API error (${response.status}): ${errText}`);
     }
 

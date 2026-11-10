@@ -20,6 +20,7 @@ export interface ProviderKeys {
   anthropic?: string;
   openai?: string;
   gemini?: string;
+  opencode?: string;
   openrouter?: string;
   deepseek?: string;
   groq?: string;
@@ -81,6 +82,7 @@ export class AuthStore {
       anthropic: process.env.ANTHROPIC_API_KEY || data.providers?.anthropic,
       openai: process.env.OPENAI_API_KEY || data.providers?.openai,
       gemini: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || data.providers?.gemini,
+      opencode: process.env.OPENCODE_API_KEY || data.providers?.opencode,
       openrouter: process.env.OPENROUTER_API_KEY || data.providers?.openrouter,
       deepseek: process.env.DEEPSEEK_API_KEY || data.providers?.deepseek,
       groq: process.env.GROQ_API_KEY || data.providers?.groq,
@@ -106,7 +108,8 @@ export class AuthStore {
     let default_model = data.default_model;
 
     if (!default_provider) {
-      if (providers.gemini) default_provider = "gemini";
+      if (providers.opencode) default_provider = "opencode";
+      else if (providers.gemini) default_provider = "gemini";
       else if (providers.openai) default_provider = "openai";
       else if (providers.anthropic) default_provider = "anthropic";
       else if (providers.deepseek) default_provider = "deepseek";
@@ -117,6 +120,7 @@ export class AuthStore {
 
     if (!default_model && default_provider) {
       const canonicalMap: Record<string, string> = {
+        opencode: "opencode-zen",
         gemini: "gemini-2.5-flash",
         openai: "gpt-4o",
         anthropic: "claude-3-7-sonnet",
@@ -166,9 +170,11 @@ export class AuthStore {
   public static setProviderKey(provider: string, key: string): void {
     const config = this.load();
     const p = provider.toLowerCase();
-    config.providers[p] = key;
+    const cleanedKey = key.trim().replace(/[\r\n\t]/g, "").replace(/^['"]|['"]$/g, "").replace(/^Bearer\s+/i, "");
+    config.providers[p] = cleanedKey;
     config.default_provider = p;
     const canonicalMap: Record<string, string> = {
+      opencode: "opencode-zen",
       gemini: "gemini-2.5-flash",
       openai: "gpt-4o",
       anthropic: "claude-3-7-sonnet",
