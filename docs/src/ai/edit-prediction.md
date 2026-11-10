@@ -19,7 +19,7 @@ For privacy and training data details, see
 To use Zeta, [sign in](../authentication.md#what-features-require-signing-in).
 Once signed in, predictions appear as you type.
 
-You can confirm that Zeta is properly configured by opening the [Settings Editor](zed://settings/edit_predictions.providers) (`Cmd+,` on macOS or `Ctrl+,` on Linux/Windows) and searching for `edit_predictions`. The `provider` field should be set to `Zed AI`.
+You can confirm that Zeta is properly configured by opening the [Settings Editor](recode://settings/edit_predictions.providers) (`Cmd+,` on macOS or `Ctrl+,` on Linux/Windows) and searching for `edit_predictions`. The `provider` field should be set to `Zed AI`.
 
 Or verify this in your settings.json:
 
@@ -182,7 +182,7 @@ Alternatively, consider [using Subtle Mode](#switching-modes).
 
 ### On Buffers
 
-To not have predictions appear automatically as you type, set this in your settings file ([how to edit](../configuring-zed.md#settings-files)):
+To not have predictions appear automatically as you type, set this in your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {
@@ -195,7 +195,7 @@ Still, you can trigger edit predictions manually by executing {#action editor::S
 
 ### For Specific Languages
 
-To not have predictions appear automatically as you type when working with a specific language, set this in your settings file ([how to edit](../configuring-zed.md#settings-files)):
+To not have predictions appear automatically as you type when working with a specific language, set this in your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {
@@ -209,7 +209,7 @@ To not have predictions appear automatically as you type when working with a spe
 
 ### In Specific Directories
 
-To disable edit predictions for specific directories or files, set this in your settings file ([how to edit](../configuring-zed.md#settings-files)):
+To disable edit predictions for specific directories or files, set this in your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {
@@ -237,7 +237,7 @@ Edit Prediction also works with other providers.
 
 ### GitHub Copilot {#github-copilot}
 
-To use GitHub Copilot as your provider, set this in your settings file ([how to edit](../configuring-zed.md#settings-files)):
+To use GitHub Copilot as your provider, set this in your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {
@@ -251,7 +251,7 @@ To sign in to GitHub Copilot, click on the Copilot icon in the status bar. A pop
 
 #### Using GitHub Copilot Enterprise
 
-If your organization uses GitHub Copilot Enterprise, you can configure Zed to use your enterprise instance by specifying the enterprise URI in your settings file ([how to edit](../configuring-zed.md#settings-files)):
+If your organization uses GitHub Copilot Enterprise, you can configure Zed to use your enterprise instance by specifying the enterprise URI in your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {

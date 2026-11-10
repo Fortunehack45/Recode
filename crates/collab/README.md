@@ -43,7 +43,7 @@ foreman start
 In a second terminal, run two or more instances of Zed.
 
 ```sh
-script/zed-local -2
+script/recode-local -2
 ```
 
 This script starts one to four instances of Zed, depending on the `-2`, `-3` or `-4` flags. Each instance will be connected to the local `collab` server, signed in as a different user from `seed.json` or `seed.default.json`.

@@ -20,7 +20,7 @@ pub struct OpenBrowser {
     pub url: Arc<str>,
 }
 
-/// Opens a zed:// URL within the application.
+/// Opens a recode:// URL within the application.
 #[derive(Clone, PartialEq, Deserialize, JsonSchema, Action)]
 #[action(namespace = recode, deprecated_aliases = ["zed::OpenZedUrl"])]
 #[serde(deny_unknown_fields)]

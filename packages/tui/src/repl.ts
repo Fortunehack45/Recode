@@ -21,7 +21,7 @@ import { FontManager, BorderStyleType, MascotStyleType } from "./font.js";
 import { LiveActionIndicator } from "./action_state.js";
 import { NativeInputBox } from "./input.js";
 
-export const RECODE_VERSION = "1.30.4";
+export const RECODE_VERSION = "1.30.5";
 
 export type AgentMode = "build" | "plan";
 

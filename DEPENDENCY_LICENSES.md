@@ -9,7 +9,7 @@ Audit of workspace member crates, external Cargo dependencies, npm dependencies,
   - Framework / Infrastructure (e.g. `gpui`, `collections`, `sum_tree`, `util`, `scheduler`): `Apache-2.0`.
 - **External Third-Party Crates in `Cargo.lock`**: 1319 dependencies.
 - **Flagged Copyleft Issues**: **0 unexpected copyleft issues**.
-  - `zed-licenses.toml` strictly whitelists non-copyleft / permissive licenses: `Apache-2.0`, `MIT`, `MIT-0`, `MPL-2.0`, `BSD-3-Clause`, `BSD-2-Clause`, `ISC`, `CC0-1.0`, `Unicode-3.0`, `OpenSSL`, `Zlib`, `BSL-1.0`, `CDLA-Permissive-2.0`.
+  - `recode-licenses.toml` strictly whitelists non-copyleft / permissive licenses: `Apache-2.0`, `MIT`, `MIT-0`, `MPL-2.0`, `BSD-3-Clause`, `BSD-2-Clause`, `ISC`, `CC0-1.0`, `Unicode-3.0`, `OpenSSL`, `Zlib`, `BSL-1.0`, `CDLA-Permissive-2.0`.
   - **AGPL**: Specifically forbidden by Zed policy (`# Licenses allowed in Zed's dependencies. AGPL should not be added to this list.`). Verified: **No AGPL dependencies present**.
 
 ## 2. Workspace Crates (Total: 258)

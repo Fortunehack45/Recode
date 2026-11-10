@@ -1,5 +1,5 @@
 ---
-title: AI Coding Agent - Zed Agent Panel
+title: AI Coding Agent - Recode Agent Panel
 description: Use Zed's AI coding agent to generate, refactor, and debug code with tool calling and multi-model support.
 ---
 
@@ -12,9 +12,9 @@ Open it with {#action agent::NewThread} from [the Command Palette](../command-pa
 
 ## Getting Started {#getting-started}
 
-If you're using the Agent Panel for the first time, configure either a model for the [Zed Agent](./zed-agent.md) or an [External Agent](./external-agents.md).
+If you're using the Agent Panel for the first time, configure either a model for the [Recode Agent](./recode-agent.md) or an [External Agent](./external-agents.md).
 
-- Use [LLM Providers](./llm-providers.md) for Zed-hosted models, API access, subscriptions, gateways, and local models.
+- Use [LLM Providers](./llm-providers.md) for Recode-hosted models, API access, subscriptions, gateways, and local models.
 - Use [External Agents](./external-agents.md) for ACP-integrated agents.
 - Use [AI Quick Start](./quick-start.md) if you are not sure which path to choose.
 
@@ -37,8 +37,8 @@ Start a new thread with {#kb agent::NewThread}, or open the "New Thread…" menu
 
 From the "New Thread…" menu you can:
 
-- Pick **Zed Agent** or any installed [External Agent](./external-agents.md) to start a new thread with that agent.
-- Choose **New From Summary** to start a fresh Zed Agent thread seeded with a summary of the current conversation — useful for compacting long threads as you approach the context window limit.
+- Pick **Recode Agent** or any installed [External Agent](./external-agents.md) to start a new thread with that agent.
+- Choose **New From Summary** to start a fresh Recode Agent thread seeded with a summary of the current conversation — useful for compacting long threads as you approach the context window limit.
 - Choose **Terminal** to open a terminal thread directly in the Agent Panel — see [Terminal Threads](#terminal-threads) for details.
 
 {#action agent::NewExternalAgentThread} creates a new thread with the specified External Agent id.
@@ -64,7 +64,7 @@ You can click on the card that contains your message and re-submit it with an ad
 
 Messages sent while the agent is in the generating state get, by default, queued.
 
-By default, queued messages get sent once the agent finishes generating. If you want a queued message to reach the Zed Agent sooner—interrupting it at its next step (usually between a tool call and a response) rather than waiting for it to finish—toggle "Steer" on that message. Steering is only available for the Zed Agent, since Zed can't detect turn boundaries for external agents.
+By default, queued messages get sent once the agent finishes generating. If you want a queued message to reach the Recode Agent sooner—interrupting it at its next step (usually between a tool call and a response) rather than waiting for it to finish—toggle "Steer" on that message. Steering is only available for the Recode Agent, since Zed can't detect turn boundaries for external agents.
 
 You can edit or remove (an individual or all) queued messages.
 You can also still interrupt the agent immediately if you want by either clicking on the stop button or by clicking the "Send Now" (double-enter) on a queued message.
@@ -89,7 +89,7 @@ When focus is in the message editor, you can also use {#kb agent::ScrollOutputPa
 
 Thread titles are auto-generated based on the content of the conversation.
 But you can also edit them manually by clicking the title and typing, or regenerate them by clicking the "Regenerate Thread Title" button in the ellipsis menu in the top right of the panel.
-To stop Zed Agent thread titles from being generated automatically, set `agent.auto_generate_thread_titles` to `false`. Threads then use the first line of your first message as their title.
+To stop Recode Agent thread titles from being generated automatically, set `agent.auto_generate_thread_titles` to `false`. Threads then use the first line of your first message as their title.
 
 ### Following the Agent {#following-the-agent}
 
@@ -156,7 +156,7 @@ Copying an image and pasting it is also supported.
 
 Zed surfaces how many tokens you are consuming for your currently active thread near the profile selector in the panel's message editor.
 
-Zed automatically compacts long Zed Agent threads as they approach the configured token threshold. Compaction summarizes earlier messages and replaces them in the model context with that summary, leaving more room for the next turn. The thread shows a **Context Compacted** entry that you can expand to inspect the summary. You can compact manually by typing `/compact` in the message editor.
+Zed automatically compacts long Recode Agent threads as they approach the configured token threshold. Compaction summarizes earlier messages and replaces them in the model context with that summary, leaving more room for the next turn. The thread shows a **Context Compacted** entry that you can expand to inspect the summary. You can compact manually by typing `/compact` in the message editor.
 
 If the selected model's context window is too small for automatic compaction (less than 80000 tokens), a banner appears above the message editor as you approach the token limit. Use **Start New Thread** from that banner, or choose **New From Summary** from the New Thread menu (the `+` button on the top right), to continue in a new thread seeded with a summary. You can also @-mention a past thread in a new one.
 
@@ -164,7 +164,7 @@ Configure automatic compaction with `agent.auto_compact`. See [Agent Settings](.
 
 ## Changing Models {#changing-models}
 
-After you've configured your LLM providers—either via [API access](./use-api-access.md) or through [Zed-hosted models](../account/zed-hosted-models.md)—you can switch between their models by clicking on the model selector on the message editor or by using the {#kb agent::ToggleModelSelector} keybinding.
+After you've configured your LLM providers—either via [API access](./use-api-access.md) or through [Recode-hosted models](../account/recode-hosted-models.md)—you can switch between their models by clicking on the model selector on the message editor or by using the {#kb agent::ToggleModelSelector} keybinding.
 
 > The same model can be offered via multiple providers - for example, Claude Sonnet 4.5 is available via Zed Pro, OpenRouter, Anthropic directly, and more.
 > Make sure you've selected the correct model **_provider_** for the model you'd like to use, delineated by the logo to the left of the model in the model selector.
@@ -179,7 +179,7 @@ Cycle through your favorites with {#kb agent::CycleFavoriteModels} without openi
 
 The Agent Panel supports tool calling, which enables agentic editing. Zed includes [built-in tools](./tools.md) for searching your codebase, editing files, running terminal commands, and more.
 
-Use [Agent Profiles](./agent-profiles.md) to choose which built-in tools and MCP tools are available in a Zed Agent thread. Use [Tool Permissions](./tool-permissions.md) to control whether permission-gated tool calls are allowed, denied, or confirmed.
+Use [Agent Profiles](./agent-profiles.md) to choose which built-in tools and MCP tools are available in a Recode Agent thread. Use [Tool Permissions](./tool-permissions.md) to control whether permission-gated tool calls are allowed, denied, or confirmed.
 
 You can add external tools with [MCP Servers](./mcp.md).
 
@@ -189,7 +189,7 @@ Tool calling needs to be individually supported by each model and model provider
 Therefore, despite the presence of built-in tools, some models may not have the ability to pick them up.
 You should see a "No tools" label if you select a model that falls into this case.
 
-All [Zed-hosted models](../account/zed-hosted-models.md) support tool calling out-of-the-box.
+All [Recode-hosted models](../account/recode-hosted-models.md) support tool calling out-of-the-box.
 
 ### MCP Servers {#mcp-servers}
 

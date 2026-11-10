@@ -11,7 +11,7 @@ Some subscriptions work as Zed model providers. Others are used through an Exter
 
 | Subscription                  | Zed AI features                                      | External Agent via ACP                | Terminal Thread                | Notes                                                            |
 | ----------------------------- | ---------------------------------------------------- | ------------------------------------- | ------------------------------ | ---------------------------------------------------------------- |
-| Zed Pro, Business, or Student | [Zed-hosted models](../account/zed-hosted-models.md) | No                                    | No                             | Billed through Zed                                               |
+| Zed Pro, Business, or Student | [Recode-hosted models](../account/recode-hosted-models.md) | No                                    | No                             | Billed through Zed                                               |
 | ChatGPT Plus / Pro            | ChatGPT Subscription                                 | Codex where supported                 | Codex CLI                      | Sign in with OpenAI in Zed; separate from OpenAI API keys        |
 | Claude Pro / Max              | No direct Zed LLM provider path                      | Claude Agent                          | Claude Code                    | Separate from Anthropic API keys                                 |
 | GitHub Copilot                | GitHub Copilot Chat; Copilot edit prediction         | Copilot agent where available         | CLI where available            | Requires Copilot/Copilot Chat auth                               |
@@ -40,7 +40,7 @@ If you use a Copilot agent or CLI, that setup is owned by Copilot. See [External
 
 ### GitHub Copilot Enterprise {#copilot-enterprise}
 
-To use your enterprise instance for Copilot Chat and edit predictions, add this to your settings file ([how to edit](../configuring-zed.md#settings-files)):
+To use your enterprise instance for Copilot Chat and edit predictions, add this to your settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {

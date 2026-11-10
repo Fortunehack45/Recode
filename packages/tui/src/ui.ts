@@ -38,7 +38,7 @@ export class UI {
    * Iconic 3D Isometric ASCII Banner matching Claude Code,
    * styled with Recode's high-contrast monochrome theme.
    */
-  public static printBanner(version = "1.30.4"): void {
+  public static printBanner(version = "1.30.5"): void {
     const theme = ThemeManager.get();
     const bannerLines = [
       "  ██████╗ ███████╗ ██████╗  ██████╗ ██████╗  ███████╗",
@@ -71,7 +71,7 @@ export class UI {
    * Pill + 3D Isometric ASCII RECODE Banner + Security Notes.
    * Clears entire scrollback buffer and leaves welcome screen cleanly on display.
    */
-  public static printWelcomeSplash(version = "1.30.4", showPrompt = false): void {
+  public static printWelcomeSplash(version = "1.30.5", showPrompt = false): void {
     const theme = ThemeManager.get();
     this.clearScreen();
     console.log();
@@ -102,7 +102,7 @@ export class UI {
     workspaceDir: string,
     currentModel: string,
     mode: "build" | "plan" = "build",
-    version = "1.30.4"
+    version = "1.30.5"
   ): void {
     const theme = ThemeManager.get();
     const font = FontManager.get();
@@ -269,7 +269,7 @@ export class UI {
     _workspaceDir?: string,
     _currentModel?: string,
     _mode: "build" | "plan" = "build",
-    _version = "1.30.4",
+    _version = "1.30.5",
     _sessionId = "session_main"
   ): void {
     console.log();

@@ -6,12 +6,12 @@ description: Understand how Zed handles AI prompts, code context, hosted model r
 # AI Privacy
 
 This page explains the privacy and trust boundaries for AI features in Zed,
-including [Zed Agent](./zed-agent.md), [Edit Prediction](./edit-prediction.md),
+including [Recode Agent](./recode-agent.md), [Edit Prediction](./edit-prediction.md),
 [Inline Assistant](./inline-assistant.md), and
 [Git commit generation](../git.md#ai-support-in-git).
 
 Zed does not retain your prompts or code context by default. For
-[Zed-hosted models](../account/zed-hosted-models.md), Zed has no-training
+[Recode-hosted models](../account/recode-hosted-models.md), Zed has no-training
 commitments from model providers, and provider agreements require zero data
 retention for inference requests except for
 [provider-designated models with safety retention](#provider-safety-retention),
@@ -23,7 +23,7 @@ training data collection.
 
 | Path                                                         | Who handles model requests                        | What to know                                                                                                                                                                                                                   | Details                                                                                           |
 | ------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| [Zed-hosted models](../account/zed-hosted-models.md)         | Zed routes requests to hosted model providers     | Provider agreements prohibit training on your prompts or code context and require zero data retention for inference requests, except for provider-designated models with safety retention, such as Anthropic's Covered Models. | [Zed-hosted model commitments](#data-retention-and-training)                                      |
+| [Recode-hosted models](../account/recode-hosted-models.md)         | Zed routes requests to hosted model providers     | Provider agreements prohibit training on your prompts or code context and require zero data retention for inference requests, except for provider-designated models with safety retention, such as Anthropic's Covered Models. | [Zed-hosted model commitments](#data-retention-and-training)                                      |
 | [Provider API keys](./use-api-access.md)                     | The configured provider                           | The provider handles requests under its own terms. Provider keys saved through Zed are stored in the system keychain, not in `settings.json`.                                                                                  | [Use API Access](./use-api-access.md)                                                             |
 | [Existing subscriptions](./use-an-existing-subscription.md)  | The subscription provider                         | The provider handles requests under the subscription terms.                                                                                                                                                                    | [Use an Existing Subscription](./use-an-existing-subscription.md)                                 |
 | [Gateways](./use-a-gateway.md)                               | The configured gateway and upstream providers     | The gateway and upstream providers handle requests under their own terms.                                                                                                                                                      | [Use a Gateway](./use-a-gateway.md)                                                               |
@@ -36,7 +36,7 @@ training data collection.
 
 ## Recode-Hosted Model Commitments {#data-retention-and-training}
 
-For Zed-hosted models, Zed has commitments from model providers that prohibit
+For Recode-hosted models, Zed has commitments from model providers that prohibit
 training on your prompts or code context and require zero data retention for
 inference requests, except for
 [provider-designated models with safety retention](#provider-safety-retention),
@@ -66,7 +66,7 @@ For these models:
 - Zed does not retain your prompts or outputs. Retention happens at the
   provider, under the provider's documented access controls and deletion
   timelines.
-- All other Zed-hosted models keep zero-data-retention handling.
+- All other Recode-hosted models keep zero-data-retention handling.
 
 If you don't want provider-side retention, use a model that the provider has
 not designated for safety retention. Switching to
@@ -95,7 +95,7 @@ can be stored in each opt-in case.
 - [Privacy for Business](../business/privacy.md): How Zed Business enforces
   privacy settings across an organization.
 - [Admin Controls](../business/admin-controls.md): How owners and admins control
-  Zed-hosted models, Edit Prediction, and feedback sharing.
+  Recode-hosted models, Edit Prediction, and feedback sharing.
 - [AI Quick Start](./quick-start.md#turn-ai-off): How to turn AI off.
 - [Privacy Policy](https://zed.dev/privacy-policy): Zed's privacy policy.
 - [Subprocessors](https://zed.dev/subprocessors): Zed's subprocessors.

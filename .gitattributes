@@ -9,4 +9,4 @@
 *.json text eol=lf
 *.md text eol=lf
 *.toml text eol=lf
-crates/zed/resources/windows/zed.sh text eol=lf
+crates/zed/resources/windows/recode.sh text eol=lf

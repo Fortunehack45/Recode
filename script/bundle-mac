@@ -227,8 +227,8 @@ function sign_app_binaries() {
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${app_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
+        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${app_path}" -v
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
 
@@ -241,9 +241,9 @@ function sign_app_binaries() {
         # - get a signing key for the MQ55VZLNZQ team from Nathan.
         # - create your own signing key, and update references to MQ55VZLNZQ to your own team ID
         # then comment out this line.
-        cat crates/zed/resources/zed.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/zed.entitlements"
+        cat crates/zed/resources/recode.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/recode.entitlements"
 
-        codesign --force --deep --entitlements "${app_path}/Contents/Resources/zed.entitlements" --sign ${MACOS_SIGNING_KEY:- -} "${app_path}" -v
+        codesign --force --deep --entitlements "${app_path}/Contents/Resources/recode.entitlements" --sign ${MACOS_SIGNING_KEY:- -} "${app_path}" -v
     fi
 
     bundle_name=$(basename "$app_path")
@@ -312,7 +312,7 @@ function sign_binary() {
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing executable $binary_path"
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/zed.entitlements --sign "$IDENTITY" "${binary_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${binary_path}" -v
     fi
 }
 

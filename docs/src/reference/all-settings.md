@@ -7081,7 +7081,7 @@ See [Agent Panel](#agent-panel) for width, flexible sizing, and Threads Sidebar 
 | `model_parameters`                     | `[]`                                            | Temperature overrides with optional provider/model filters; the last matching entry wins.             |
 | `tool_permissions.default`             | `"confirm"`                                     | Fallback tool permission: `"allow"`, `"deny"`, or `"confirm"`.                                        |
 | `tool_permissions.tools`               | `{}`                                            | Per-tool permissions and input-matching rules.                                                        |
-| `default_profile`                      | `"write"`                                       | Default Zed Agent profile.                                                                            |
+| `default_profile`                      | `"write"`                                       | Default Recode Agent profile.                                                                            |
 | `profiles`                             | Built-in `write`, `ask`, and `minimal` profiles | Named profiles controlling models and available tools.                                                |
 | `single_file_review`                   | `false`                                         | Show edit-review controls in individual files as well as the review multibuffer.                      |
 | `auto_compact.enabled`                 | `true`                                          | Summarize earlier messages automatically at the configured context threshold.                         |
@@ -7115,7 +7115,7 @@ Several of these settings have their own documentation with complete examples: [
 
 ### Subagent Model {#agent-subagent-model}
 
-- Description: The model, reasoning, and speed settings for new Zed Agent subagents. This setting does not configure external agents. See [Subagent Models](../ai/agent-settings.md#subagent-models).
+- Description: The model, reasoning, and speed settings for new Recode Agent subagents. This setting does not configure external agents. See [Subagent Models](../ai/agent-settings.md#subagent-models).
 - Setting: `agent.subagent_model`
 
 ## Context Servers {#context-servers}
@@ -7617,7 +7617,7 @@ For example, this uses One Light on Preview and disables middle-click paste on L
 }
 ```
 
-The [Per-Release Channel Overrides](../configuring-zed.md#per-release-channel-overrides) section has a longer example.
+The [Per-Release Channel Overrides](../configuring-recode.md#per-release-channel-overrides) section has a longer example.
 
 ## An example configuration:
 

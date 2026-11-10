@@ -99,7 +99,7 @@ test("LiveActionIndicator tracks real-time action states", () => {
 test("UI renders welcome splash, dashboard, history, chats, and channel cards cleanly", () => {
   // Verify UI static methods run without error
   UI.printBoxedPill("Test Pill");
-  UI.printBanner("1.30.4");
+  UI.printBanner("1.30.5");
   UI.printThemeGallery();
   UI.printFontMenu();
   UI.printColorPalette();

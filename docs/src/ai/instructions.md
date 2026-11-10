@@ -1,11 +1,11 @@
 ---
 title: Agent Instructions - Zed
-description: Configure always-on personal and project instructions for Zed Agent with AGENTS.md and compatible project instruction files.
+description: Configure always-on personal and project instructions for Recode Agent with AGENTS.md and compatible project instruction files.
 ---
 
 # Instructions
 
-Instructions are always-on context for the Zed Agent. Use instructions for persistent guidance that should apply to every relevant agent interaction.
+Instructions are always-on context for the Recode Agent. Use instructions for persistent guidance that should apply to every relevant agent interaction.
 
 Use [Skills](./skills.md) instead when you want reusable task instructions that can be invoked by name.
 
@@ -13,7 +13,7 @@ Zed supports [`AGENTS.md`](https://agents.md/) as the primary instruction file f
 
 ## Personal Instructions {#personal-instructions}
 
-Personal instructions apply to every project you open with the Zed Agent.
+Personal instructions apply to every project you open with the Recode Agent.
 
 Create or edit:
 
@@ -41,12 +41,12 @@ Project instructions override personal `AGENTS.md` when they conflict.
 
 ## Instruction File Support {#support}
 
-| File                              | [Zed Agent](./zed-agent.md)                            | [External Agents](./external-agents.md) | Terminal Threads                 |
+| File                              | [Recode Agent](./recode-agent.md)                            | [External Agents](./external-agents.md) | Terminal Threads                 |
 | --------------------------------- | ------------------------------------------------------ | --------------------------------------- | -------------------------------- |
 | `~/.config/zed/AGENTS.md`         | Loaded as personal instructions                        | Not generally used                      | Not used unless the CLI reads it |
 | Project `AGENTS.md`               | Loaded as project instructions                         | Depends on the agent                    | Depends on the CLI               |
-| `CLAUDE.md`                       | Loaded as compatible project instructions by Zed Agent | Claude reads natively                   | Claude Code CLI reads natively   |
-| `.github/copilot-instructions.md` | Loaded as compatible project instructions by Zed Agent | Depends on the agent                    | Depends on the CLI               |
+| `CLAUDE.md`                       | Loaded as compatible project instructions by Recode Agent | Claude reads natively                   | Claude Code CLI reads natively   |
+| `.github/copilot-instructions.md` | Loaded as compatible project instructions by Recode Agent | Depends on the agent                    | Depends on the CLI               |
 
 External Agents and [Terminal Threads](./terminal-threads.md) may read their own native instruction files directly. Do not assume Zed's instruction loader controls those agents.
 

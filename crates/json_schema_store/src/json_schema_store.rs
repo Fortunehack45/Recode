@@ -12,7 +12,7 @@ use project::{LspStore, lsp_store::LocalLspAdapterDelegate};
 use settings::{LSP_SETTINGS_SCHEMA_URL_PREFIX, Settings as _, SettingsLocation};
 use util::schemars::{AllowTrailingCommas, DefaultDenyUnknownFields};
 
-const SCHEMA_URI_PREFIX: &str = "zed://schemas/";
+const SCHEMA_URI_PREFIX: &str = "recode://schemas/";
 
 const TSCONFIG_SCHEMA: &str = include_str!("schemas/tsconfig.json");
 const PACKAGE_JSON_SCHEMA: &str = include_str!("schemas/package.json");
@@ -146,7 +146,6 @@ pub fn handle_schema_request(
     let path = match uri
         .strip_prefix(SCHEMA_URI_PREFIX)
         .or_else(|| uri.strip_prefix("recode://schemas/"))
-        .or_else(|| uri.strip_prefix("zed://schemas/"))
     {
         Some(path) => path,
         None => return Task::ready(Err(anyhow::anyhow!("Invalid schema URI: {}", uri))),

@@ -16,12 +16,12 @@ The Inline Assistant sends your current selection (or line) to a language model 
 If you're using the Inline Assistant for the first time, you need to have at least one [LLM provider](./llm-providers.md) configured.
 You can do that by:
 
-1. [using Zed-hosted models](../account/zed-hosted-models.md), so you have access to models billed through Zed
+1. [using Recode-hosted models](../account/recode-hosted-models.md), so you have access to models billed through Zed
 2. [using API access](./use-api-access.md), either from model providers like Anthropic or model gateways like OpenRouter.
 
 If you have already set up an LLM provider to interact with [the Agent Panel](./agent-panel.md#getting-started), then that will also work for the Inline Assistant.
 
-[External Agents](./external-agents.md) run in agent threads, but they are not available for Inline Assistant generations. The Inline Assistant uses Zed-configured [LLM providers](./llm-providers.md), including Zed-hosted models, provider API keys, gateways, [local models](./use-a-local-model.md), and supported subscriptions.
+[External Agents](./external-agents.md) run in agent threads, but they are not available for Inline Assistant generations. The Inline Assistant uses Zed-configured [LLM providers](./llm-providers.md), including Recode-hosted models, provider API keys, gateways, [local models](./use-a-local-model.md), and supported subscriptions.
 
 ## Adding Context
 
@@ -46,7 +46,7 @@ This works well with excerpts in [multibuffers](../multibuffers.md).
 
 You can use the Inline Assistant to send the same prompt to multiple models at once.
 
-Here's how you can customize your settings file ([how to edit](../configuring-zed.md#settings-files)) to add this functionality:
+Here's how you can customize your settings file ([how to edit](../configuring-recode.md#settings-files)) to add this functionality:
 
 ```json [settings]
 {

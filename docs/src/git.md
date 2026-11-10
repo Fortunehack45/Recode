@@ -99,7 +99,7 @@ To change the default, add this to your `settings.json`:
 }
 ```
 
-See [Configuring Zed](./configuring-zed.md) for more about the Settings Editor.
+See [Configuring Recode](./configuring-recode.md) for more about the Settings Editor.
 
 #### Split vs unified
 

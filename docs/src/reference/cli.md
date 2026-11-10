@@ -220,10 +220,10 @@ This creates a temporary file with the stdin content and opens it in Zed.
 
 ## URL Handling
 
-The CLI can open `zed://`, `file://`, and `ssh://` URLs:
+The CLI can open `recode://`, `file://`, and `ssh://` URLs:
 
 ```sh
-zed zed://settings
+recode recode://settings
 zed file:///Users/whatever/.zshrc
 zed ssh://me@example.com/abs/path
 zed ssh://me@example.com:/abs/path

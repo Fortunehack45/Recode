@@ -33,13 +33,13 @@ To install a skill, copy the skill's folder into `~/.agents/skills/` for global 
 
 ## Managing Skills {#managing-skills}
 
-Open the Settings Editor (`Cmd+,` on macOS, `Ctrl+,` on Linux/Windows) and navigate to **AI > Skills**, or go directly to [agent.skills](zed://settings/agent.skills).
+Open the Settings Editor (`Cmd+,` on macOS, `Ctrl+,` on Linux/Windows) and navigate to **AI > Skills**, or go directly to [agent.skills](recode://settings/agent.skills).
 
 The **User** tab shows your global skills, and each **Project** tab shows the skills for that project.
 
 For each skill you can:
 
-- **Copy Share Link** — copies a `zed://skill` link that embeds the skill, ready to send to someone else (see [Sharing Skills](#sharing-skills))
+- **Copy Share Link** — copies a `recode://skill` link that embeds the skill, ready to send to someone else (see [Sharing Skills](#sharing-skills))
 - **Open** — opens the skill's `SKILL.md` file in the editor
 - **Delete** — removes the skill folder from disk
 
@@ -47,7 +47,7 @@ In the skills page, you'll see a **Create Skill** button that opens the settings
 
 ## Sharing Skills {#sharing-skills}
 
-You can hand a skill to a teammate without hosting it anywhere. In the Skills settings page, click the **link** icon on a skill row to copy a `zed://skill?data=…` link to your clipboard.
+You can hand a skill to a teammate without hosting it anywhere. In the Skills settings page, click the **link** icon on a skill row to copy a `recode://skill?data=…` link to your clipboard.
 The link is self-contained: it embeds the full `SKILL.md` contents (base64url-encoded), so the recipient doesn't need access to your project or any registry.
 
 When someone opens that link (for example by pasting it into their browser or clicking it in a chat), Zed opens the "Create Skill" page in the settings window, pre-filled with the shared skill.
@@ -190,7 +190,7 @@ The agent cannot edit `SKILL.md` files or their bundled resources without your e
 
 ## Agent Path Boundaries {#agent-path-boundaries}
 
-Zed Skills apply to the Zed Agent. [External Agents](./external-agents.md) and Terminal Threads may have their own native skills, prompts, or instruction systems. Configure those in the External Agent or CLI.
+Zed Skills apply to the Recode Agent. [External Agents](./external-agents.md) and Terminal Threads may have their own native skills, prompts, or instruction systems. Configure those in the External Agent or CLI.
 
 ## Limitations {#limitations}
 

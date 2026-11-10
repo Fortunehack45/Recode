@@ -14,7 +14,7 @@
 
 ---
 
-title: Configuring Zed - Settings and Preferences
+title: Configuring Recode - Settings and Preferences
 description: Configure Zed with the Settings Editor, JSON files, and project-specific overrides. Covers all settings options.
 
 ---
@@ -113,12 +113,12 @@ Changes made in the Settings Editor apply across all channels.
 
 ## Settings Deep Links {#deep-links}
 
-Zed supports deep links that open specific settings directly:
+Recode supports deep links that open specific settings directly:
 
 ```
-zed://settings/theme
-zed://settings/vim_mode
-zed://settings/buffer_font_size
+recode://settings/theme
+recode://settings/vim_mode
+recode://settings/buffer_font_size
 ```
 
 These are useful for sharing configuration tips or linking from documentation.

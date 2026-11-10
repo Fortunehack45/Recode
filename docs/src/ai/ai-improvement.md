@@ -6,7 +6,7 @@ description: Understand opt-in AI feedback ratings, Edit Prediction training dat
 # Feedback and Training Data
 
 Normal AI requests are not retained by Zed. For
-[Zed-hosted models](../account/zed-hosted-models.md), provider agreements
+[Recode-hosted models](../account/recode-hosted-models.md), provider agreements
 prohibit training on your prompts or code context and require zero data
 retention, except for
 [provider-designated models with safety retention](./privacy-and-security.md#provider-safety-retention),
@@ -102,7 +102,7 @@ regardless of opt-in status:
 
 You can explicitly exclude additional paths or file extensions by adding them to
 [`edit_predictions.disabled_globs`](https://zed.dev/docs/reference/all-settings#edit-predictions)
-in your Zed settings file ([how to edit](../configuring-zed.md#settings-files)):
+in your Zed settings file ([how to edit](../configuring-recode.md#settings-files)):
 
 ```json [settings]
 {

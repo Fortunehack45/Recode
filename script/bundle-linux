@@ -236,7 +236,7 @@ else
 fi
 
 mkdir -p "${zed_dir}/share/applications"
-envsubst < "crates/zed/resources/zed.desktop.in" > "${zed_dir}/share/applications/$APP_ID.desktop"
+envsubst < "crates/zed/resources/recode.desktop.in" > "${zed_dir}/share/applications/$APP_ID.desktop"
 chmod +x "${zed_dir}/share/applications/$APP_ID.desktop"
 
 # Copy generated licenses so they'll end up in archive too

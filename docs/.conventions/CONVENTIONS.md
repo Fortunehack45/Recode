@@ -305,7 +305,7 @@ Example:
 
 For JSON-only settings (complex types without UI support), note this and link to instructions:
 
-> Add the following to your settings file ([how to edit](./configuring-zed.md#settings-files)):
+> Add the following to your settings file ([how to edit](./configuring-recode.md#settings-files)):
 
 ### Settings File Locations
 

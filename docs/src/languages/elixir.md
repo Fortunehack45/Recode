@@ -30,7 +30,7 @@ Alternatively, you can provide your own custom binaries by passing the path and 
 
 Some of the language servers can also accept initialization or workspace configuration options. See the sections below for an outline of what each server supports. The configuration can be passed in your settings file via `lsp.{language-server-id}.initialization_options` and `lsp.{language-server-id}.settings` respectively.
 
-Visit the [Configuring Zed](../configuring-zed.md#settings-files) guide for more information on how to edit your settings file.
+Visit the [Configuring Recode](../configuring-recode.md#settings-files) guide for more information on how to edit your settings file.
 
 ### Using ElixirLS
 

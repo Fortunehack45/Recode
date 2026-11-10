@@ -27,7 +27,7 @@ Zed is free to use. You can configure AI agents with your own API keys via [Use 
 
 ### Recode Pro {#pro}
 
-Zed Pro includes access to all hosted AI models and Edit Predictions. The plan includes $5 of monthly token credit; usage beyond that is billed at the rates listed on [Zed-Hosted Models](./zed-hosted-models.md). A [trial of Zed Pro](#trials) includes $5 of GPT-6 Luna usage and unlimited Edit Predictions for 14 days from when you start the trial.
+Zed Pro includes access to all hosted AI models and Edit Predictions. The plan includes $5 of monthly token credit; usage beyond that is billed at the rates listed on [Recode-Hosted Models](./recode-hosted-models.md). A [trial of Zed Pro](#trials) includes $5 of GPT-6 Luna usage and unlimited Edit Predictions for 14 days from when you start the trial.
 
 For details on billing and payment, see [Individual Billing](./billing.md).
 
@@ -39,11 +39,11 @@ For a full feature overview, see [Zed Business](../business/overview.md). For bi
 
 ### Student Plan {#student}
 
-The [Zed Student plan](https://zed.dev/education) includes unlimited [Edit Predictions](../ai/edit-prediction.md), $10/month in token credits, and all [hosted AI models](./zed-hosted-models.md) except Claude Fable, Claude Opus, GPT-6 Astra, GPT-5.5 pro, and GPT-5.4 pro. The plan is available free for one year to verified university students.
+The [Zed Student plan](https://zed.dev/education) includes unlimited [Edit Predictions](../ai/edit-prediction.md), $10/month in token credits, and all [hosted AI models](./recode-hosted-models.md) except Claude Fable, Claude Opus, GPT-6 Astra, GPT-5.5 pro, and GPT-5.4 pro. The plan is available free for one year to verified university students.
 
 ## Usage {#usage}
 
-Usage of Zed's hosted models is measured on a token basis, converted to dollars at the rates listed on [Zed-Hosted Models](./zed-hosted-models.md) (list price from the provider, +10%).
+Usage of Zed's hosted models is measured on a token basis, converted to dollars at the rates listed on [Recode-Hosted Models](./recode-hosted-models.md) (list price from the provider, +10%).
 
 Monthly included credit resets on your monthly billing date. To view your current usage, navigate to the Billing page at [dashboard.zed.dev](https://dashboard.zed.dev). Usage data from our metering provider, Orb, is embedded on that page.
 

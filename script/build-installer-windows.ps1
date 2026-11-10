@@ -62,7 +62,6 @@ if (Test-Path "$TargetDir/recode.exe") {
 # Copy cli binary
 if (Test-Path "$TargetDir/cli.exe") {
     Copy-Item "$TargetDir/cli.exe" "$staging/bin/recode.exe" -Force
-    Copy-Item "$TargetDir/cli.exe" "$staging/bin/zed.exe" -Force
 }
 
 # Copy auto update helper
@@ -90,7 +89,7 @@ if (Test-Path "$TargetDir/conpty.dll") {
 }
 
 # Compile with Inno Setup
-$issFile = Join-Path $repoRoot "crates/zed/resources/windows/zed.iss"
+$issFile = Join-Path $repoRoot "crates/zed/resources/windows/recode.iss"
 $definitions = @(
     "/DAppId={{2DB0DA96-CA55-49BB-AF4F-64AF36A86712}}",
     "/DAppIconName=app-icon",

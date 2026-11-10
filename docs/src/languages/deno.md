@@ -66,7 +66,7 @@ TBD: Deno TypeScript REPL instructions [docs/repl#typescript-deno](../repl.md#ty
 
 ## Configuration completion
 
-To get completions for `deno.json` or `package.json`, add the following to your settings file ([how to edit](../configuring-zed.md#settings-files)). For more details, see [JSON](./json.md).
+To get completions for `deno.json` or `package.json`, add the following to your settings file ([how to edit](../configuring-recode.md#settings-files)). For more details, see [JSON](./json.md).
 
 ```json [settings]
 "lsp": {

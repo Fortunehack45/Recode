@@ -11,7 +11,7 @@ import {
   LiveActionIndicator,
 } from "@recode-dev/tui";
 
-const VERSION = "1.30.4";
+const VERSION = "1.30.5";
 
 function printUsage(): void {
   const theme = ThemeManager.get();

@@ -34,7 +34,7 @@ An owner has full control over the organization, including:
 - Manage billing, payment methods, and invoices
 - Configure data-sharing policies
 - Disable Zed's collaborative features
-- Control whether members can use Zed-hosted models and Zed's edit predictions
+- Control whether members can use Recode-hosted models and Zed's edit predictions
 - Transfer ownership to another member
 
 ### Admin {#role-admin}

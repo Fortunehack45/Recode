@@ -1982,7 +1982,7 @@ pub const ZED_URL_SCHEME: &str = "recode";
 /// A parsed Zed link that can be handled internally by the application.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ZedLink {
-    /// Join a channel: `zed.dev/channel/channel-name-123` or `zed://channel/channel-name-123`
+    /// Join a channel: `recode.dev/channel/channel-name-123` or `recode://channel/channel-name-123`
     Channel { channel_id: u64 },
     /// Open channel notes: `zed.dev/channel/channel-name-123/notes` or with heading `notes#heading`
     ChannelNotes {
@@ -2003,7 +2003,6 @@ pub fn parse_zed_link(link: &str, cx: &App) -> Option<ZedLink> {
         .and_then(|result| result.strip_prefix('/'))
         .or_else(|| {
             link.strip_prefix(RECODE_URL_SCHEME)
-                .or_else(|| link.strip_prefix("zed"))
                 .and_then(|result| result.strip_prefix("://"))
         })?;
 

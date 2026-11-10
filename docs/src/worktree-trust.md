@@ -34,7 +34,7 @@ Restricted Mode prevents:
 
 ## Configuring broad worktree trust
 
-By default, Zed does not trust new worktrees. Users must trust each new worktree individually. Though not recommended, users can trust all worktrees with this setting ([how to edit](./configuring-zed.md#settings-files)):
+By default, Zed does not trust new worktrees. Users must trust each new worktree individually. Though not recommended, users can trust all worktrees with this setting ([how to edit](./configuring-recode.md#settings-files)):
 
 ```json [settings]
 "session": {

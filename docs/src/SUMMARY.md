@@ -47,7 +47,7 @@
 - [AI Quick Start](./ai/quick-start.md)
 - [AI by Company](./ai/by-company.md)
 - [Agents](./ai/agents.md)
-  - [Zed Agent](./ai/zed-agent.md)
+  - [Recode Agent](./ai/recode-agent.md)
   - [External Agents](./ai/external-agents.md)
   - [Terminal Threads](./ai/terminal-threads.md)
 - [Agent Panel](./ai/agent-panel.md)
@@ -74,7 +74,7 @@
 
 - [Authenticate](./authentication.md)
 - [Plans & Pricing](./account/plans-and-pricing.md)
-- [Zed-Hosted Models](./account/zed-hosted-models.md)
+- [Recode-Hosted Models](./account/recode-hosted-models.md)
 - [Billing](./account/billing.md)
 
 # Recode Business

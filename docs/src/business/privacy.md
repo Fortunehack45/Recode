@@ -44,7 +44,7 @@ These controls cover what Zed stores and trains on. They don't change how AI inf
 
 Administrators have additional options in [Admin Controls](./admin-controls.md):
 
-- Disable Zed-hosted models entirely via the Zed Model Provider toggle, so no
+- Disable Recode-hosted models entirely via the Zed Model Provider toggle, so no
   prompts reach Zed's infrastructure
 - Disable Edit Predictions org-wide
 - Disable Edit Prediction Feedback
