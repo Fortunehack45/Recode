@@ -178,6 +178,7 @@ members = [
     "crates/recent_projects",
     "crates/recode_agent_core",
     "crates/recode_buffer",
+    "crates/recode_core_app",
     "crates/recode_lsp",
     "crates/recode_shell",
     "crates/recode_terminal_palette",

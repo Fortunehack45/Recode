@@ -1,0 +1,18 @@
+[package]
+name = "recode_core_app"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room top-level application coordinator, state manager, and event loop dispatcher for Recode"
+
+[dependencies]
+recode_buffer = { path = "../recode_buffer" }
+recode_shell = { path = "../recode_shell" }
+recode_workspace = { path = "../recode_workspace" }
+recode_lsp = { path = "../recode_lsp" }
+recode_terminal_palette = { path = "../recode_terminal_palette" }
+recode_agent_core = { path = "../recode_agent_core" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+smallvec = { version = "1.13", features = ["serde"] }
+
+[dev-dependencies]
