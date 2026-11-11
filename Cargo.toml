@@ -178,6 +178,7 @@ members = [
     "crates/recent_projects",
     "crates/recode_buffer",
     "crates/recode_shell",
+    "crates/recode_workspace",
     "crates/refineable",
     "crates/refineable/derive_refineable",
     "crates/release_channel",

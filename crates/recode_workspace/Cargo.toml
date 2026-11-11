@@ -1,0 +1,12 @@
+[package]
+name = "recode_workspace"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room workspace, multi-root file tree, and filesystem navigation engine for Recode"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+smallvec = { version = "1.13", features = ["serde"] }
+
+[dev-dependencies]
