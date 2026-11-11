@@ -155,20 +155,20 @@ impl OpenRequest {
         }
 
         for url in request.urls {
-            if let Some(server_name) = url.strip_prefix("recode-cli://") {
+            if let Some(server_name) = url.strip_prefix("recode-cli://").or_else(|| url.strip_prefix("zed-cli://")) {
                 this.kind = Some(OpenRequestKind::CliConnection(connect_to_cli(server_name)?));
-            } else if let Some(action_index) = url.strip_prefix("recode-dock-action://") {
+            } else if let Some(action_index) = url.strip_prefix("recode-dock-action://").or_else(|| url.strip_prefix("zed-dock-action://")) {
                 this.kind = Some(OpenRequestKind::DockMenuAction {
                     index: action_index.parse()?,
                 });
             } else if let Some(file) = url.strip_prefix("file://") {
                 this.parse_file_path(file)
-            } else if let Some(file) = url.strip_prefix("recode://file") {
+            } else if let Some(file) = url.strip_prefix("recode://file").or_else(|| url.strip_prefix("zed://file")) {
                 this.parse_file_path(file)
-            } else if let Some(file) = url.strip_prefix("recode://ssh") {
+            } else if let Some(file) = url.strip_prefix("recode://ssh").or_else(|| url.strip_prefix("zed://ssh")) {
                 let ssh_url = "ssh:/".to_string() + file;
                 this.parse_ssh_file_path(&ssh_url, cx)?
-            } else if let Some(extension_id) = url.strip_prefix("recode://extension/") {
+            } else if let Some(extension_id) = url.strip_prefix("recode://extension/").or_else(|| url.strip_prefix("zed://extension/")) {
                 this.kind = Some(OpenRequestKind::Extension {
                     extension_id: extension_id.to_string(),
                 });

@@ -136,8 +136,8 @@ fn send_args_to_instance(args: &Args) -> anyhow::Result<()> {
     }
 
     let (server, server_name) =
-        IpcOneShotServer::<IpcHandshake>::new().context("Handshake before Zed spawn")?;
-    let url = format!("zed-cli://{server_name}");
+        IpcOneShotServer::<IpcHandshake>::new().context("Handshake before Recode spawn")?;
+    let url = format!("recode-cli://{server_name}");
 
     let request = {
         let (paths, urls) = split_paths_and_urls(&args.paths_or_urls);
