@@ -1,0 +1,12 @@
+[package]
+name = "recode_buffer"
+version = "0.1.0"
+edition = "2021"
+description = "Clean-room high-performance text buffer, multi-cursor editing, and history tracking engine for Recode"
+
+[dependencies]
+unicode-segmentation = "1.12"
+smallvec = { version = "1.13", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]

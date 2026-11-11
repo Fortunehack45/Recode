@@ -176,6 +176,7 @@ members = [
     "crates/proto",
     "crates/proxy_handshake",
     "crates/recent_projects",
+    "crates/recode_buffer",
     "crates/refineable",
     "crates/refineable/derive_refineable",
     "crates/release_channel",
