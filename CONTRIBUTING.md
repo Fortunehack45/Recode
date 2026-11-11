@@ -26,6 +26,12 @@ All activity in Recode forums is subject to our Code of Conduct.
 - **Improve performance and reduce memory allocations**
 - **Add small quality-of-life features or shortcuts**
 
+## Contributor License Agreement & Terms
+
+By submitting a Pull Request, issue patch, or contribution to Recode, you agree to the [Recode Contributor License Agreement (CLA)](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md) and acknowledge that:
+1. Recode is governed by the [Recode Source-Available & Anti-Forking License](LICENSE.md).
+2. The source code is made publicly available for personal use, inspection, and upstream contributions; creating downstream forks, rebranding the software, or publishing competing distributions is strictly prohibited under our [Trademark Policy](legal/TRADEMARK_POLICY.md).
+
 ## Building from Source
 
 ```bash

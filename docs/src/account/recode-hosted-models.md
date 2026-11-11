@@ -1,15 +1,15 @@
 ---
-title: Recode-Hosted Models - Zed
-description: AI models available via Zed Pro including Claude Fable 5.1, Claude Opus 5.5, GPT-6.1 Sol, and Gemini 4 Argon. Pricing, context windows, and tool call support.
+title: Recode-Hosted Models
+description: AI models available via Recode Pro including Claude Fable 5.1, Claude Opus 5.5, GPT-6.1 Sol, and Gemini 4 Argon. Pricing, context windows, and tool call support.
 ---
 
 # Recode-Hosted Models
 
-Zed's plans offer hosted versions of major LLMs with higher rate limits than direct API access. Model availability is updated regularly. To use your own API keys instead, see [LLM Providers](../ai/llm-providers.md). For general setup, see [AI Quick Start](../ai/quick-start.md).
+Recode's plans offer hosted versions of major LLMs with higher rate limits than direct API access. Model availability is updated regularly. To use your own API keys instead, see [LLM Providers](../ai/llm-providers.md). For general setup, see [AI Quick Start](../ai/quick-start.md).
 
-> **Note:** Zed Pro and Zed Business include all models listed below. The Student plan does not include Claude Fable, Claude Opus, GPT-6 Astra, GPT-5.5 pro, or GPT-5.4 pro. The Zed Pro trial includes GPT-6 Luna only.
+> **Note:** Recode Pro and Recode Business include all models listed below. The Student plan does not include Claude Fable, Claude Opus, GPT-6 Astra, GPT-5.5 pro, or GPT-5.4 pro. The Recode Pro trial includes GPT-6 Luna only.
 
-| Model             | Provider  | Token Type          | Provider Price per 1M tokens | Zed Price per 1M tokens |
+| Model             | Provider  | Token Type          | Provider Price per 1M tokens | Recode Price per 1M tokens |
 | ----------------- | --------- | ------------------- | ---------------------------- | ----------------------- |
 | Claude Fable 5.1  | Anthropic | Input               | $10.00                       | $11.00                  |
 |                   | Anthropic | Output              | $50.00                       | $55.00                  |
@@ -126,11 +126,11 @@ Zed's plans offer hosted versions of major LLMs with higher rate limits than dir
 | Gemini 3 Flash    | Google    | Input               | $0.50                        | $0.55                   |
 |                   | Google    | Output              | $3.00                        | $3.30                   |
 
-> **Warn:** Anthropic retains prompts and outputs sent to Claude Fable 5.1 and Claude Fable 5 for at least 30 days for trust and safety purposes. The no-training commitment still applies, and Zed does not retain your prompts or outputs. See [Provider Safety Retention for Designated Models](../ai/privacy-and-security.md#provider-safety-retention).
+> **Warn:** Anthropic retains prompts and outputs sent to Claude Fable 5.1 and Claude Fable 5 for at least 30 days for trust and safety purposes. The no-training commitment still applies, and Recode does not retain your prompts or outputs. See [Provider Safety Retention for Designated Models](../ai/privacy-and-security.md#provider-safety-retention).
 
 ## Recent Model Retirements {#recent-model-retirements}
 
-Zed no longer offers the models below:
+Recode no longer offers the models below:
 
 - Claude Opus 4.1 → Claude Opus 4.5, Claude Opus 4.6, Claude Opus 4.7, or Claude Opus 4.8
 - Claude Sonnet 4 → Claude Sonnet 4.5 or Claude Sonnet 4.6
@@ -139,11 +139,11 @@ Zed no longer offers the models below:
 - Gemini 2.5 Pro → Gemini 3.1 Pro
 - Gemini 3 Pro (retired March 26, 2026) → Gemini 3.1 Pro
 - Gemini 2.5 Flash → Gemini 3 Flash or Gemini 3.5 Flash
-- Grok 4, Grok 4 Fast, Grok 4 Fast (Non-Reasoning), and Grok Code Fast 1 ([retired May 15, 2026](https://docs.x.ai/developers/migration/may-15-retirement)). Zed no longer offers hosted xAI models.
+- Grok 4, Grok 4 Fast, Grok 4 Fast (Non-Reasoning), and Grok Code Fast 1 ([retired May 15, 2026](https://docs.x.ai/developers/migration/may-15-retirement)). Recode no longer offers hosted xAI models.
 
 ## Usage {#usage}
 
-Any usage of a Zed-hosted model will be billed at the Zed Price (rightmost column above). See [Plans & Pricing](./plans-and-pricing.md) for details on Zed's plans and limits for use of hosted models.
+Any usage of a Recode-hosted model will be billed at the Recode Price (rightmost column above). See [Plans & Pricing](./plans-and-pricing.md) for details on Recode's plans and limits for use of hosted models.
 
 Gemini 4 Argon bills implicit cache hits at the cached-input rate above. Gemini 3 models do not use Google context caching and are billed only as input and output tokens, which preserves zero-data-retention behavior for those requests. For background, see Google's Vertex AI documentation on [context caching](https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview) and [zero data retention](https://cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention).
 
@@ -153,7 +153,7 @@ Gemini 4 Argon bills implicit cache hits at the cached-input rate above. Gemini 
 
 A context window is the maximum span of text and code an LLM can consider at once, including both the input prompt and output generated by the model.
 
-| Model             | Provider  | Zed-Hosted Context Window |
+| Model             | Provider  | Recode-Hosted Context Window |
 | ----------------- | --------- | ------------------------- |
 | Claude Fable 5.1  | Anthropic | 1M                        |
 | Claude Fable 5    | Anthropic | 1M                        |
@@ -189,9 +189,9 @@ A context window is the maximum span of text and code an LLM can consider at onc
 | Gemini 3.5 Flash  | Google    | 1M                        |
 | Gemini 3 Flash    | Google    | 1M                        |
 
-> Zed currently limits hosted Gemini 3.1 Pro requests to 200k tokens because pricing changes above that context size.
+> Recode currently limits hosted Gemini 3.1 Pro requests to 200k tokens because pricing changes above that context size.
 
-Each Agent thread in Zed maintains its own context window.
+Each Agent thread in Recode maintains its own context window.
 The more prompts, attached files, and responses included in a session, the larger the context window grows.
 
 Start a new thread for each distinct task to keep context focused.

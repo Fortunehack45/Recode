@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/Fortunehack45/Recode/releases"><img src="https://img.shields.io/github/v/release/Fortunehack45/Recode?style=flat-square&color=blue" alt="Latest Release" /></a>
-  <a href="LICENSE-GPL"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=flat-square" alt="License" /></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-Source--Available%20%7C%20RSAL-blue?style=flat-square" alt="License: Source-Available" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="Platforms" />
   <img src="https://img.shields.io/badge/built%20with-Rust%20%2B%20GPUI-orange?style=flat-square" alt="Rust GPUI" />
   <img src="https://img.shields.io/badge/AI-Claude%20%7C%20GPT--4o%20%7C%20Gemini%20%7C%20DeepSeek%20%7C%20Ollama-purple?style=flat-square" alt="AI Models" />
@@ -20,7 +20,7 @@
 
 ## Overview
 
-**Recode** is an open-source, native, GPU-accelerated code editor engineered in pure Rust. It combines instantaneous cold boot speeds (<50ms) and silky 120 FPS rendering with a deeply integrated autonomous AI coding agent, multi-file diff engine, full Model Context Protocol (MCP) ecosystem, and Bring Your Own Key (BYOK) privacy.
+**Recode** is a source-available, native, GPU-accelerated code editor engineered in pure Rust. It combines instantaneous cold boot speeds (<50ms) and silky 120 FPS rendering with a deeply integrated autonomous AI coding agent, multi-file diff engine, full Model Context Protocol (MCP) ecosystem, and Bring Your Own Key (BYOK) privacy.
 
 <p align="center">
   <img src="assets/images/recode-editor-agent.jpg" alt="Recode Autonomous AI Editor and Workspace" width="100%" />
@@ -238,9 +238,13 @@ cargo build --release --package recode --package cli
 
 ---
 
-## 📄 License & Community
+## 📄 License & Source-Available Community Model
 
-Recode is an open-source autonomous AI code editor built on the foundation of the Zed architecture. Upstream core components are licensed under the **GNU General Public License v3.0** (`GPL-3.0-or-later`), with specific modules licensed under the **Apache License 2.0** where marked.
+Recode is developed under the **Recode Source-Available & Anti-Forking License (RSAL v1.0)**. The source code is publicly accessible on GitHub for auditing, personal compilation, and upstream contribution.
 
-- See [LICENSE-GPL](LICENSE-GPL) and [LICENSE-APACHE](LICENSE-APACHE) for complete license terms.
-- Source Code & Issue Tracker: [https://github.com/Fortunehack45/Recode](https://github.com/Fortunehack45/Recode)
+- **Anti-Forking & Anti-Rebranding Protection:** Downstream cloning, rebranding, white-labeling, or distributing derivative competing editor/IDE products is strictly prohibited under our [Trademark Policy](legal/TRADEMARK_POLICY.md) and [License](LICENSE.md).
+- **Official Commercial EULA:** See [legal/EULA.md](legal/EULA.md) and [EULA.md](EULA.md).
+- **Contributor Agreement (CLA):** See [legal/CONTRIBUTOR_LICENSE_AGREEMENT.md](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md).
+- **Terms of Service:** See [legal/terms.md](legal/terms.md).
+- **Privacy Policy:** See [legal/privacy-policy.md](legal/privacy-policy.md).
+- **Official Repository & Releases:** [https://github.com/Fortunehack45/Recode](https://github.com/Fortunehack45/Recode) | [legal@recode.dev](mailto:legal@recode.dev)

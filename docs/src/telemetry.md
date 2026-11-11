@@ -1,75 +1,54 @@
 ---
 title: Telemetry
-description: "What data Zed collects and how to control telemetry settings."
+description: "What data Recode collects and how to control telemetry settings."
 ---
 
-# Telemetry in Zed
+# Telemetry in Recode
 
-Zed collects anonymous telemetry to understand usage patterns and diagnose issues.
+Recode is built around local-first privacy. We collect minimal, anonymized telemetry strictly to understand stability patterns and diagnose engine crashes.
 
 Telemetry falls into two categories:
 
-- **Client-side**: Usage metrics and crash reports. You can disable these in settings.
-- **Server-side**: Collected when using hosted services like AI or Collaboration. Required for these features to function.
+- **Client-Side Diagnostics**: Optional anonymous crash reports and high-level feature usage metrics. You have full control to disable these completely in settings.
+- **Server-Side Metrics**: Minimal token counters collected only when using Recode-hosted AI services for subscription metering. (Not applicable when using local Ollama or personal BYOK keys).
 
 ## Configuring Telemetry Settings
 
-You have full control over what data is sent out by Zed.
-To enable or disable some or all telemetry types, open Settings ({#kb zed::OpenSettings}) and search for "telemetry", or add the following to your settings file:
+You have full control over what diagnostic data is sent out by Recode.
+To disable all telemetry, open Settings (`Ctrl+,` or `Cmd+,`) and set telemetry to false:
 
 ```json [settings]
 "telemetry": {
     "diagnostics": false,
     "metrics": false
-},
+}
 ```
-
-## Dataflow
-
-Telemetry is sent from the application to our servers every 5 minutes (or when 50 events accumulate), then routed to the appropriate service. We currently use:
-
-- [Sentry](https://sentry.io): Crash-monitoring service - stores diagnostic events
-- [Snowflake](https://snowflake.com): Data warehouse - stores both diagnostic and metric events
-- [Hex](https://www.hex.tech): Dashboards and data exploration - accesses data stored in Snowflake
-- [Amplitude](https://www.amplitude.com): Dashboards and data exploration - accesses data stored in Snowflake
 
 ## Types of Telemetry
 
-### Diagnostics
+### Diagnostics & Crash Reports
 
-Crash reports consist of a [minidump](https://learn.microsoft.com/en-us/windows/win32/debug/minidump-files) and debug metadata. Reports are sent on the next launch after a crash, allowing Zed to identify and fix issues without requiring you to file a bug report.
-
-You can inspect what data is sent in the `CrashInfo` struct in [crates/crashes/src/crashes.rs](https://github.com/zed-industries/zed/blob/main/crates/crashes/src/crashes.rs). See also: [Debugging Crashes](./development/debugging-crashes.md).
+Crash reports consist of an anonymized minidump and debug metadata to help us identify and fix engine panics. Reports do not contain your project source code, file contents, or personal credentials.
 
 ### Client-Side Metrics
 
-Client-side telemetry includes:
+When metrics are enabled, Recode sends high-level operational counts, such as:
+- File extensions of opened buffers (e.g., `.rs`, `.tsx`, `.py`)
+- Editor features invoked (e.g., Command Palette, Terminal Dock)
+- Detected build systems (e.g., Cargo, npm)
 
-- File extensions of opened files
-- Features and tools used within the editor
-- Project statistics (e.g., number of files)
-- Frameworks detected in your projects
+This data never includes your code or proprietary project logic.
 
-This data does not include your code or sensitive project details. Events are sent over HTTPS and rate-limited.
+### Local AI & BYOK Exemption
 
-Usage data is tied to a random telemetry ID. If you've authenticated, this ID may be linked to your email so Zed can analyze patterns over time and reach out for feedback.
+When you use local offline models via Ollama (`http://127.0.0.1:11434`) or provide your own API keys (BYOK), prompts and completions are strictly isolated to your workstation and the provider endpoint. Recode does not log, proxy, or collect your private prompts or completions.
 
-To audit what Zed has reported, run {#action zed::OpenTelemetryLog} from the command palette or click `Help > View Telemetry Log`.
+## Recode Business Controls
 
-For the full list of event types, see the `Event` enum in [telemetry_events.rs](https://github.com/zed-industries/zed/blob/main/crates/telemetry_events/src/telemetry_events.rs).
+Administrators on Recode Business can enforce org-wide policies disabling all telemetry across all managed developer workstations.
 
-### Server-Side Metrics
+## Questions & Privacy Requests
 
-When using Zed's hosted services, we collect metadata for rate limiting and billing (e.g., token usage). Zed does not store your prompts or code unless you explicitly share feedback or opt into Edit Prediction training data collection.
-
-For details on AI request paths and opt-in data sharing, see [AI Privacy](./ai/privacy-and-security.md) and [Feedback and Training Data](./ai/ai-improvement.md).
-
-## Recode Business
-
-Administrators on Zed Business can enforce a no-sharing policy org-wide; members can't opt into [Edit Prediction training data sharing](./ai/ai-improvement.md#edit-predictions) or [AI feedback ratings](./ai/ai-improvement.md#ai-feedback-with-ratings). See [Data Sharing](./business/admin-controls.md#data-sharing) in Admin Controls.
-
-<!-- TODO: link to telemetry org-wide disable control once it ships (currently planned for a future release) -->
-
-## Concerns and Questions
-
-If you have concerns about telemetry, you can [open an issue](https://github.com/zed-industries/zed/issues/new/choose) or email hi@zed.dev.
+If you have questions regarding telemetry or data handling, please contact our privacy engineering team:
+- 📧 **Privacy & Telemetry:** [privacy@recode.dev](mailto:privacy@recode.dev)
+- 🌐 **Privacy Policy:** [Recode Privacy Policy](../legal/privacy-policy.md)

@@ -1,14 +1,14 @@
 ---
-title: Business Support - Zed Business
-description: How to contact Zed for business inquiries and support.
+title: Business Support - Recode Business
+description: How to contact Recode for business inquiries, enterprise support, and SLA agreements.
 ---
 
 # Business Support
 
-For billing and business support (account setup, invoices, organization questions), email [billing-support@zed.dev](mailto:billing-support@zed.dev). Business support is prioritized relative to other support channels.
+For billing and business support (account setup, invoices, organization questions, enterprise licensing), email [enterprise@recode.dev](mailto:enterprise@recode.dev) or [billing@recode.dev](mailto:billing@recode.dev). Business support inquiries receive prioritized SLA routing.
 
-For general questions, email [hi@zed.dev](mailto:hi@zed.dev).
+For general inquiries and partnerships, email [support@recode.dev](mailto:support@recode.dev).
 
-## Open-source issues
+## Issues & Technical Support
 
-Questions and bugs about the Zed editor itself (features, extensions, language support, crashes) go through the main Zed project on [GitHub](https://github.com/zed-industries/zed/issues).
+Bug reports, feature requests, and feedback about the Recode editor itself can be submitted directly via our official GitHub issue tracker at [https://github.com/Fortunehack45/Recode/issues](https://github.com/Fortunehack45/Recode/issues).
