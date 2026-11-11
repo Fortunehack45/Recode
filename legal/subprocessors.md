@@ -3,29 +3,29 @@ title: Subprocessor List
 slug: subprocessors
 ---
 
-Zed uses select third-party subprocessors to deliver core product functionality. Each subprocessor processes customer personal data only as necessary to provide its service, and all are subject to appropriate data protection agreements.
+Recode uses select third-party subprocessors to deliver core product functionality. Each subprocessor processes customer personal data only as necessary to provide its service, and all are subject to appropriate data protection agreements.
 
-### How Zed Uses Subprocessors
+### How Recode Uses Subprocessors
 
-To provide fast, reliable, and secure functionality, Zed relies on a small number of carefully vetted third-party subprocessors. These vendors help us deliver essential capabilities such as hosting, billing, analytics, real-time collaboration, and hosted AI features.
+To provide fast, reliable, and secure functionality, Recode relies on a small number of carefully vetted third-party subprocessors. These vendors help us deliver essential capabilities such as hosting, billing, analytics, real-time collaboration, and hosted AI features.
 
 Each subprocessor only processes customer personal data as needed to provide its service.
 
-Zed maintains contracts and data protection agreements with all subprocessors, including GDPR-compliant terms where applicable. We do not sell customer data, and we do not share customer personal data with vendors for advertising or marketing purposes.
+Recode maintains contracts and data protection agreements with all subprocessors, including GDPR-compliant terms where applicable. We do not sell customer data, and we do not share customer personal data with vendors for advertising or marketing purposes.
 
 ### AI Subprocessors
 
-Zed offers three modes for AI:
+Recode offers three modes for AI:
 
-1. **Bring your own API key** — data goes directly from the customer to the model provider; Zed does not process or store it.
-2. [**External Agents**](https://zed.dev/docs/ai/external-agents) — Zed uses ACP to provide an enhanced experience with terminal-based AI code agents like Claude Code or OpenAI Codex. Data is not processed or stored by Zed when using external agents.
-3. **Zed-hosted models** — Zed sends customer prompts to one of its AI providers (listed below). These vendors act as subprocessors only for customers who choose this mode.
+1. **Local AI / Offline** — runs 100% locally on your machine (e.g. via Ollama); zero data leaves your computer.
+2. **Bring your own API key** — data goes directly from the customer to the model provider; Recode does not process or store it.
+3. **External Agents** — Recode uses standard protocols to provide an enhanced experience with terminal-based AI code agents. Data is not processed or stored by Recode when using external agents.
 
 ### Ongoing Updates
 
-**Last Updated**: March 2, 2026
+**Last Updated**: November 2026
 
-This subprocessor list is reviewed regularly. Zed will notify customers of material changes in accordance with our [Terms](https://zed.dev/terms) and [Privacy Policy](https://zed.dev/privacy-policy).
+This subprocessor list is reviewed regularly. Recode will notify customers of material changes in accordance with our [Terms](https://recode.dev/terms) and [Privacy Policy](https://recode.dev/privacy-policy).
 
 ---
 
@@ -70,13 +70,13 @@ This subprocessor list is reviewed regularly. Zed will notify customers of mater
 
 ## Analytics & Data Processing
 
-| Subprocessor         | Purpose                                                                                  | Data Location |
-| -------------------- | ---------------------------------------------------------------------------------------- | ------------- |
-| **Amplitude**        | Product analytics                                                                        | United States |
-| **Axiom**            | Application telemetry, observability, and logs                                           | United States |
-| **Fivetran**         | Automates data pipeline integration (extract, transformation, and load services) for Zed | United States |
-| **Hex Technologies** | Analytics and debugging                                                                  | United States |
-| **Snowflake**        | Data warehouse                                                                           | United States |
+| Subprocessor         | Purpose                                                                                     | Data Location |
+| -------------------- | ------------------------------------------------------------------------------------------- | ------------- |
+| **Amplitude**        | Product analytics                                                                           | United States |
+| **Axiom**            | Application telemetry, observability, and logs                                              | United States |
+| **Fivetran**         | Automates data pipeline integration (extract, transformation, and load services) for Recode | United States |
+| **Hex Technologies** | Analytics and debugging                                                                     | United States |
+| **Snowflake**        | Data warehouse                                                                              | United States |
 
 ---
 
@@ -88,15 +88,14 @@ This subprocessor list is reviewed regularly. Zed will notify customers of mater
 
 ---
 
-## AI Services (Zed-Hosted Models)
+## AI Services (Cloud Model Providers)
 
-_These subprocessors apply only when customers opt to use Zed's hosted AI models. When users supply their own API keys, or use external agents, data is sent directly to the provider and does not pass through Zed's infrastructure._
+_These third-party API providers apply only when customers choose to use cloud AI models with their own keys. When users run local offline models (like Ollama), zero data passes through third-party infrastructure._
 
 | Subprocessor        | Purpose                                                                                                                                                                                                          | Data Location |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| **Anthropic**       | Requests may be sent to Anthropic even if you have another provider's model selected in chat (e.g. for summarization or generating git commit messages). We have a zero data retention agreement with Anthropic, except for models Anthropic designates as covered models, for which Anthropic retains prompts and outputs for 30 days for trust and safety purposes ([Anthropic's policy](https://support.claude.com/en/articles/15425996-data-retention-practices-for-mythos-class-models)). | United States |
-| **Baseten**         | Inference infrastructure for Edit Predictions                                                                                                                                                                    | United States |
-| **Exa Labs**        | AI-powered contextual search and retrieval                                                                                                                                                                       | United States |
-| **Google (Vertex)** | Requests may be sent to Google even if you have another provider's model selected in chat (e.g. for summarization). We have a zero data retention agreement with Google.                                         | United States |
-| **OpenAI**          | Requests may be sent to OpenAI even if you have another provider's model selected in chat (e.g. for summarization or generating git commit messages). We have a zero data retention agreement with OpenAI.       | United States |
-| **xAI**             | Requests may be sent to xAI even if you have another provider's model selected in chat (e.g. for summarization or generating git commit messages). We have a zero data retention agreement with xAI.             | United States |
+| **Anthropic**       | LLM completions for chat and code generation when Anthropic models are selected. Zero data retention agreements apply where available.                                                                           | United States |
+| **Google (Vertex)** | LLM completions for chat and code generation when Gemini models are selected. Zero data retention agreements apply where available.                                                                             | United States |
+| **OpenAI**          | LLM completions for chat and code generation when OpenAI models are selected. Zero data retention agreements apply where available.                                                                               | United States |
+| **xAI**             | LLM completions for chat and code generation when xAI models are selected. Zero data retention agreements apply where available.                                                                                  | United States |
+| **OpenRouter**      | Unified routing gateway for open-source and proprietary models when OpenRouter is selected.                                                                                                                      | United States |
