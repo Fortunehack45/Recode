@@ -179,6 +179,7 @@ members = [
     "crates/recode_buffer",
     "crates/recode_lsp",
     "crates/recode_shell",
+    "crates/recode_terminal_palette",
     "crates/recode_workspace",
     "crates/refineable",
     "crates/refineable/derive_refineable",
