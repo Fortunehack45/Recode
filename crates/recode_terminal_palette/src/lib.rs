@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Terminal Grid, Fuzzy Search, and Command Palette Engine.
 //!
 //! Provides dynamic PTY cell grid calculations, scrollback history,

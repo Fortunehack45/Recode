@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Workspace, Multi-Root File Tree, and Navigation Engine.
 //!
 //! Provides directory tree sorting, visible row projections, keyboard traversal,

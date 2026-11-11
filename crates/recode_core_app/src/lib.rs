@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Unified Desktop Application Engine.
 //!
 //! Integrates text editing, layout docking, workspace files, LSP client,

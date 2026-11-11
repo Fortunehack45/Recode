@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Theming and Layout Shell Engine.
 //!
 //! Provides design token theme management, responsive docking topology,

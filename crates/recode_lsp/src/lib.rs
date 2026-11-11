@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Language Server Protocol (LSP) Client and Diagnostics Engine.
 //!
 //! Provides JSON-RPC 2.0 Content-Length framing, document lifecycle tracking,

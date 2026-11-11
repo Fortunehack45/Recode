@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Text Buffer & Editing Engine.
 //!
 //! Provides coordinate addressing, grapheme-aware navigation, multi-cursor

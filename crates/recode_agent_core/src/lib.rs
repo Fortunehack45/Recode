@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Recode. All rights reserved.
+// Proprietary and confidential. Unauthorized copying, modification, or redistribution is strictly prohibited.
+
 //! Recode Core Clean-Room Agent Panel, LLM Integration, and Tools Engine.
 //!
 //! Provides conversation transcripts, streaming message bubbles, local Ollama integration,
