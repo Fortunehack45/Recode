@@ -223,7 +223,7 @@ pub fn init(languages: Arc<LanguageRegistry>, fs: Arc<dyn Fs>, node: NodeRuntime
             ..Default::default()
         },
         LanguageInfo {
-            name: "zed-keybind-context",
+            name: "recode-keybind-context",
             ..Default::default()
         },
     ];
@@ -423,7 +423,7 @@ mod tests {
         let language_of = |path: &str, cx: &App| {
             let file: Arc<dyn File> = Arc::new(TestFile {
                 path: Arc::from(rel_path(path)),
-                root_name: "zed".into(),
+                root_name: "recode".into(),
                 local_root: None,
             });
 

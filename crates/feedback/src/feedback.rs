@@ -4,19 +4,19 @@ use gpui::{App, ClipboardItem, PromptLevel, actions};
 use system_specs::{CopySystemSpecsIntoClipboard, SystemSpecs};
 use util::ResultExt;
 use workspace::Workspace;
-use zed_actions::feedback::{EmailZed, FileBugReport, RequestFeature};
+use recode_actions::feedback::{EmailRecode, FileBugReport, RequestFeature};
 
 actions!(
-    zed,
+    recode,
     [
         /// Opens the Recode repository on GitHub.
-        OpenZedRepo,
+        OpenRecodeRepo,
         /// Copies installed extensions to the clipboard for bug reports.
         CopyInstalledExtensionsIntoClipboard
     ]
 );
 
-const ZED_REPO_URL: &str = "https://github.com/Fortunehack45/Recode";
+const RECODE_REPO_URL: &str = "https://github.com/Fortunehack45/Recode";
 
 const REQUEST_FEATURE_URL: &str = "https://github.com/Fortunehack45/Recode/issues";
 
@@ -33,7 +33,7 @@ fn file_bug_report_url(specs: &SystemSpecs) -> String {
     )
 }
 
-fn email_zed_url(specs: &SystemSpecs) -> String {
+fn email_recode_url(specs: &SystemSpecs) -> String {
     format!(
         concat!("mailto:support@recode.dev", "?", "body={}"),
         email_body(specs)
@@ -96,20 +96,20 @@ pub fn init(cx: &mut App) {
                 })
                 .detach();
             })
-            .register_action(move |_, _: &EmailZed, window, cx| {
+            .register_action(move |_, _: &EmailRecode, window, cx| {
                 let specs =
                     SystemSpecs::new(window, cx, telemetry::os_name(), telemetry::os_version());
                 cx.spawn_in(window, async move |_, cx| {
                     let specs = specs.await;
                     cx.update(|_, cx| {
-                        cx.open_url(&email_zed_url(&specs));
+                        cx.open_url(&email_recode_url(&specs));
                     })
                     .log_err();
                 })
                 .detach();
             })
-            .register_action(move |_, _: &OpenZedRepo, _, cx| {
-                cx.open_url(ZED_REPO_URL);
+            .register_action(move |_, _: &OpenRecodeRepo, _, cx| {
+                cx.open_url(RECODE_REPO_URL);
             });
     })
     .detach();

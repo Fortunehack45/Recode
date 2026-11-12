@@ -48,7 +48,7 @@ use settings::Settings;
 use stack_frame_list::StackFrameList;
 use task::{
     BuildTaskDefinition, DebugScenario, SharedTaskContext, Shell, ShellBuilder, SpawnInTerminal,
-    TaskContext, ZedDebugConfig, substitute_variables_in_str,
+    TaskContext, RecodeDebugConfig, substitute_variables_in_str,
 };
 use terminal_view::TerminalView;
 use ui::{
@@ -755,8 +755,8 @@ impl RunningState {
                     .for_each(|value| Self::substitute_variables_in_config(value, context));
             }
             serde_json::Value::String(s) => {
-                // Some built-in zed tasks wrap their arguments in quotes as they might contain spaces.
-                if s.starts_with("\"$ZED_") && s.ends_with('"') {
+                // Some built-in recode tasks wrap their arguments in quotes as they might contain spaces.
+                if s.starts_with("\"$RECODE_") && s.ends_with('"') {
                     *s = s[1..s.len() - 1].to_string();
                 }
                 if let Some(substituted) = substitute_variables_in_str(s, context) {
@@ -817,8 +817,8 @@ impl RunningState {
                     .for_each(|value| Self::relativize_paths(None, value, context));
             }
             serde_json::Value::String(s) if key == Some("program") || key == Some("cwd") => {
-                // Some built-in zed tasks wrap their arguments in quotes as they might contain spaces.
-                if s.starts_with("\"$ZED_") && s.ends_with('"') {
+                // Some built-in recode tasks wrap their arguments in quotes as they might contain spaces.
+                if s.starts_with("\"$RECODE_") && s.ends_with('"') {
                     *s = s[1..s.len() - 1].to_string();
                 }
                 resolve_path(s);
@@ -1274,7 +1274,7 @@ impl RunningState {
                     })?
                     .await?;
 
-                let zed_config = ZedDebugConfig {
+                let recode_config = RecodeDebugConfig {
                     label: label.clone(),
                     adapter: adapter.clone(),
                     request,
@@ -1283,7 +1283,7 @@ impl RunningState {
 
                 let scenario = dap_registry
                     .adapter(&adapter)
-                    .with_context(|| anyhow!("{adapter}: is not a valid adapter name"))?.config_from_zed_format(zed_config)
+                    .with_context(|| anyhow!("{adapter}: is not a valid adapter name"))?.config_from_recode_format(recode_config)
                     .await?;
                 config = scenario.config;
                 util::merge_non_null_json_value_into(extra_config, &mut config);
@@ -1293,7 +1293,7 @@ impl RunningState {
                 let Err(e) = request_type else {
                     unreachable!();
                 };
-                anyhow::bail!("Zed cannot determine how to run this debug scenario. `build` field was not provided and Debug Adapter won't accept provided configuration because: {e}");
+                anyhow::bail!("Recode cannot determine how to run this debug scenario. `build` field was not provided and Debug Adapter won't accept provided configuration because: {e}");
             };
 
             Ok(DebugTaskDefinition {

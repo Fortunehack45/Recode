@@ -161,7 +161,7 @@ pub use workspace_settings::{
     RestoreOnStartupBehavior, StatusBarSettings, TabBarSettings, WorkspaceSettings,
     closing_last_window_quits_app, observe_accessible_mode,
 };
-use zed_actions::{Spawn, feedback::FileBugReport, theme::ToggleMode};
+use recode_actions::{Spawn, feedback::FileBugReport, theme::ToggleMode};
 
 use crate::{dock::PanelSizeState, item::ItemBufferKind, notifications::NotificationId};
 use crate::{
@@ -309,15 +309,15 @@ fn render_window_title_format(
     segments.join(separator)
 }
 
-static ZED_WINDOW_SIZE: LazyLock<Option<Size<Pixels>>> = LazyLock::new(|| {
-    env::var("ZED_WINDOW_SIZE")
+static RECODE_WINDOW_SIZE: LazyLock<Option<Size<Pixels>>> = LazyLock::new(|| {
+    env::var("RECODE_WINDOW_SIZE")
         .ok()
         .as_deref()
         .and_then(parse_pixel_size_env_var)
 });
 
-static ZED_WINDOW_POSITION: LazyLock<Option<Point<Pixels>>> = LazyLock::new(|| {
-    env::var("ZED_WINDOW_POSITION")
+static RECODE_WINDOW_POSITION: LazyLock<Option<Point<Pixels>>> = LazyLock::new(|| {
+    env::var("RECODE_WINDOW_POSITION")
         .ok()
         .as_deref()
         .and_then(parse_pixel_position_env_var)
@@ -7322,7 +7322,7 @@ impl Workspace {
 
             let Some(task) = task else {
                 anyhow::bail!(
-                    "failed to construct view from leader (maybe from a different version of zed?)"
+                    "failed to construct view from leader (maybe from a different version of Recode?)"
                 );
             };
 
@@ -9470,8 +9470,8 @@ fn leader_border_for_pane(
 }
 
 fn window_bounds_env_override() -> Option<Bounds<Pixels>> {
-    ZED_WINDOW_POSITION
-        .zip(*ZED_WINDOW_SIZE)
+    RECODE_WINDOW_POSITION
+        .zip(*RECODE_WINDOW_SIZE)
         .map(|(position, size)| Bounds {
             origin: position,
             size,
@@ -10662,9 +10662,9 @@ actions!(
         /// Use `collab_panel::OpenSelectedChannelNotes` to open the channel notes for the selected
         /// channel in the collab panel.
         ///
-        /// If you want to open a specific channel, use `zed::OpenZedUrl` with a channel notes URL -
+        /// If you want to open a specific channel, use `recode::OpenRecodeUrl` with a channel notes URL -
         /// can be copied via "Copy link to section" in the context menu of the channel notes
-        /// buffer. These URLs look like `https://zed.dev/channel/channel-name-CHANNEL_ID/notes`.
+        /// buffer. These URLs look like `https://recode.dev/channel/channel-name-CHANNEL_ID/notes`.
         OpenChannelNotes,
         /// Mutes your microphone.
         Mute,
@@ -10690,11 +10690,11 @@ pub struct OpenChannelNotesById {
 }
 
 actions!(
-    zed,
+    recode,
     [
-        /// Opens the Zed log file.
+        /// Opens the Recode log file.
         OpenLog,
-        /// Reveals the Zed log file in the system file manager.
+        /// Reveals the Recode log file in the system file manager.
         RevealLogInFileManager
     ]
 );
@@ -11005,7 +11005,7 @@ pub async fn get_any_active_multi_workspace(
         })
         .await?;
     }
-    activate_any_workspace_window(&mut cx).context("could not open zed")
+    activate_any_workspace_window(&mut cx).context("could not open recode")
 }
 
 pub fn activate_any_workspace_window(cx: &mut AsyncApp) -> Option<WindowHandle<MultiWorkspace>> {
@@ -11263,7 +11263,7 @@ pub enum WorkspaceMatching {
     /// Match paths against existing worktrees including subdirectories, and
     /// fall back to any existing window if no worktree matched.
     ///
-    /// For example, `zed -a foo/bar` will activate the `bar` workspace if it
+    /// For example, `recode -a foo/bar` will activate the `bar` workspace if it
     /// exists, otherwise it will open a new window with `foo/bar` as the root.
     MatchSubdirectory,
 }
@@ -12802,7 +12802,7 @@ mod tests {
             file_stem: Some("main".to_string()),
             remote_name: Some("nickname".to_string()),
             remote_host: Some("example.com".to_string()),
-            app_name: "Zed",
+            app_name: "Recode",
             branch: Some("main".to_string()),
         };
 
@@ -12858,7 +12858,7 @@ mod tests {
             file_stem: Some("main".to_string()),
             remote_name: None,
             remote_host: None,
-            app_name: "Zed",
+            app_name: "Recode",
             branch: None,
         };
 
@@ -12880,14 +12880,14 @@ mod tests {
     fn test_render_window_title_format_renders_new_variables() {
         let context = WindowTitleContext {
             project_name: "project".to_string(),
-            app_name: "Zed",
+            app_name: "Recode",
             branch: Some("feature/foo".to_string()),
             ..Default::default()
         };
 
         assert_eq!(
             render_window_title_format("${projectName}${separator}${appName}", " — ", &context),
-            "project — Zed"
+            "project — Recode"
         );
         assert_eq!(
             render_window_title_format("${projectName}${separator}${branch}", " — ", &context),
@@ -13289,7 +13289,7 @@ mod tests {
             });
         });
         cx.executor().run_until_parked();
-        assert_eq!(cx.window_title().as_deref(), Some("Zed — root1, root2"));
+        assert_eq!(cx.window_title().as_deref(), Some("Recode — root1, root2"));
 
         let item = cx.new(|cx| {
             TestItem::new(cx).with_project_items(&[TestProjectItem::new_in_worktree(
@@ -13306,7 +13306,7 @@ mod tests {
         let expected_file_path = path!("/root1/src/one.txt");
         assert_eq!(
             cx.window_title().as_deref(),
-            Some(format!("Zed — root1, root2 — one — {expected_file_path}").as_str())
+            Some(format!("Recode — root1, root2 — one — {expected_file_path}").as_str())
         );
     }
 
@@ -19649,7 +19649,7 @@ mod tests {
     async fn test_toggle_theme_mode_persists_and_updates_active_theme(cx: &mut TestAppContext) {
         use settings::{ThemeName, ThemeSelection};
         use theme::SystemAppearance;
-        use zed_actions::theme::ToggleMode;
+        use recode_actions::theme::ToggleMode;
 
         init_test(cx);
 

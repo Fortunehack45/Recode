@@ -1028,7 +1028,7 @@ fn versioned_archive_cache_dir(
     sha256: Option<&str>,
 ) -> PathBuf {
     let version = version.unwrap_or_default();
-    let sanitized_version = sanitize_path_component(version);
+    let sanitirecode_version = sanitize_path_component(version);
 
     let mut version_hasher = Sha256::new();
     version_hasher.update(version.as_bytes());
@@ -1043,7 +1043,7 @@ fn versioned_archive_cache_dir(
     let archive_hash = format!("{:x}", archive_hasher.finalize());
 
     base_dir.join(format!(
-        "v_{sanitized_version}_{}_{}",
+        "v_{sanitirecode_version}_{}_{}",
         &version_hash[..16],
         &archive_hash[..16],
     ))

@@ -102,7 +102,7 @@ impl VsCodeSettings {
     fn read_window_title_format(&self) -> Option<String> {
         self.read_string("window.title")
             .map(|template| translate_vscode_window_title_format(&template))
-            // If every placeholder is dropped during translation, keep Zed's
+            // If every placeholder is dropped during translation, keep Recode's
             // default title behavior instead of importing a template that
             // renders as nothing but whitespace.
             .filter(|template| !template.trim().is_empty())
@@ -1002,7 +1002,7 @@ impl VsCodeSettings {
             .map(|v| {
                 v.iter()
                     .map(|(k, v)| (k.clone(), v.to_string()))
-                    // zed does not support substitutions, so this can break env vars
+                    // recode does not support substitutions, so this can break env vars
                     .filter(|(_, v)| !v.contains('$'))
                     .collect()
             });
@@ -1147,7 +1147,7 @@ impl VsCodeSettings {
             scan_symlinks: None,
             private_files: None,
             hidden_files: None,
-            // Zed cannot represent the writable exceptions in `files.readonlyExclude`
+            // Recode cannot represent the writable exceptions in `files.readonlyExclude`
             read_only_files: Self::enabled_patterns(
                 self.read_value("files.readonlyInclude").filter(|_| {
                     !self
@@ -1170,7 +1170,7 @@ impl VsCodeSettings {
                 patterns
                     .iter()
                     .filter(|(pattern, enabled)| {
-                        // Zed reserves `...` for inheritance, not a literal path
+                        // Recode reserves `...` for inheritance, not a literal path
                         !pattern.is_empty()
                             && pattern.as_str() != SplicingVec::REST
                             && enabled.as_bool() == Some(true)
@@ -1209,7 +1209,7 @@ fn translate_vscode_window_title_format(template: &str) -> String {
             | "remoteHost" | "appName" | "branch" | "separator" => {
                 translated.push_str(&template[variable_start..=content_end]);
             }
-            // Keep VS Code alias support in the importer so native Zed settings
+            // Keep VS Code alias support in the importer so native Recode settings
             // only expose the documented placeholder names.
             "rootName" => translated.push_str("${projectName}"),
             "activeEditorShort" => translated.push_str("${fileName}"),
@@ -1217,7 +1217,7 @@ fn translate_vscode_window_title_format(template: &str) -> String {
             "activeEditorLong" => translated.push_str("${filePath}"),
             "activeRepositoryBranchName" => translated.push_str("${branch}"),
             // VS Code's `${remoteName}` is a provider label such as `SSH`, while
-            // Zed's `${remoteName}` resolves to the connection's name or host,
+            // Recode's `${remoteName}` resolves to the connection's name or host,
             // so the token is dropped rather than imported with mismatched
             // semantics.
             _ => {}
@@ -1587,7 +1587,7 @@ mod tests {
 
         assert_eq!(imported_title("{}"), None);
 
-        // VS Code variables are translated to their Zed equivalents.
+        // VS Code variables are translated to their Recode equivalents.
         assert_eq!(
             imported_title(
                 r#"{ "window.title": "${rootName} ${activeRepositoryBranchName} ${activeEditorMedium}" }"#,
@@ -1595,21 +1595,21 @@ mod tests {
             Some("${projectName} ${branch} ${relativePath}".to_string())
         );
 
-        // Zed-native variables pass through unchanged.
+        // Recode-native variables pass through unchanged.
         assert_eq!(
             imported_title(r#"{ "window.title": "${projectName}${separator}${filePath}" }"#),
             Some("${projectName}${separator}${filePath}".to_string())
         );
 
         // VS Code's `${remoteName}` is a provider label such as `SSH`, which
-        // doesn't match Zed's connection-name semantics, so it is dropped.
+        // doesn't match Recode's connection-name semantics, so it is dropped.
         assert_eq!(
             imported_title(r#"{ "window.title": "${remoteName}: ${rootName}" }"#),
             Some(": ${projectName}".to_string())
         );
 
         // Templates that translate to nothing but whitespace fall back to
-        // Zed's default title instead of overriding it.
+        // Recode's default title instead of overriding it.
         assert_eq!(
             imported_title(r#"{ "window.title": " ${activeFolderShort} " }"#),
             None

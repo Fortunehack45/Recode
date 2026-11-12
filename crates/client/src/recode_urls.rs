@@ -50,7 +50,7 @@ pub fn start_trial_url(_cx: &App) -> String {
     DEFAULT_RECODE_REPO_URL.to_string()
 }
 
-pub fn upgrade_to_zed_pro_url(_cx: &App) -> String {
+pub fn upgrade_to_recode_pro_url(_cx: &App) -> String {
     DEFAULT_RECODE_REPO_URL.to_string()
 }
 

@@ -1249,7 +1249,7 @@ mod tests {
     #[test]
     fn test_metadata_block_text_is_verbatim() {
         let parsed =
-            parse_markdown_with_options("---\nurl: https://zed.dev\n---\nBody", false, false, true);
+            parse_markdown_with_options("---\nurl: https://recode.dev\n---\nBody", false, false, true);
         assert!(
             parsed
                 .events

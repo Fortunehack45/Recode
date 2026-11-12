@@ -14,7 +14,7 @@ use serde::Serialize;
 use std::{cmp::Reverse, path::PathBuf};
 use ui::prelude::*;
 use workspace::{ModalView, Workspace};
-use zed_actions::ShowCallStats;
+use recode_actions::ShowCallStats;
 
 const WEBRTC_AUDIO_SAMPLES_PER_MILLISECOND: f64 = 48.0;
 const PLAYBACK_FRAME_DURATION_MILLISECONDS: u64 = 10;
@@ -133,7 +133,7 @@ impl CallStatsModal {
             return;
         };
         let save_dialog =
-            cx.prompt_for_new_path(&PathBuf::default(), Some("zed-call-diagnostics.json"));
+            cx.prompt_for_new_path(&PathBuf::default(), Some("recode-call-diagnostics.json"));
         cx.spawn(async move |_, cx| {
             let Some(path) = save_dialog.await?? else {
                 return anyhow::Ok(());

@@ -249,14 +249,14 @@ impl From<BedrockModelMode> for ModelMode {
 /// under in the keychain.
 const AMAZON_AWS_URL: &str = "https://amazonaws.com";
 
-// These environment variables all use a `ZED_` prefix because we don't want to overwrite the user's AWS credentials.
-static ZED_BEDROCK_ACCESS_KEY_ID_VAR: LazyLock<EnvVar> = env_var!("ZED_ACCESS_KEY_ID");
-static ZED_BEDROCK_SECRET_ACCESS_KEY_VAR: LazyLock<EnvVar> = env_var!("ZED_SECRET_ACCESS_KEY");
-static ZED_BEDROCK_SESSION_TOKEN_VAR: LazyLock<EnvVar> = env_var!("ZED_SESSION_TOKEN");
-static ZED_AWS_PROFILE_VAR: LazyLock<EnvVar> = env_var!("ZED_AWS_PROFILE");
-static ZED_BEDROCK_REGION_VAR: LazyLock<EnvVar> = env_var!("ZED_AWS_REGION");
-static ZED_AWS_ENDPOINT_VAR: LazyLock<EnvVar> = env_var!("ZED_AWS_ENDPOINT");
-static ZED_BEDROCK_BEARER_TOKEN_VAR: LazyLock<EnvVar> = env_var!("ZED_BEDROCK_BEARER_TOKEN");
+// These environment variables all use a `RECODE_` prefix because we don't want to overwrite the user's AWS credentials.
+static RECODE_BEDROCK_ACCESS_KEY_ID_VAR: LazyLock<EnvVar> = env_var!("RECODE_ACCESS_KEY_ID");
+static RECODE_BEDROCK_SECRET_ACCESS_KEY_VAR: LazyLock<EnvVar> = env_var!("RECODE_SECRET_ACCESS_KEY");
+static RECODE_BEDROCK_SESSION_TOKEN_VAR: LazyLock<EnvVar> = env_var!("RECODE_SESSION_TOKEN");
+static RECODE_AWS_PROFILE_VAR: LazyLock<EnvVar> = env_var!("RECODE_AWS_PROFILE");
+static RECODE_BEDROCK_REGION_VAR: LazyLock<EnvVar> = env_var!("RECODE_AWS_REGION");
+static RECODE_AWS_ENDPOINT_VAR: LazyLock<EnvVar> = env_var!("RECODE_AWS_ENDPOINT");
+static RECODE_BEDROCK_BEARER_TOKEN_VAR: LazyLock<EnvVar> = env_var!("RECODE_BEDROCK_BEARER_TOKEN");
 
 /// AWS Regions where the `bedrock-mantle` endpoint is available.
 /// See <https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html#regions>.
@@ -516,7 +516,7 @@ impl State {
         let credentials_provider = self.credentials_provider.clone();
         cx.spawn(async move |this, cx| {
             // Try environment variables first
-            let (auth, from_env) = if let Some(bearer_token) = &ZED_BEDROCK_BEARER_TOKEN_VAR.value {
+            let (auth, from_env) = if let Some(bearer_token) = &RECODE_BEDROCK_BEARER_TOKEN_VAR.value {
                 if !bearer_token.is_empty() {
                     (
                         Some(BedrockAuth::ApiKey {
@@ -527,10 +527,10 @@ impl State {
                 } else {
                     (None, false)
                 }
-            } else if let Some(access_key_id) = &ZED_BEDROCK_ACCESS_KEY_ID_VAR.value {
-                if let Some(secret_access_key) = &ZED_BEDROCK_SECRET_ACCESS_KEY_VAR.value {
+            } else if let Some(access_key_id) = &RECODE_BEDROCK_ACCESS_KEY_ID_VAR.value {
+                if let Some(secret_access_key) = &RECODE_BEDROCK_SECRET_ACCESS_KEY_VAR.value {
                     if !access_key_id.is_empty() && !secret_access_key.is_empty() {
-                        let session_token = ZED_BEDROCK_SESSION_TOKEN_VAR
+                        let session_token = RECODE_BEDROCK_SESSION_TOKEN_VAR
                             .value
                             .as_deref()
                             .filter(|s| !s.is_empty())
@@ -592,7 +592,7 @@ impl State {
     /// Get the resolved region. Checks env var, then settings, then defaults to us-east-1.
     fn get_region(&self) -> String {
         // Priority: env var > settings > default
-        if let Some(region) = ZED_BEDROCK_REGION_VAR.value.as_deref() {
+        if let Some(region) = RECODE_BEDROCK_REGION_VAR.value.as_deref() {
             if !region.is_empty() {
                 return region.to_string();
             }
@@ -1296,7 +1296,7 @@ async fn resolve_request_auth(
                     secret_access_key,
                     session_token,
                     None,
-                    "zed-bedrock-provider",
+                    "recode-bedrock-provider",
                 ),
             });
         }
@@ -2935,14 +2935,14 @@ impl Render for ConfigurationView {
             Some(BedrockAuth::IamCredentials { .. }) if env_var_set => {
                 format!(
                     "Using IAM credentials from {} and {} environment variables",
-                    ZED_BEDROCK_ACCESS_KEY_ID_VAR.name, ZED_BEDROCK_SECRET_ACCESS_KEY_VAR.name
+                    RECODE_BEDROCK_ACCESS_KEY_ID_VAR.name, RECODE_BEDROCK_SECRET_ACCESS_KEY_VAR.name
                 )
             }
             Some(BedrockAuth::IamCredentials { .. }) => "Using IAM credentials".into(),
             Some(BedrockAuth::ApiKey { .. }) if env_var_set => {
                 format!(
                     "Using Bedrock API Key from {} environment variable",
-                    ZED_BEDROCK_BEARER_TOKEN_VAR.name
+                    RECODE_BEDROCK_BEARER_TOKEN_VAR.name
                 )
             }
             Some(BedrockAuth::ApiKey { .. }) => "Using Bedrock API Key".into(),
@@ -2961,10 +2961,10 @@ impl Render for ConfigurationView {
         let tooltip_label = if env_var_set {
             Some(format!(
                 "To reset your credentials, unset the {}, {}, and {} or {} environment variables.",
-                ZED_BEDROCK_ACCESS_KEY_ID_VAR.name,
-                ZED_BEDROCK_SECRET_ACCESS_KEY_VAR.name,
-                ZED_BEDROCK_SESSION_TOKEN_VAR.name,
-                ZED_BEDROCK_BEARER_TOKEN_VAR.name
+                RECODE_BEDROCK_ACCESS_KEY_ID_VAR.name,
+                RECODE_BEDROCK_SECRET_ACCESS_KEY_VAR.name,
+                RECODE_BEDROCK_SESSION_TOKEN_VAR.name,
+                RECODE_BEDROCK_BEARER_TOKEN_VAR.name
             ))
         } else if is_settings_derived {
             Some(
@@ -3105,10 +3105,10 @@ impl ConfigurationView {
             .child(
                 Label::new(format!(
                     "You can also set the {}, {} and {} environment variables (or {} for Bedrock API Key authentication) and restart Recode.",
-                    ZED_BEDROCK_ACCESS_KEY_ID_VAR.name,
-                    ZED_BEDROCK_SECRET_ACCESS_KEY_VAR.name,
-                    ZED_BEDROCK_REGION_VAR.name,
-                    ZED_BEDROCK_BEARER_TOKEN_VAR.name
+                    RECODE_BEDROCK_ACCESS_KEY_ID_VAR.name,
+                    RECODE_BEDROCK_SECRET_ACCESS_KEY_VAR.name,
+                    RECODE_BEDROCK_REGION_VAR.name,
+                    RECODE_BEDROCK_BEARER_TOKEN_VAR.name
                 ))
                 .size(LabelSize::Small)
                 .color(Color::Muted),
@@ -3116,9 +3116,9 @@ impl ConfigurationView {
             .child(
                 Label::new(format!(
                     "Optionally, if your environment uses AWS CLI profiles, you can set {}; if it requires a custom endpoint, you can set {}; and if it requires a Session Token, you can set {}.",
-                    ZED_AWS_PROFILE_VAR.name,
-                    ZED_AWS_ENDPOINT_VAR.name,
-                    ZED_BEDROCK_SESSION_TOKEN_VAR.name
+                    RECODE_AWS_PROFILE_VAR.name,
+                    RECODE_AWS_ENDPOINT_VAR.name,
+                    RECODE_BEDROCK_SESSION_TOKEN_VAR.name
                 ))
                 .size(LabelSize::Small)
                 .color(Color::Muted)
@@ -3131,7 +3131,7 @@ impl ConfigurationView {
             .child(
                 Label::new(format!(
                     "Region is configured via {} environment variable or settings.json (defaults to us-east-1).",
-                    ZED_BEDROCK_REGION_VAR.name
+                    RECODE_BEDROCK_REGION_VAR.name
                 ))
                 .size(LabelSize::Small)
                 .color(Color::Muted)
@@ -3472,7 +3472,7 @@ mod tests {
             BedrockRequestAuth::ApiKey { api_key } if api_key == "token"
         ));
 
-        // An API key configured in Zed takes precedence over the environment.
+        // An API key configured in Recode takes precedence over the environment.
         provider.state.update(cx, |state, _| {
             state.set_auth(Some(BedrockAuth::ApiKey {
                 api_key: "configured".into(),

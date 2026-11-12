@@ -1,7 +1,7 @@
 use crate::{
     AuthenticateError, LanguageModel, LanguageModelCompletionError, LanguageModelId,
     LanguageModelProvider, LanguageModelProviderId, LanguageModelProviderState,
-    ZED_CLOUD_PROVIDER_ID, unavailable_error,
+    RECODE_CLOUD_PROVIDER_ID, unavailable_error,
 };
 use collections::{BTreeMap, HashSet};
 use gpui::{App, Context, Entity, EventEmitter, Global, Task, prelude::*};
@@ -101,8 +101,8 @@ impl LanguageModel {
         self.id == other.id && self.provider_id == other.provider_id
     }
 
-    pub fn is_provided_by_zed(&self) -> bool {
-        self.provider_id == ZED_CLOUD_PROVIDER_ID
+    pub fn is_provided_by_recode(&self) -> bool {
+        self.provider_id == RECODE_CLOUD_PROVIDER_ID
     }
 }
 
@@ -194,13 +194,13 @@ impl LanguageModelRegistry {
     }
 
     pub fn providers(&self) -> Vec<Arc<dyn LanguageModelProvider>> {
-        let zed_provider_id = LanguageModelProviderId("zed.dev".into());
+        let recode_provider_id = LanguageModelProviderId("recode.dev".into());
         let mut providers = Vec::with_capacity(self.providers.len());
-        if let Some(provider) = self.providers.get(&zed_provider_id) {
+        if let Some(provider) = self.providers.get(&recode_provider_id) {
             providers.push(provider.clone());
         }
         providers.extend(self.providers.values().filter_map(|p| {
-            if p.id() != zed_provider_id {
+            if p.id() != recode_provider_id {
                 Some(p.clone())
             } else {
                 None
@@ -300,9 +300,6 @@ impl LanguageModelRegistry {
     pub fn provider(&self, id: &LanguageModelProviderId) -> Option<Arc<dyn LanguageModelProvider>> {
         if let Some(provider) = self.providers.get(id) {
             return Some(provider.clone());
-        }
-        if id.0.as_ref() == "recode.dev" {
-            return self.providers.get(&ZED_CLOUD_PROVIDER_ID).cloned();
         }
         None
     }
@@ -475,7 +472,7 @@ impl LanguageModelRegistry {
 
     pub fn default_model(&self) -> Option<LanguageModel> {
         #[cfg(debug_assertions)]
-        if std::env::var("ZED_SIMULATE_NO_LLM_PROVIDER").is_ok() {
+        if std::env::var("RECODE_SIMULATE_NO_LLM_PROVIDER").is_ok() {
             return None;
         }
 
@@ -496,7 +493,7 @@ impl LanguageModelRegistry {
 
     pub fn inline_assistant_model(&self) -> Option<LanguageModel> {
         #[cfg(debug_assertions)]
-        if std::env::var("ZED_SIMULATE_NO_LLM_PROVIDER").is_ok() {
+        if std::env::var("RECODE_SIMULATE_NO_LLM_PROVIDER").is_ok() {
             return None;
         }
 
@@ -507,7 +504,7 @@ impl LanguageModelRegistry {
 
     pub fn commit_message_model(&self, cx: &App) -> Option<LanguageModel> {
         #[cfg(debug_assertions)]
-        if std::env::var("ZED_SIMULATE_NO_LLM_PROVIDER").is_ok() {
+        if std::env::var("RECODE_SIMULATE_NO_LLM_PROVIDER").is_ok() {
             return None;
         }
 
@@ -519,7 +516,7 @@ impl LanguageModelRegistry {
 
     pub fn thread_summary_model(&self, cx: &App) -> Option<LanguageModel> {
         #[cfg(debug_assertions)]
-        if std::env::var("ZED_SIMULATE_NO_LLM_PROVIDER").is_ok() {
+        if std::env::var("RECODE_SIMULATE_NO_LLM_PROVIDER").is_ok() {
             return None;
         }
 
@@ -534,7 +531,7 @@ impl LanguageModelRegistry {
     /// the thread's primary model should handle `None` themselves.
     pub fn compaction_model(&self) -> Option<LanguageModel> {
         #[cfg(debug_assertions)]
-        if std::env::var("ZED_SIMULATE_NO_LLM_PROVIDER").is_ok() {
+        if std::env::var("RECODE_SIMULATE_NO_LLM_PROVIDER").is_ok() {
             return None;
         }
 

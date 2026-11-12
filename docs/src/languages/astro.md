@@ -1,6 +1,6 @@
 ---
 title: Astro
-description: "Configure Astro language support in Zed, including language servers, formatting, and debugging."
+description: "Configure Astro language support in Recode, including language servers, formatting, and debugging."
 ---
 
 # Astro

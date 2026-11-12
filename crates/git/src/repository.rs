@@ -1344,7 +1344,7 @@ pub async fn get_git_committer(cx: &AsyncApp) -> GitCommitter {
     }
 
     let git_binary_path =
-        if cfg!(target_os = "macos") && option_env!("ZED_BUNDLE").as_deref() == Some("true") {
+        if cfg!(target_os = "macos") && option_env!("RECODE_BUNDLE").as_deref() == Some("true") {
             cx.update(|cx| {
                 cx.path_for_auxiliary_executable("git")
                     .context("could not find git binary path")
@@ -2118,7 +2118,7 @@ impl GitRepository for RealGitRepository {
             .spawn(async move {
                 let git = git?;
                 // Use `%gs` (reflog subject), not `%s` (commit subject). See
-                // https://github.com/zed-industries/zed/issues/55234 for further
+                // https://github.com/Fortunehack45/Recode/issues/55234 for further
                 // context.
                 //
                 // A stash is a regular commit object whose tree records the working
@@ -3841,7 +3841,7 @@ impl GitBinary {
     }
 
     /// Git, credential helpers, and SSH have separate prompting mechanisms, so
-    /// omitting an askpass delegate must configure more than Zed's prompt path.
+    /// omitting an askpass delegate must configure more than Recode's prompt path.
     async fn run_remote_command<S>(
         &self,
         askpass: Option<AskPassDelegate>,
@@ -3885,7 +3885,7 @@ impl GitBinary {
                     command.env("GIT_SSH_COMMAND", ssh_command);
                 }
                 // Neither of these should be able to route back to a prompt via a
-                // value inherited from the environment Zed was launched with.
+                // value inherited from the environment Recode was launched with.
                 command.env_remove("GIT_ASKPASS");
                 command.env_remove("SSH_ASKPASS");
                 remote_command_output(command.output().await?)
@@ -3898,7 +3898,7 @@ impl GitBinary {
     async fn batch_mode_ssh_command(&self, env: &HashMap<String, String>) -> Option<String> {
         // Same precedence the spawned command ends up with: the project
         // environment is applied over `self.envs`, and both over the environment
-        // Zed itself was launched with, which the child inherits.
+        // Recode itself was launched with, which the child inherits.
         let inherited = |key: &str| {
             env.get(key)
                 .or_else(|| self.envs.get(key))
@@ -3951,7 +3951,7 @@ impl GitBinary {
         }
 
         #[cfg(target_os = "windows")]
-        command.env("ZED_ASKPASS_SOCKET", ask_pass.socket_path());
+        command.env("RECODE_ASKPASS_SOCKET", ask_pass.socket_path());
         let git_process = command.spawn()?;
 
         run_askpass_command(ask_pass, git_process).await
@@ -4208,10 +4208,10 @@ fn parse_upstream_track(upstream_track: &str) -> Result<UpstreamTracking> {
 
 fn checkpoint_author_envs() -> HashMap<String, String> {
     HashMap::from_iter([
-        ("GIT_AUTHOR_NAME".to_string(), "Zed".to_string()),
-        ("GIT_AUTHOR_EMAIL".to_string(), "hi@zed.dev".to_string()),
-        ("GIT_COMMITTER_NAME".to_string(), "Zed".to_string()),
-        ("GIT_COMMITTER_EMAIL".to_string(), "hi@zed.dev".to_string()),
+        ("GIT_AUTHOR_NAME".to_string(), "Recode".to_string()),
+        ("GIT_AUTHOR_EMAIL".to_string(), "hi@recode.dev".to_string()),
+        ("GIT_COMMITTER_NAME".to_string(), "Recode".to_string()),
+        ("GIT_COMMITTER_EMAIL".to_string(), "hi@recode.dev".to_string()),
     ])
 }
 
@@ -6035,7 +6035,7 @@ mod tests {
                         sha: "eb0cae33272689bd11030822939dd2701c52f81e".into(),
                         subject: "Add feature".into(),
                         commit_timestamp: 1762948725,
-                        author_name: SharedString::new_static("Zed"),
+                        author_name: SharedString::new_static("Recode"),
                         has_parent: true,
                     })
                 },
@@ -6047,7 +6047,7 @@ mod tests {
                         sha: "895951d681e5561478c0acdd6905e8aacdfd2249".into(),
                         subject: "Initial commit".into(),
                         commit_timestamp: 1762948695,
-                        author_name: SharedString::new_static("Zed"),
+                        author_name: SharedString::new_static("Recode"),
                         has_parent: false,
                     })
                 }
@@ -6794,8 +6794,8 @@ mod tests {
     #[test]
     fn test_parse_remote_urls() {
         let stdout = concat!(
-            "origin\thttps://github.com/zed-industries/zed.git (fetch) [blob:none]\n",
-            "origin\thttps://github.com/zed-industries/zed.git (push)\n",
+            "origin\thttps://github.com/Fortunehack45/Recode.git (fetch) [blob:none]\n",
+            "origin\thttps://github.com/Fortunehack45/Recode.git (push)\n",
             "upstream\t/Users/user/My Projects/upstream.git (fetch)\n",
             "upstream\t/Users/user/My Projects/upstream.git (push)\n",
             "a\t/x (fetch) dir (fetch)\n",
@@ -6808,7 +6808,7 @@ mod tests {
         assert_eq!(remote_urls.len(), 4);
         assert_eq!(
             remote_urls.get("origin").map(String::as_str),
-            Some("https://github.com/zed-industries/zed.git")
+            Some("https://github.com/Fortunehack45/Recode.git")
         );
         assert_eq!(
             remote_urls.get("upstream").map(String::as_str),
@@ -6848,7 +6848,7 @@ mod tests {
             "remote",
             "add",
             "origin",
-            "https://github.com/zed-industries/zed.git",
+            "https://github.com/Fortunehack45/Recode.git",
         ])
         .await
         .unwrap();
@@ -6871,7 +6871,7 @@ mod tests {
         assert_eq!(remote_urls.len(), 2);
         assert_eq!(
             remote_urls.get("origin").unwrap(),
-            "https://github.com/zed-industries/zed.git"
+            "https://github.com/Fortunehack45/Recode.git"
         );
         assert_eq!(
             remote_urls.get("upstream").unwrap(),

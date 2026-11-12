@@ -25,12 +25,12 @@ pub fn router() -> Router {
         .route("/telemetry/hangs", post(post_panic))
 }
 
-pub struct ZedChecksumHeader(Vec<u8>);
+pub struct RecodeChecksumHeader(Vec<u8>);
 
-impl Header for ZedChecksumHeader {
+impl Header for RecodeChecksumHeader {
     fn name() -> &'static HeaderName {
-        static ZED_CHECKSUM_HEADER: OnceLock<HeaderName> = OnceLock::new();
-        ZED_CHECKSUM_HEADER.get_or_init(|| HeaderName::from_static("x-zed-checksum"))
+        static RECODE_CHECKSUM_HEADER: OnceLock<HeaderName> = OnceLock::new();
+        RECODE_CHECKSUM_HEADER.get_or_init(|| HeaderName::from_static("x-recode-checksum"))
     }
 
     fn decode<'i, I>(values: &mut I) -> Result<Self, axum::headers::Error>
@@ -61,7 +61,7 @@ pub async fn post_panic() -> Result<()> {
 
 pub async fn post_events(
     Extension(app): Extension<Arc<AppState>>,
-    TypedHeader(ZedChecksumHeader(checksum)): TypedHeader<ZedChecksumHeader>,
+    TypedHeader(RecodeChecksumHeader(checksum)): TypedHeader<RecodeChecksumHeader>,
     country_code_header: Option<TypedHeader<CloudflareIpCountryHeader>>,
     body: Bytes,
 ) -> Result<()> {
@@ -119,7 +119,7 @@ pub async fn post_events(
 }
 
 pub fn calculate_json_checksum(app: Arc<AppState>, json: &impl AsRef<[u8]>) -> Option<Vec<u8>> {
-    let checksum_seed = app.config.zed_client_checksum_seed.as_ref()?;
+    let checksum_seed = app.config.recode_client_checksum_seed.as_ref()?;
 
     let mut summer = Sha256::new();
     summer.update(checksum_seed);

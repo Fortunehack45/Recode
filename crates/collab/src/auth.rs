@@ -33,7 +33,7 @@ pub async fn validate_header<B>(mut req: Request<B>, next: Next<B>) -> impl Into
     if first == "dev-server-token" {
         Err(Error::http(
             StatusCode::UNAUTHORIZED,
-            "Dev servers were removed in Zed 0.157 please upgrade to SSH remoting".to_string(),
+            "Dev servers were removed in Recode 0.157 please upgrade to SSH remoting".to_string(),
         ))?;
     }
 
@@ -55,7 +55,7 @@ pub async fn validate_header<B>(mut req: Request<B>, next: Next<B>) -> impl Into
 
     // Recode Direct GitHub OAuth verification:
     // If the access token is a GitHub token (starts with gh or bearer token),
-    // authenticate directly against GitHub API without requiring Zed Cloud.
+    // authenticate directly against GitHub API without requiring Recode Cloud.
     if access_token.starts_with("gh") || access_token.len() > 20 {
         if let Ok(gh_resp) = http_client
             .get("https://api.github.com/user")
@@ -91,7 +91,7 @@ pub async fn validate_header<B>(mut req: Request<B>, next: Next<B>) -> impl Into
     }
 
     let response = http_client
-        .get(format!("{}/client/users/me", state.config.zed_cloud_url()))
+        .get(format!("{}/client/users/me", state.config.recode_cloud_url()))
         .header("Content-Type", "application/json")
         .header("Authorization", format!("{user_id} {access_token}"))
         .send()

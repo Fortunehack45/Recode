@@ -137,28 +137,28 @@ pub struct Config {
     pub kinesis_stream: Option<String>,
     pub kinesis_access_key: Option<String>,
     pub kinesis_secret_key: Option<String>,
-    pub zed_environment: Arc<str>,
-    pub zed_cloud_internal_api_key: String,
-    pub zed_client_checksum_seed: Option<String>,
+    pub recode_environment: Arc<str>,
+    pub recode_cloud_internal_api_key: String,
+    pub recode_client_checksum_seed: Option<String>,
 }
 
 impl Config {
     pub fn is_development(&self) -> bool {
-        self.zed_environment == "development".into()
+        self.recode_environment == "development".into()
     }
 
-    /// Returns the base `zed.dev` URL.
-    pub fn zed_dot_dev_url(&self) -> &str {
-        match self.zed_environment.as_ref() {
+    /// Returns the base `recode.dev` URL.
+    pub fn recode_dot_dev_url(&self) -> &str {
+        match self.recode_environment.as_ref() {
             "development" => "http://localhost:3000",
             "staging" => "http://localhost:3000",
             _ => "http://localhost:3000",
         }
     }
 
-    /// Returns the base Zed Cloud URL.
-    pub fn zed_cloud_url(&self) -> &str {
-        match self.zed_environment.as_ref() {
+    /// Returns the base Recode Cloud URL.
+    pub fn recode_cloud_url(&self) -> &str {
+        match self.recode_environment.as_ref() {
             "development" => "http://localhost:8787",
             _ => "http://localhost:8080",
         }
@@ -175,14 +175,14 @@ impl Config {
             livekit_secret: None,
             rust_log: None,
             log_json: None,
-            zed_environment: "test".into(),
-            zed_cloud_internal_api_key: "test-internal-api-key".into(),
+            recode_environment: "test".into(),
+            recode_cloud_internal_api_key: "test-internal-api-key".into(),
             blob_store_url: None,
             blob_store_region: None,
             blob_store_access_key: None,
             blob_store_secret_key: None,
             blob_store_bucket: None,
-            zed_client_checksum_seed: None,
+            recode_client_checksum_seed: None,
             kinesis_region: None,
             kinesis_access_key: None,
             kinesis_secret_key: None,
@@ -263,8 +263,8 @@ impl AppState {
             },
             user_service: Arc::new(CloudUserService::new(
                 http_client,
-                config.zed_cloud_url().to_string(),
-                config.zed_cloud_internal_api_key.clone(),
+                config.recode_cloud_url().to_string(),
+                config.recode_cloud_internal_api_key.clone(),
             )),
             config,
         };

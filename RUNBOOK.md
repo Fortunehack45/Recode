@@ -34,8 +34,8 @@ cargo build --release --package recode --package cli
    DATABASE_URL = "postgres://postgres:password@localhost:5432/recode_collab"
    DATABASE_MAX_CONNECTIONS = 5
    HTTP_PORT = 8080
-   ZED_ENVIRONMENT = "development"
-   ZED_CLOUD_INTERNAL_API_KEY = "local-secret"
+   RECODE_ENVIRONMENT = "development"
+   RECODE_CLOUD_INTERNAL_API_KEY = "local-secret"
    ```
 3. Run the collab server:
    ```bash
@@ -60,7 +60,7 @@ cargo build --release --package recode --package cli
      LIVEKIT_SERVER="wss://recode-....livekit.cloud" \
      LIVEKIT_KEY="API_KEY_HERE" \
      LIVEKIT_SECRET="API_SECRET_HERE" \
-     ZED_CLOUD_INTERNAL_API_KEY="recode-internal-secret"
+     RECODE_CLOUD_INTERNAL_API_KEY="recode-internal-secret"
    ```
 4. Deploy using `fly.toml`:
    ```bash

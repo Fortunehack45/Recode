@@ -1074,14 +1074,14 @@ impl ContextProvider for RustContextProvider {
                     "-p".into(),
                     RUST_PACKAGE_TASK_VARIABLE.template_value(),
                 ],
-                cwd: Some("$ZED_DIRNAME".to_owned()),
+                cwd: Some("$RECODE_DIRNAME".to_owned()),
                 ..TaskTemplate::default()
             },
             TaskTemplate {
                 label: "Check all targets (workspace)".into(),
                 command: "cargo".into(),
                 args: vec!["check".into(), "--workspace".into(), "--all-targets".into()],
-                cwd: Some("$ZED_DIRNAME".to_owned()),
+                cwd: Some("$RECODE_DIRNAME".to_owned()),
                 ..TaskTemplate::default()
             },
             TaskTemplate {
@@ -1393,10 +1393,10 @@ async fn human_readable_package_name(
 }
 
 // For providing local `cargo check -p $pkgid` task, we do not need most of the information we have returned.
-// Output example in the root of Zed project:
+// Output example in the root of Recode project:
 // ```sh
 // ❯ cargo pkgid zed
-// path+file:///absolute/path/to/project/zed/crates/zed#0.131.0
+// path+file:///absolute/path/to/project/recode/crates/recode#0.131.0
 // ```
 // Another variant, if a project has a custom package name or hyphen in the name:
 // ```
@@ -2068,7 +2068,7 @@ mod tests {
             "filter range text '{filter_text}' should contain 'ref' for filtering to work",
         );
 
-        // Test for correct range calculation with mixed empty and non-empty tabstops.(See https://github.com/zed-industries/zed/issues/44825)
+        // Test for correct range calculation with mixed empty and non-empty tabstops.(See https://github.com/recode-industries/recode/issues/44825)
         let res = adapter
             .label_for_completion(
                 &lsp::CompletionItem {
@@ -2165,7 +2165,7 @@ mod tests {
             adapter
                 .label_for_symbol(
                     &language::Symbol {
-                        name: "zed".to_string(),
+                        name: "recode".to_string(),
                         kind: language::SymbolKind::Package,
                         container_name: None,
                     },
@@ -2274,8 +2274,8 @@ mod tests {
     fn test_package_name_from_pkgid() {
         for (input, expected) in [
             (
-                "path+file:///absolute/path/to/project/zed/crates/zed#0.131.0",
-                "zed",
+                "path+file:///absolute/path/to/project/recode/crates/recode#0.131.0",
+                "recode",
             ),
             (
                 "path+file:///absolute/path/to/project/custom-package#my-custom-package@0.1.0",
@@ -2290,16 +2290,16 @@ mod tests {
     fn test_target_info_from_metadata() {
         for (input, absolute_path, expected) in [
             (
-                r#"{"packages":[{"id":"path+file:///absolute/path/to/project/zed/crates/zed#0.131.0","manifest_path":"/path/to/zed/Cargo.toml","targets":[{"name":"zed","kind":["bin"],"src_path":"/path/to/zed/src/main.rs"}]}]}"#,
-                "/path/to/zed/src/main.rs",
+                r#"{"packages":[{"id":"path+file:///absolute/path/to/project/recode/crates/recode#0.131.0","manifest_path":"/path/to/recode/Cargo.toml","targets":[{"name":"recode","kind":["bin"],"src_path":"/path/to/recode/src/main.rs"}]}]}"#,
+                "/path/to/recode/src/main.rs",
                 Some((
                     Some(TargetInfo {
-                        package_name: "zed".into(),
-                        target_name: "zed".into(),
+                        package_name: "recode".into(),
+                        target_name: "recode".into(),
                         required_features: Vec::new(),
                         target_kind: TargetKind::Bin,
                     }),
-                    Arc::from("/path/to/zed".as_ref()),
+                    Arc::from("/path/to/recode".as_ref()),
                 )),
             ),
             (

@@ -208,7 +208,7 @@ impl ActivityGuard {
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 #[inline]
 pub fn guess_compositor() -> &'static str {
-    if std::env::var_os("ZED_HEADLESS").is_some() {
+    if std::env::var_os("RECODE_HEADLESS").is_some() {
         return "Headless";
     }
     GraphicalEnvironment::detect().guess_compositor()
@@ -918,7 +918,7 @@ pub struct WindowButtonLayout {
 
 #[cfg(any(target_os = "linux", target_os = "freebsd"))]
 impl WindowButtonLayout {
-    /// Returns Zed's built-in fallback button layout for Linux titlebars.
+    /// Returns Recode's built-in fallback button layout for Linux titlebars.
     pub fn linux_default() -> Self {
         Self {
             left: [None; MAX_BUTTONS_PER_SIDE],

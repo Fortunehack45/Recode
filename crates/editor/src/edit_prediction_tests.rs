@@ -484,7 +484,7 @@ async fn test_edit_prediction_jump_disabled_for_non_zed_providers(cx: &mut gpui:
     init_test(cx, |_| {});
 
     let mut cx = EditorTestContext::new(cx).await;
-    let provider = cx.new(|_| FakeNonZedEditPredictionDelegate::default());
+    let provider = cx.new(|_| FakeNonRecodeEditPredictionDelegate::default());
     assign_editor_completion_provider_non_zed(provider.clone(), &mut cx);
 
     // Cursor is 2+ lines above the proposed edit
@@ -504,17 +504,17 @@ async fn test_edit_prediction_jump_disabled_for_non_zed_providers(cx: &mut gpui:
 
     cx.update_editor(|editor, window, cx| editor.update_visible_edit_prediction(window, cx));
 
-    // For non-Zed providers, there should be no move completion (jump functionality disabled)
+    // For non-Recode providers, there should be no move completion (jump functionality disabled)
     cx.editor(|editor, _, _| {
         if let Some(completion_state) = &editor.active_edit_prediction {
             // Should be an Edit prediction, not a Move prediction
             match &completion_state.completion {
                 EditPrediction::Edit { .. } => {
-                    // This is expected for non-Zed providers
+                    // This is expected for non-Recode providers
                 }
                 EditPrediction::MoveWithin { .. } | EditPrediction::MoveOutside { .. } => {
                     panic!(
-                        "Non-Zed providers should not show Move predictions (jump functionality)"
+                        "Non-Recode providers should not show Move predictions (jump functionality)"
                     );
                 }
             }
@@ -1656,7 +1656,7 @@ fn assign_editor_completion_menu_provider(cx: &mut EditorTestContext) {
 }
 
 fn propose_edits_non_zed<T: ToOffset>(
-    provider: &Entity<FakeNonZedEditPredictionDelegate>,
+    provider: &Entity<FakeNonRecodeEditPredictionDelegate>,
     edits: Vec<(Range<T>, &str)>,
     cx: &mut EditorTestContext,
 ) {
@@ -1679,7 +1679,7 @@ fn propose_edits_non_zed<T: ToOffset>(
 }
 
 fn assign_editor_completion_provider_non_zed(
-    provider: Entity<FakeNonZedEditPredictionDelegate>,
+    provider: Entity<FakeNonRecodeEditPredictionDelegate>,
     cx: &mut EditorTestContext,
 ) {
     cx.update_editor(|editor, window, cx| {
@@ -1778,7 +1778,7 @@ impl EditPredictionDelegate for FakeEditPredictionDelegate {
     }
 
     fn icons(&self, _cx: &gpui::App) -> EditPredictionIconSet {
-        EditPredictionIconSet::new(IconName::ZedPredict)
+        EditPredictionIconSet::new(IconName::RecodePredict)
     }
 
     fn is_enabled(
@@ -1826,11 +1826,11 @@ impl EditPredictionDelegate for FakeEditPredictionDelegate {
 }
 
 #[derive(Default, Clone)]
-pub struct FakeNonZedEditPredictionDelegate {
+pub struct FakeNonRecodeEditPredictionDelegate {
     pub completion: Option<edit_prediction_types::EditPrediction>,
 }
 
-impl FakeNonZedEditPredictionDelegate {
+impl FakeNonRecodeEditPredictionDelegate {
     pub fn set_edit_prediction(
         &mut self,
         completion: Option<edit_prediction_types::EditPrediction>,
@@ -1839,13 +1839,13 @@ impl FakeNonZedEditPredictionDelegate {
     }
 }
 
-impl EditPredictionDelegate for FakeNonZedEditPredictionDelegate {
+impl EditPredictionDelegate for FakeNonRecodeEditPredictionDelegate {
     fn name() -> &'static str {
         "fake-non-zed-provider"
     }
 
     fn display_name() -> &'static str {
-        "Fake Non-Zed Provider"
+        "Fake Non-Recode Provider"
     }
 
     fn show_predictions_in_menu() -> bool {
@@ -1857,7 +1857,7 @@ impl EditPredictionDelegate for FakeNonZedEditPredictionDelegate {
     }
 
     fn icons(&self, _cx: &gpui::App) -> EditPredictionIconSet {
-        EditPredictionIconSet::new(IconName::ZedPredict)
+        EditPredictionIconSet::new(IconName::RecodePredict)
     }
 
     fn is_enabled(

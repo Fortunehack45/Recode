@@ -47,7 +47,7 @@ impl FontFamilyCache {
             .all_font_names()
             .into_iter()
             .filter(|name| {
-                name != ".ZedMono" && name != ".ZedSans" && name != "ZedMono" && name != "ZedSans" && name != "Zed Plex Mono" && name != "Zed Plex Sans"
+                name != ".RecodeMono" && name != ".RecodeSans" && name != "RecodeMono" && name != "RecodeSans"
             })
             .map(SharedString::from)
             .collect();
@@ -94,7 +94,7 @@ impl FontFamilyCache {
                     .all_font_names()
                     .into_iter()
                     .filter(|name| {
-                        name != ".ZedMono" && name != ".ZedSans" && name != "ZedMono" && name != "ZedSans" && name != "Zed Plex Mono" && name != "Zed Plex Sans"
+                        name != ".RecodeMono" && name != ".RecodeSans" && name != "RecodeMono" && name != "RecodeSans"
                     })
                     .map(SharedString::from)
                     .collect();

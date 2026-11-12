@@ -25,8 +25,8 @@ impl FontPickerDelegate {
         let font_family_cache = FontFamilyCache::global(cx);
 
         let current_font = match current_font.as_ref() {
-            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => SharedString::from(".RecodeMono"),
-            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => SharedString::from(".RecodeSans"),
+            ".RecodeMono" | "RecodeMono" => SharedString::from(".RecodeMono"),
+            ".RecodeSans" | "RecodeSans" => SharedString::from(".RecodeSans"),
             _ => current_font,
         };
 
@@ -36,7 +36,7 @@ impl FontPickerDelegate {
 
         fonts.retain(|font| {
             let s = font.as_ref();
-            s != ".ZedMono" && s != ".ZedSans" && s != "ZedMono" && s != "ZedSans" && s != "Zed Plex Mono" && s != "Zed Plex Sans"
+            s != ".RecodeMono" && s != ".RecodeSans" && s != "RecodeMono" && s != "RecodeSans"
         });
 
         if !fonts.iter().any(|f| f.as_ref() == ".RecodeMono") {
@@ -179,10 +179,10 @@ impl PickerDelegate for FontPickerDelegate {
         let font_match = self.filtered_fonts.get(ix)?;
         let font_name: SharedString = font_match.string.clone().into();
         let display_label = match font_name.as_ref() {
-            ".RecodeMono" | "RecodeMono" | ".ZedMono" | "ZedMono" | "Zed Plex Mono" => {
+            ".RecodeMono" | "RecodeMono" | ".RecodeMono" | "RecodeMono" => {
                 SharedString::from("Recode Mono")
             }
-            ".RecodeSans" | "RecodeSans" | ".ZedSans" | "ZedSans" | "Zed Plex Sans" => {
+            ".RecodeSans" | "RecodeSans" | ".RecodeSans" | "RecodeSans" => {
                 SharedString::from("Recode Sans")
             }
             other => {

@@ -43,7 +43,7 @@ use ui::{ContextMenu, prelude::*};
 use util::paths::PathStyle;
 use util::{ResultExt, debug_panic};
 use workspace::{CollaboratorId, Workspace};
-use zed_actions::agent::{Chat, PasteRaw};
+use recode_actions::agent::{Chat, PasteRaw};
 
 #[derive(Default)]
 pub struct SessionCapabilities {
@@ -249,7 +249,7 @@ pub enum MessageEditorEvent {
 
 impl EventEmitter<MessageEditorEvent> for MessageEditor {}
 
-/// Command kinds Zed doesn't know are offered as plain commands without input.
+/// Command kinds Recode doesn't know are offered as plain commands without input.
 fn command_input(command: &acp_v2::AvailableCommand) -> Option<&acp_v2::AvailableCommandInput> {
     match command {
         acp_v2::AvailableCommand::Command(command) => command.input.as_ref(),
@@ -2438,7 +2438,7 @@ mod tests {
 
     #[test]
     fn test_validate_slash_commands_accepts_scope_qualified_skill() {
-        let agent_id = AgentId::from("Zed");
+        let agent_id = AgentId::from("Recode");
         let make_skill = |name: &str, source: &str| AvailableSkill {
             name: name.into(),
             description: "desc".into(),
@@ -2483,15 +2483,15 @@ mod tests {
             );
 
         // The `:` separator is what distinguishes a skill scope from
-        // an MCP server prefix — the dotted form `/zed.deploy` is an
+        // an MCP server prefix — the dotted form `/recode.deploy` is an
         // MCP-style lookup, which doesn't match here.
         MessageEditor::validate_slash_commands("/zed.deploy", &commands, &skills, &agent_id)
             .expect_err("/zed.deploy (dotted) should be treated as an MCP-style prefix and fail");
 
         // Wrong scope is rejected so the resolver doesn't silently
-        // fall through when the user meant a skill. `zed:help` looks
+        // fall through when the user meant a skill. `recode:help` looks
         // like a skill scope qualifier but no skill named `help`
-        // exists in the `zed` worktree (it's an MCP command).
+        // exists in the `recode` worktree (it's an MCP command).
         let err =
             MessageEditor::validate_slash_commands("/zed:help", &commands, &skills, &agent_id)
                 .expect_err(
@@ -2722,7 +2722,7 @@ mod tests {
         fs.insert_tree(
             "/test",
             json!({
-                ".zed": {
+                ".recode": {
                     "tasks.json": r#"[{"label": "test", "command": "echo"}]"#
                 },
                 "src": {

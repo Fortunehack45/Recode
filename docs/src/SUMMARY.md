@@ -223,7 +223,7 @@
 
 # Developing Recode
 
-- [Developing Zed](./development.md)
+- [Developing Recode](./development.md)
   - [macOS](./development/macos.md)
   - [Linux](./development/linux.md)
   - [Windows](./development/windows.md)

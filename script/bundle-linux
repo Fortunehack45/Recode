@@ -11,7 +11,7 @@ Build a release .tar.gz for Linux.
 
 Options:
   -h, --help        Display this help and exit.
-  --flatpak         Set ZED_BUNDLE_TYPE=flatpak so that this can be included in system info
+  --flatpak         Set RECODE_BUNDLE_TYPE=flatpak so that this can be included in system info
   --require-sentry  Require Sentry credentials, CLI, and successful symbol upload (official releases).
   --skip-sentry     Skip symbol upload for local packaging; incompatible with --require-sentry.
   "
@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         --flatpak)
-            export ZED_BUNDLE_TYPE=flatpak
+            export RECODE_BUNDLE_TYPE=flatpak
             shift
             ;;
         --require-sentry)
@@ -85,12 +85,12 @@ elif [[ -z "${SENTRY_AUTH_TOKEN:+set}" ]]; then
     skip_sentry=true
 fi
 
-export ZED_BUNDLE=true
+export RECODE_BUNDLE=true
 
-channel=$(<crates/zed/RELEASE_CHANNEL)
+channel=$(<crates/recode/RELEASE_CHANNEL)
 target_dir="${CARGO_TARGET_DIR:-target}"
 
-version="$(script/get-crate-version zed)"
+version="$(script/get-crate-version recode)"
 # Set RELEASE_VERSION so it's compiled into GPUI and it knows about the version.
 export RELEASE_VERSION="${version}"
 
@@ -126,7 +126,7 @@ if [[ ! "$lld_version" =~ LLD\ ([0-9]+)\. ]] || (( BASH_REMATCH[1] < 12 )); then
 fi
 
 # Build binary in release mode
-cargo --config .cargo/bundle-config.toml rustc --release --target "${target_triple}" --package zed --bin zed -- -C linker="$CC" -C llvm-args=-addrsig -C link-arg=-fuse-ld=lld -C link-arg=--ld-path="$lld" -C link-arg=-Wl,--icf=safe
+cargo --config .cargo/bundle-config.toml rustc --release --target "${target_triple}" --package recode --bin recode -- -C linker="$CC" -C llvm-args=-addrsig -C link-arg=-fuse-ld=lld -C link-arg=--ld-path="$lld" -C link-arg=-Wl,--icf=safe
 cargo --config .cargo/bundle-config.toml build --release --target "${target_triple}" --package cli
 # Build remote_server in separate invocation to prevent feature unification from other crates
 # from influencing dynamic libraries required by it.
@@ -137,13 +137,13 @@ fi
 cargo --config .cargo/bundle-config.toml build --release --target "${remote_server_triple}" --package remote_server
 
 if ! "$skip_sentry"; then
-    echo "Uploading zed debug symbols to sentry..."
+    echo "Uploading recode debug symbols to sentry..."
     # Sentry needs the full ELF for .eh_frame unwinding, not just the debug
     # companion. See https://github.com/getsentry/symbolic/issues/783.
     for attempt in 1 2 3; do
         echo "Attempting sentry upload (attempt $attempt/3)..."
-        if sentry-cli debug-files upload --include-sources --wait -p zed -o zed-dev \
-            "${target_dir}/${target_triple}"/release/zed \
+        if sentry-cli debug-files upload --include-sources --wait -p recode -o recode-dev \
+            "${target_dir}/${target_triple}"/release/recode \
             "${target_dir}/${remote_server_triple}"/release/remote-server; then
             echo "Sentry upload successful on attempt $attempt"
             break
@@ -162,7 +162,7 @@ fi
 # is skipped.
 # We use llvm-objcopy because GNU objcopy on older distros (e.g. Ubuntu 20.04)
 # doesn't understand CREL sections produced by newer LLVM.
-llvm-objcopy --only-keep-debug "${target_dir}/${target_triple}/release/zed" "${target_dir}/${target_triple}/release/zed.dbg"
+llvm-objcopy --only-keep-debug "${target_dir}/${target_triple}/release/recode" "${target_dir}/${target_triple}/release/recode.dbg"
 llvm-objcopy --only-keep-debug "${target_dir}/${remote_server_triple}/release/remote-server" "${target_dir}/${remote_server_triple}/release/remote-server.dbg"
 
 # Ensure that remote_server does not depend on libssl nor libcrypto, as we got rid of these deps.
@@ -183,13 +183,13 @@ fi
 # into a temp directory.
 temp_dir=$(mktemp -d)
 trap 'rm -rf "$temp_dir"' EXIT
-zed_dir="${temp_dir}/zed$suffix.app"
+recode_dir="${temp_dir}/recode$suffix.app"
 
 # Cargo may reuse its outputs on the next invocation. Strip packaging copies
 # so reruns still upload full ELFs and extract complete debug companions.
-mkdir -p "${zed_dir}/bin" "${zed_dir}/libexec"
-llvm-objcopy --strip-unneeded "${target_dir}/${target_triple}/release/zed" "${zed_dir}/libexec/zed-editor"
-llvm-objcopy --strip-debug --discard-all "${target_dir}/${target_triple}/release/cli" "${zed_dir}/bin/zed"
+mkdir -p "${recode_dir}/bin" "${recode_dir}/libexec"
+llvm-objcopy --strip-unneeded "${target_dir}/${target_triple}/release/recode" "${recode_dir}/libexec/recode-editor"
+llvm-objcopy --strip-debug --discard-all "${target_dir}/${target_triple}/release/cli" "${recode_dir}/bin/recode"
 llvm-objcopy --strip-debug --discard-all "${target_dir}/${remote_server_triple}/release/remote-server" "${temp_dir}/remote_server"
 
 # Libs
@@ -200,55 +200,55 @@ llvm-objcopy --strip-debug --discard-all "${target_dir}/${remote_server_triple}/
 # get dlopen'd are built against the system GLib, and resolving them against an
 # older bundled copy fails with missing symbols.
 find_libs() {
-    ldd ${target_dir}/${target_triple}/release/zed |\
+    ldd ${target_dir}/${target_triple}/release/recode |\
         cut -d' ' -f3 |\
         grep -v '\<\(libc.so\|libgcc_s.so\|libm.so\|libpthread.so\|libdl.so\|libasound.so\)' |\
         grep -v '\<\(libglib-2.0.so\|libgobject-2.0.so\|libgio-2.0.so\|libgmodule-2.0.so\|libpcre.so\|libpcre2-8.so\|libmount.so\|libblkid.so\|libselinux.so\|libffi.so\|libresolv.so\|libz.so\)'
 }
 
-mkdir -p "${zed_dir}/lib"
-rm -rf "${zed_dir}/lib/*"
-cp $(find_libs) "${zed_dir}/lib"
+mkdir -p "${recode_dir}/lib"
+rm -rf "${recode_dir}/lib/*"
+cp $(find_libs) "${recode_dir}/lib"
 
 # Icons
-mkdir -p "${zed_dir}/share/icons/hicolor/512x512/apps"
-cp "crates/zed/resources/app-icon$suffix.png" "${zed_dir}/share/icons/hicolor/512x512/apps/zed.png"
-mkdir -p "${zed_dir}/share/icons/hicolor/1024x1024/apps"
-cp "crates/zed/resources/app-icon$suffix@2x.png" "${zed_dir}/share/icons/hicolor/1024x1024/apps/zed.png"
+mkdir -p "${recode_dir}/share/icons/hicolor/512x512/apps"
+cp "crates/recode/resources/app-icon$suffix.png" "${recode_dir}/share/icons/hicolor/512x512/apps/recode.png"
+mkdir -p "${recode_dir}/share/icons/hicolor/1024x1024/apps"
+cp "crates/recode/resources/app-icon$suffix@2x.png" "${recode_dir}/share/icons/hicolor/1024x1024/apps/recode.png"
 
 # .desktop
 export DO_STARTUP_NOTIFY="true"
-export APP_CLI="zed"
-export APP_ICON="zed"
+export APP_CLI="recode"
+export APP_ICON="recode"
 export APP_ARGS="%U"
 if [[ "$channel" == "preview" ]]; then
-  export APP_NAME="Zed Preview"
-  APP_ID="dev.zed.Zed-Preview"
+  export APP_NAME="Recode Preview"
+  APP_ID="dev.recode.Recode-Preview"
 elif [[ "$channel" == "nightly" ]]; then
-  export APP_NAME="Zed Nightly"
-  APP_ID="dev.zed.Zed-Nightly"
+  export APP_NAME="Recode Nightly"
+  APP_ID="dev.recode.Recode-Nightly"
 elif [[ "$channel" == "dev" ]]; then
-  export APP_NAME="Zed Devel"
-  APP_ID="dev.zed.Zed-Dev"
+  export APP_NAME="Recode Devel"
+  APP_ID="dev.recode.Recode-Dev"
 else
-  export APP_NAME="Zed"
-  APP_ID="dev.zed.Zed"
+  export APP_NAME="Recode"
+  APP_ID="dev.recode.Recode"
 fi
 
-mkdir -p "${zed_dir}/share/applications"
-envsubst < "crates/zed/resources/recode.desktop.in" > "${zed_dir}/share/applications/$APP_ID.desktop"
-chmod +x "${zed_dir}/share/applications/$APP_ID.desktop"
+mkdir -p "${recode_dir}/share/applications"
+envsubst < "crates/recode/resources/recode.desktop.in" > "${recode_dir}/share/applications/$APP_ID.desktop"
+chmod +x "${recode_dir}/share/applications/$APP_ID.desktop"
 
 # Copy generated licenses so they'll end up in archive too
-cp "assets/licenses.md" "${zed_dir}/licenses.md"
+cp "assets/licenses.md" "${recode_dir}/licenses.md"
 
 # Create archive out of everything that's in the temp directory
 arch=$(uname -m)
-archive="zed-linux-${arch}.tar.gz"
+archive="recode-linux-${arch}.tar.gz"
 
 rm -rf "${archive}"
-remove_match="zed(-[a-zA-Z0-9]+)?-linux-$(uname -m)\.tar\.gz"
+remove_match="recode(-[a-zA-Z0-9]+)?-linux-$(uname -m)\.tar\.gz"
 ls "${target_dir}/release" | grep -E ${remove_match} | xargs -d "\n" -I {} rm -f "${target_dir}/release/{}" || true
-tar -czvf "${target_dir}/release/$archive" -C ${temp_dir} "zed$suffix.app"
+tar -czvf "${target_dir}/release/$archive" -C ${temp_dir} "recode$suffix.app"
 
-gzip -f --stdout --best "${temp_dir}/remote_server" > "${target_dir}/zed-remote-server-linux-${arch}.gz"
+gzip -f --stdout --best "${temp_dir}/remote_server" > "${target_dir}/recode-remote-server-linux-${arch}.gz"

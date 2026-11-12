@@ -19,7 +19,7 @@ use std::{ops::Range, sync::Arc};
 use ui::{ButtonLike, Divider, Tooltip, prelude::*};
 use util::debug_panic;
 use workspace::{HideStatusItem, StatusItemView, Workspace, item::ItemHandle};
-use zed_actions::agent::{
+use recode_actions::agent::{
     ConflictContent, ResolveConflictedFilesWithAgent, ResolveConflictsWithAgent,
 };
 
@@ -408,7 +408,7 @@ fn render_conflict_buttons(
                 Button::new("resolve-with-agent", "Resolve with Agent")
                     .label_size(LabelSize::Small)
                     .start_icon(
-                        Icon::new(IconName::ZedAssistant)
+                        Icon::new(IconName::RecodeAssistant)
                             .size(IconSize::Small)
                             .color(Color::Muted),
                     )

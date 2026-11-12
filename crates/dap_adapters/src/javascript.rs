@@ -220,17 +220,17 @@ impl DebugAdapter for JsDebugAdapter {
         DebugAdapterName(Self::ADAPTER_NAME.into())
     }
 
-    async fn config_from_zed_format(&self, zed_scenario: ZedDebugConfig) -> Result<DebugScenario> {
+    async fn config_from_recode_format(&self, recode_scenario: RecodeDebugConfig) -> Result<DebugScenario> {
         let mut args = json!({
             "type": "pwa-node",
-            "request": match zed_scenario.request {
+            "request": match recode_scenario.request {
                 DebugRequest::Launch(_) => "launch",
                 DebugRequest::Attach(_) => "attach",
             },
         });
 
         let map = args.as_object_mut().unwrap();
-        match &zed_scenario.request {
+        match &recode_scenario.request {
             DebugRequest::Attach(attach) => {
                 map.insert("processId".into(), attach.process_id.into());
             }
@@ -248,7 +248,7 @@ impl DebugAdapter for JsDebugAdapter {
                     map.insert("env".into(), launch.env_json());
                 }
 
-                if let Some(stop_on_entry) = zed_scenario.stop_on_entry {
+                if let Some(stop_on_entry) = recode_scenario.stop_on_entry {
                     map.insert("stopOnEntry".into(), stop_on_entry.into());
                 }
                 if let Some(cwd) = launch.cwd.as_ref() {
@@ -258,8 +258,8 @@ impl DebugAdapter for JsDebugAdapter {
         };
 
         Ok(DebugScenario {
-            adapter: zed_scenario.adapter,
-            label: zed_scenario.label,
+            adapter: recode_scenario.adapter,
+            label: recode_scenario.label,
             build: None,
             config: args,
             tcp_connection: None,
@@ -347,7 +347,7 @@ impl DebugAdapter for JsDebugAdapter {
                                     "items": {
                                         "type": "string"
                                     },
-                                    "default": ["${ZED_WORKTREE_ROOT}/**/*.js", "!**/node_modules/**"]
+                                    "default": ["${RECODE_WORKTREE_ROOT}/**/*.js", "!**/node_modules/**"]
                                 },
                                 "sourceMaps": {
                                     "type": "boolean",
@@ -393,7 +393,7 @@ impl DebugAdapter for JsDebugAdapter {
                                 "webRoot": {
                                     "type": "string",
                                     "description": "Workspace absolute path to the webserver root",
-                                    "default": "${ZED_WORKTREE_ROOT}"
+                                    "default": "${RECODE_WORKTREE_ROOT}"
                                 },
                                 "userDataDir": {
                                     "type": ["string", "boolean"],
@@ -481,7 +481,7 @@ impl DebugAdapter for JsDebugAdapter {
                                     "items": {
                                         "type": "string"
                                     },
-                                    "default": ["${ZED_WORKTREE_ROOT}/**/*.js", "!**/node_modules/**"]
+                                    "default": ["${RECODE_WORKTREE_ROOT}/**/*.js", "!**/node_modules/**"]
                                 },
                                 "url": {
                                     "type": "string",
@@ -490,7 +490,7 @@ impl DebugAdapter for JsDebugAdapter {
                                 "webRoot": {
                                     "type": "string",
                                     "description": "Workspace absolute path to the webserver root",
-                                    "default": "${ZED_WORKTREE_ROOT}"
+                                    "default": "${RECODE_WORKTREE_ROOT}"
                                 },
                                 "skipFiles": {
                                     "type": "array",

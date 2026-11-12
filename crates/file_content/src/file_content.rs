@@ -474,7 +474,7 @@ fn is_plausible_utf16_text(bytes: &[u8], little_endian: bool) -> bool {
     // word characters, so require a minimum share of them. Code units above
     // the Latin-1 range (and surrogate pairs) also count as word-like so
     // that scripts such as Cyrillic or Greek, whose letters are non-ASCII,
-    // are still recognized -- tag bytes paired with a zero byte can never
+    // are still recognirecode -- tag bytes paired with a zero byte can never
     // land there.
     let enough_word_chars = word_like_count * 100 >= total * 30;
 

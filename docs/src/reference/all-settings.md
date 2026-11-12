@@ -1,18 +1,18 @@
 ---
 title: All Settings
-description: "Complete reference for all Zed settings."
+description: "Complete reference for all Recode settings."
 ---
 
 # All Settings
 
-This is the complete reference for all Zed settings.
+This is the complete reference for all Recode settings.
 
 You may also want to change your [theme](../themes.md), configure your [key bindings](../key-bindings.md), set up [tasks](../tasks.md), or install [extensions](../extensions.md).
 
 # Settings
 
-The sections below document supported Zed settings.
-Open the Settings Editor with {#action zed::OpenSettings} and search for a setting, or add the JSON configuration to your `settings.json`.
+The sections below document supported Recode settings.
+Open the Settings Editor with {#action recode::OpenSettings} and search for a setting, or add the JSON configuration to your `settings.json`.
 Defaults shown here are the top-level defaults; language, platform, and release-channel overrides can change them.
 
 ## Accessible Mode {#accessible-mode}
@@ -191,7 +191,7 @@ Open the Settings Editor and search for “Threads Sidebar Default Width”. Or 
 
 Changing this setting immediately updates the sidebar width, even if you previously resized it manually. You can also double-click the divider to reset the sidebar to the configured width.
 
-Widths saved by older versions of Zed are preserved if they differ from the previous default of 300 pixels. A saved width of 300 pixels uses this setting instead.
+Widths saved by older versions of Recode are preserved if they differ from the previous default of 300 pixels. A saved width of 300 pixels uses this setting instead.
 
 ### Threads Sidebar Auto Open {#agent-threads-sidebar-auto-open}
 
@@ -346,19 +346,19 @@ You can find the names of your currently installed extensions by listing the sub
 On macOS:
 
 ```sh
-ls ~/Library/Application\ Support/Zed/extensions/installed/
+ls ~/Library/Application\ Support/Recode/extensions/installed/
 ```
 
 On Linux:
 
 ```sh
-ls ~/.local/share/zed/extensions/installed
+ls ~/.local/share/recode/extensions/installed
 ```
 
 On Windows:
 
 ```pwsh
-Get-ChildItem "$env:LOCALAPPDATA\Zed\extensions\installed" -Name
+Get-ChildItem "$env:LOCALAPPDATA\Recode\extensions\installed" -Name
 ```
 
 Define extensions which should be installed (`true`) or never installed (`false`).
@@ -397,7 +397,7 @@ Define extensions which should be installed (`true`) or never installed (`false`
 
 **Options**
 
-By default, every installed extension is auto-updated when Zed starts.
+By default, every installed extension is auto-updated when Recode starts.
 Add an extension here with `false` to pin it to its currently installed version.
 
 ```json [settings]
@@ -409,7 +409,7 @@ Add an extension here with `false` to pin it to its currently installed version.
 ```
 
 Selecting **Install Another Version…** from an extension's `⋯` menu on the Extensions
-page ({#action zed::Extensions}) does this automatically.
+page ({#action recode::Extensions}) does this automatically.
 
 ## Granted Extension Capabilities {#granted-extension-capabilities}
 
@@ -546,15 +546,15 @@ Note that a save will be triggered when an unsaved tab is closed, even if this i
 
 - Description: Base key bindings scheme. Base keymaps can be overridden with user keymaps.
 - Setting: `base_keymap`
-- Default: `Zed`
+- Default: `Recode`
 
 **Options**
 
-1. Zed
+1. Recode
 
 ```json [settings]
 {
-  "base_keymap": "Zed"
+  "base_keymap": "Recode"
 }
 ```
 
@@ -626,11 +626,11 @@ Note that a save will be triggered when an unsaved tab is closed, even if this i
 
 - Description: The name of a font to use for rendering text in the editor.
 - Setting: `buffer_font_family`
-- Default: `.ZedMono`. This currently aliases to [Lilex](https://lilex.myrt.co).
+- Default: `.RecodeMono`. This currently aliases to [Lilex](https://lilex.myrt.co).
 
 **Options**
 
-The name of any font family installed on the user's system, or `".ZedMono"`.
+The name of any font family installed on the user's system, or `".RecodeMono"`.
 
 ## Buffer Font Features
 
@@ -641,7 +641,7 @@ The name of any font family installed on the user's system, or `".ZedMono"`.
 
 **Options**
 
-Zed supports all OpenType features that can be enabled or disabled for a given buffer or terminal font, as well as setting values for font features.
+Recode supports all OpenType features that can be enabled or disabled for a given buffer or terminal font, as well as setting values for font features.
 
 For example, to disable font ligatures, add the following to your settings:
 
@@ -935,7 +935,7 @@ See [Word Diff Highlighting](../git.md#word-diff-highlighting).
 
 ## Disable AI
 
-- Description: Whether to disable all AI features in Zed
+- Description: Whether to disable all AI features in Recode
 - Setting: `disable_ai`
 - Default: `false`
 
@@ -1012,9 +1012,9 @@ For the case of "open", regular selection behavior can be achieved by holding `a
       "**/*.crt",
       "**/.dev.vars",
       "**/secrets.yml",
-      "**/.zed/settings.json",
-      "/**/zed/settings.json",
-      "/**/zed/keymap.json"
+      "**/.recode/settings.json",
+      "/**/recode/settings.json",
+      "/**/recode/keymap.json"
     ]
   }
 }
@@ -1026,7 +1026,7 @@ For the case of "open", regular selection behavior can be achieved by holding `a
 
 - Description: Which edit prediction provider to use
 - Setting: `provider`
-- Default: `"zed"`
+- Default: `"recode"`
 
 **Options**
 
@@ -1035,7 +1035,7 @@ For the case of "open", regular selection behavior can be achieved by holding `a
 ```json [settings]
 {
   "edit_predictions": {
-    "provider": "zed"
+    "provider": "recode"
   }
 }
 ```
@@ -1070,7 +1070,7 @@ These settings belong inside the `edit_predictions` object.
 | Setting                 | Default     | Description                                                                                         |
 | ----------------------- | ----------- | --------------------------------------------------------------------------------------------------- |
 | `mode`                  | `"eager"`   | Use `"eager"` for inline predictions, or `"subtle"` to preview with a modifier key where supported. |
-| `allow_data_collection` | `"default"` | Training-data preference for Zed's edit predictions: `"default"`, `"yes"`, or `"no"`.               |
+| `allow_data_collection` | `"default"` | Training-data preference for Recode's edit predictions: `"default"`, `"yes"`, or `"no"`.               |
 
 `"default"` uses the preference saved from the status bar, or disabled if none is saved.
 `"yes"` opts in and `"no"` opts out, subject to account and organization policy.
@@ -1184,13 +1184,13 @@ The [Local and Self-Hosted Models](../ai/edit-prediction.md#local-and-self-hoste
 
 - Description: Disable edit predictions for files matching these glob patterns.
 - Setting: `disabled_globs`
-- Default: `["**/.env*", "**/*.pem", "**/*.key", "**/*.cert", "**/*.crt", "**/.dev.vars", "**/secrets.yml", "**/.zed/settings.json", "/**/zed/settings.json", "/**/zed/keymap.json"]`
+- Default: `["**/.env*", "**/*.pem", "**/*.key", "**/*.cert", "**/*.crt", "**/.dev.vars", "**/secrets.yml", "**/.recode/settings.json", "/**/recode/settings.json", "/**/recode/keymap.json"]`
 
 **Options**
 
 List of `string` values.
 
-Use `"..."` to add patterns without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
+Use `"..."` to add patterns without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
 
 ```json [settings]
 {
@@ -1208,9 +1208,9 @@ Relative patterns are matched against paths relative to the worktree root. Absol
 
 ### Prediction Debounce
 
-- Description: How long Zed waits after you stop typing before automatically requesting an edit prediction.
+- Description: How long Recode waits after you stop typing before automatically requesting an edit prediction.
 - Setting: `edit_predictions.<provider>.prediction_debounce`
-- Default: `75` for GitHub Copilot, `150` for Codestral, and `0` for Zed, Mercury, Ollama, and OpenAI-compatible APIs.
+- Default: `75` for GitHub Copilot, `150` for Codestral, and `0` for Recode, Mercury, Ollama, and OpenAI-compatible APIs.
 
 **Options**
 
@@ -2228,7 +2228,7 @@ See [Tab Switcher](../tab-switcher.md).
 
 ### Session
 
-- Description: Controls Zed lifecycle-related behavior.
+- Description: Controls Recode lifecycle-related behavior.
 - Setting: `session`
 - Default:
 
@@ -2312,11 +2312,11 @@ Each option controls displaying of a particular toolbar element. If all elements
 
 **Options**
 
-This setting enables integration with macOS's native window tabbing feature. When set to `true`, Zed windows can be grouped together as tabs in a single macOS window, following the system-wide tabbing preferences set by the user (such as "Always", "In Full Screen", or "Never"). This setting is only available on macOS.
+This setting enables integration with macOS's native window tabbing feature. When set to `true`, Recode windows can be grouped together as tabs in a single macOS window, following the system-wide tabbing preferences set by the user (such as "Always", "In Full Screen", or "Never"). This setting is only available on macOS.
 
 ## Fullscreen Mode
 
-- Description: Which fullscreen mode the `zed::ToggleFullScreen` action enters (macOS only).
+- Description: Which fullscreen mode the `recode::ToggleFullScreen` action enters (macOS only).
 - Setting: `fullscreen_mode`
 - Default: `native`
 
@@ -2503,7 +2503,7 @@ Like `extend_list_on_newline`, this can be set per language under `languages`.
 - `active_encoding_button`: When to show the active encoding button: `"enabled"`, `"disabled"`, or `"non_utf8"` (only for encodings other than UTF-8 without BOM)
 - `pending_keystrokes_indicator`: Whether to show an indicator while multi-stroke input is pending. If the input has a timeout, a countdown is shown and hovering the indicator pauses it. Its binding preview popover is disabled when the which-key popup is enabled (see [key bindings](../key-bindings.md#precedence))
 
-There is an experimental setting that completely hides the status bar. This causes major usability problems (you will be unable to use many of Zed's features), but is provided for those who value screen real-estate above all else.
+There is an experimental setting that completely hides the status bar. This causes major usability problems (you will be unable to use many of Recode's features), but is provided for those who value screen real-estate above all else.
 
 ```json
 "status_bar": {
@@ -2586,7 +2586,7 @@ While other options may be changed at a runtime and should be placed under `sett
 
 - `button`: Whether to show the LSP status button in the status bar
 - `request_timeout`: The maximum amount of time to wait for responses from language servers, in seconds. A value of `0` will result in no timeout being applied (causing all LSP responses to wait indefinitely until completed). Default: `120`
-- `max_buffer_line_length`: The maximum line length a buffer may contain before Zed disables all language server features for that entire buffer. If any line exceeds this value, Zed does not open the buffer with language servers or send them buffer-specific requests. Default: `20000`
+- `max_buffer_line_length`: The maximum line length a buffer may contain before Recode disables all language server features for that entire buffer. If any line exceeds this value, Recode does not open the buffer with language servers or send them buffer-specific requests. Default: `20000`
 - `notifications`: Notification-related settings.
   - `dismiss_timeout_ms`: Timeout in milliseconds for automatically dismissing language server notifications. Set to 0 to disable auto-dismiss.
 
@@ -2682,7 +2682,7 @@ Non-negative `integer` values
 - Setting: `format_on_save`
 - Default: `off`
 
-Zed ships `"format_on_save": "on"` as a per-language default for Astro, Dart, EEx, Elixir, Elm, Go, GraphQL, HEEx, Kotlin, Rust, Starlark, and Zig. Every other language uses the top-level default above. Use [`languages`](#languages) to configure individual languages differently.
+Recode ships `"format_on_save": "on"` as a per-language default for Astro, Dart, EEx, Elixir, Elm, Go, GraphQL, HEEx, Kotlin, Rust, Starlark, and Zig. Every other language uses the top-level default above. Use [`languages`](#languages) to configure individual languages differently.
 
 **Options**
 
@@ -2751,7 +2751,7 @@ Similar to `modifications`, but behaves like `on` when range formatting cannot b
 }
 ```
 
-Tools that rewrite files on disk instead of printing the formatted contents to stdout (such as `cargo fmt`) are not compatible with `"external"`: since Zed reads the formatted buffer from stdout, a formatter that emits nothing there will not update the buffer. For Rust, use `"formatter": "language_server"` or invoke `rustfmt` directly (which supports stdin/stdout via `--emit stdout`) instead of `cargo fmt`.
+Tools that rewrite files on disk instead of printing the formatted contents to stdout (such as `cargo fmt`) are not compatible with `"external"`: since Recode reads the formatted buffer from stdout, a formatter that emits nothing there will not update the buffer. For Rust, use `"formatter": "language_server"` or invoke `rustfmt` directly (which supports stdin/stdout via `--emit stdout`) instead of `cargo fmt`.
 
 3. External formatters may optionally include a `{buffer_path}` placeholder which at runtime will include the path of the buffer being formatted. Formatters operate by receiving file content via standard input, reformatting it and then outputting it to standard output and so normally don't know the filename of what they are formatting. Tools like Prettier support receiving the file path via a command line argument which can then be used to impact formatting decisions.
 
@@ -2827,7 +2827,7 @@ Go and Python enable import organization by default through their `languages` se
 
 ## Prettier {#prettier}
 
-- Description: Configure Zed's built-in Prettier integration.
+- Description: Configure Recode's built-in Prettier integration.
 - Setting: `prettier`
 - Default:
 
@@ -2848,7 +2848,7 @@ Go and Python enable import organization by default through their `languages` se
 - `parser`: Parser preference, or an empty string to leave it unspecified.
 
 The default `languages` settings enable Prettier for languages such as JavaScript, TypeScript, CSS, JSON, and Markdown.
-Other keys in this object are passed to Prettier as options when Zed uses its own Prettier installation rather than one installed in the project.
+Other keys in this object are passed to Prettier as options when Recode uses its own Prettier installation rather than one installed in the project.
 Unless set here, `tabWidth`, `printWidth`, and `useTabs` follow `tab_size`, `preferred_line_length`, and `hard_tabs`.
 
 ## Auto close
@@ -2905,7 +2905,7 @@ The result is still `)))` and not `))))))`, which is what it would be by default
 }
 ```
 
-Use `"..."` to add patterns without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
+Use `"..."` to add patterns without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
 
 ```json [settings]
 {
@@ -2927,7 +2927,7 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 }
 ```
 
-Use `"..."` to add patterns without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
+Use `"..."` to add patterns without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
 
 ```json [settings]
 {
@@ -2940,7 +2940,7 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 ## File Scan Depth
 
 - Setting: `file_scan_depth`
-- Description: Maximum directory depth that Zed eagerly indexes outside of git repositories. Directories at this depth or deeper are indexed on demand: when expanded in the project panel or when a file inside them is opened. Contents of directories that were not indexed yet are invisible to the file finder and project search. When directories get deferred, the status bar of the affected window shows a brief "Partial file index" message. Set to `0` to always index everything eagerly and activate all git repositories immediately.
+- Description: Maximum directory depth that Recode eagerly indexes outside of git repositories. Directories at this depth or deeper are indexed on demand: when expanded in the project panel or when a file inside them is opened. Contents of directories that were not indexed yet are invisible to the file finder and project search. When directories get deferred, the status bar of the affected window shows a brief "Partial file index" message. Set to `0` to always index everything eagerly and activate all git repositories immediately.
 - Default: `5`
 
 ```json [settings]
@@ -2992,21 +2992,21 @@ In multi-folder projects, depth is measured from each root folder separately.
 }
 ```
 
-When set to `expanded`, symbolic links are only scanned after you explicitly expand them in the project panel. When set to `always`, Zed follows all symbolic links and scans their contents when indexing the project, unless they match gitignore rules. The `always` option may have performance implications for projects with many or deeply nested symlinks.
+When set to `expanded`, symbolic links are only scanned after you explicitly expand them in the project panel. When set to `always`, Recode follows all symbolic links and scans their contents when indexing the project, unless they match gitignore rules. The `always` option may have performance implications for projects with many or deeply nested symlinks.
 
 ## File Types
 
 - Setting: `file_types`
-- Description: Configure how Zed selects a language for a file based on its filename or extension. Supports glob entries.
+- Description: Configure how Recode selects a language for a file based on its filename or extension. Supports glob entries.
 - Default:
 
 ```json [settings]
 {
   "file_types": {
     "JSONC": [
-      "**/.zed/*.json",
+      "**/.recode/*.json",
       "**/.vscode/**/*.json",
-      "**/{zed,Zed}/{settings,keymap,tasks,debug}.json",
+      "**/{recode,Recode}/{settings,keymap,tasks,debug}.json",
       "tsconfig*.json"
     ],
     "Markdown": [".rules", ".cursorrules", ".windsurfrules", ".clinerules"],
@@ -3486,10 +3486,10 @@ Example:
 - `interval_secs`: How long to wait between automatic fetches, in seconds, starting after the previous fetch completes. Only applies when `enabled` is `true`. Values below 15 are clamped to 15.
 
 In remote development, auto-fetch runs on the host that owns the checkout and
-sends repository updates to your local Zed window. Your user settings are forwarded
+sends repository updates to your local Recode window. Your user settings are forwarded
 to the SSH server; server settings override them. In a shared project, the host's
 settings control auto-fetch for all collaborators. Configure `git.auto_fetch` in
-user or server settings; Git settings are not read from project `.zed/settings.json`
+user or server settings; Git settings are not read from project `.recode/settings.json`
 files.
 
 ## Git Commit Buffer Font Size {#git-commit-buffer-font-size}
@@ -3599,7 +3599,7 @@ Numbers from `6` to `100` pixels, inclusive.
 }
 ```
 
-Use `"..."` to add patterns without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
+Use `"..."` to add patterns without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
 
 ```json [settings]
 {
@@ -3723,9 +3723,9 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 
 ## Icon Theme
 
-- Description: The icon theme setting can be specified in two forms - either as the name of an icon theme or as an object containing the `mode`, `dark`, and `light` icon themes for files/folders inside Zed.
+- Description: The icon theme setting can be specified in two forms - either as the name of an icon theme or as an object containing the `mode`, `dark`, and `light` icon themes for files/folders inside Recode.
 - Setting: `icon_theme`
-- Default: `Zed (Default)`
+- Default: `Recode (Default)`
 
 ### Icon Theme Object
 
@@ -3737,8 +3737,8 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 {
   "icon_theme": {
     "mode": "system",
-    "dark": "Zed (Default)",
-    "light": "Zed (Default)"
+    "dark": "Recode (Default)",
+    "light": "Recode (Default)"
   }
 }
 ```
@@ -3757,8 +3757,8 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 {
   "icon_theme": {
     "mode": "dark",
-    "dark": "Zed (Default)",
-    "light": "Zed (Default)"
+    "dark": "Recode (Default)",
+    "light": "Recode (Default)"
   }
 }
 ```
@@ -3769,8 +3769,8 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 {
   "icon_theme": {
     "mode": "light",
-    "dark": "Zed (Default)",
-    "light": "Zed (Default)"
+    "dark": "Recode (Default)",
+    "light": "Recode (Default)"
   }
 }
 ```
@@ -3781,8 +3781,8 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 {
   "icon_theme": {
     "mode": "system",
-    "dark": "Zed (Default)",
-    "light": "Zed (Default)"
+    "dark": "Recode (Default)",
+    "light": "Recode (Default)"
   }
 }
 ```
@@ -3791,7 +3791,7 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 
 - Description: The name of the dark icon theme.
 - Setting: `dark`
-- Default: `Zed (Default)`
+- Default: `Recode (Default)`
 
 **Options**
 
@@ -3801,7 +3801,7 @@ Run the {#action icon_theme_selector::Toggle} action in the command palette to s
 
 - Description: The name of the light icon theme.
 - Setting: `light`
-- Default: `Zed (Default)`
+- Default: `Recode (Default)`
 
 **Options**
 
@@ -3881,7 +3881,7 @@ Inlay hints querying consists of two parts: editor (client) and LSP server.
 When the inlay settings above are changed to enable the hints, the editor will start to query certain types of hints and react on LSP hint refresh request from the server.
 At this point, the server may or may not return hints depending on its implementation, further configuration might be needed, refer to the corresponding LSP server documentation.
 
-The following languages have inlay hints preconfigured by Zed:
+The following languages have inlay hints preconfigured by Recode:
 
 - [Go](../languages/go.md)
 - [Rust](../languages/rust.md)
@@ -3890,7 +3890,7 @@ The following languages have inlay hints preconfigured by Zed:
 
 Use the `lsp` section for the server configuration. Examples are provided in the corresponding language documentation.
 
-Hints are not instantly queried in Zed, two kinds of debounces are used, either may be set to 0 to be disabled.
+Hints are not instantly queried in Recode, two kinds of debounces are used, either may be set to 0 to be disabled.
 Settings-related hint updates are not debounced.
 
 All possible config values for `toggle_on_modifiers_press` are:
@@ -4105,7 +4105,7 @@ See [Choosing Language Servers](../configuring-languages.md#choosing-language-se
     },
     "openai_compatible": {},
     "opencode": {
-      "api_url": "https://opencode.ai/zen"
+      "api_url": "https://opencode.ai/inference/openai/v1"
     },
     "open_router": {
       "api_url": "https://openrouter.ai/api/v1"
@@ -4125,7 +4125,7 @@ See [Choosing Language Servers](../configuring-languages.md#choosing-language-se
     "x_ai": {
       "api_url": "https://api.x.ai/v1"
     },
-    "zed.dev": {}
+    "recode.dev": {}
   }
 }
 ```
@@ -4195,19 +4195,19 @@ Edit-prediction providers are configured separately under `edit_predictions`.
 
 ## Log {#log}
 
-- Description: Change how much Zed writes to its log for specific parts of the app.
+- Description: Change how much Recode writes to its log for specific parts of the app.
 - Setting: `log`
 - Default: `{}`
 
-Use this to get more detail while troubleshooting a feature, or to silence noisy messages in the Zed log ({#action zed::OpenLog}).
-By default, Zed logs messages at `info` level and above.
+Use this to get more detail while troubleshooting a feature, or to silence noisy messages in the Recode log ({#action recode::OpenLog}).
+By default, Recode logs messages at `info` level and above.
 
 **Options**
 
 Keys are log scopes, usually crate names such as `client` or `project`.
 Use a `::`-separated module path, such as `project::lsp_store`, for finer control.
 Values are `"off"`, `"error"`, `"warn"`, `"info"`, `"debug"`, or `"trace"`.
-Changes apply without restarting Zed.
+Changes apply without restarting Recode.
 
 ```json [settings]
 {
@@ -4336,7 +4336,7 @@ Positive `integer` values, or `0` to disable modeline parsing
 
 ## Network Proxy
 
-- Description: Configure a network proxy for Zed.
+- Description: Configure a network proxy for Recode.
 - Setting: `proxy`
 - Default: `null`
 
@@ -4355,7 +4355,7 @@ The following URI schemes are supported:
 
 `http` will be used when no scheme is specified.
 
-By default no proxy will be used, or Zed will attempt to retrieve proxy settings from environment variables, such as `http_proxy`, `HTTP_PROXY`, `https_proxy`, `HTTPS_PROXY`, `all_proxy`, `ALL_PROXY`, `no_proxy` and `NO_PROXY`.
+By default no proxy will be used, or Recode will attempt to retrieve proxy settings from environment variables, such as `http_proxy`, `HTTP_PROXY`, `https_proxy`, `HTTPS_PROXY`, `all_proxy`, `ALL_PROXY`, `no_proxy` and `NO_PROXY`.
 
 For example, to set an `http` proxy, add the following to your settings:
 
@@ -4377,11 +4377,11 @@ If you wish to exclude certain hosts from using the proxy, set the `NO_PROXY` en
 
 ## Server URL {#server-url}
 
-- Description: URL of the Zed service.
+- Description: URL of the Recode service.
 - Setting: `server_url`
-- Default: `"https://zed.dev"`
+- Default: `"https://recode.dev"`
 
-The `ZED_SERVER_URL` environment variable takes precedence over this setting.
+The `RECODE_SERVER_URL` environment variable takes precedence over this setting.
 
 ## Default Open Behavior {#default-open-behavior}
 
@@ -4472,16 +4472,16 @@ Or add this to your settings.json:
 }
 ```
 
-Zed opens one README from the first project root with a match.
-Zed checks `README.md`, `readme.md`, `Readme.md`, `README`, `readme`, `Readme`, `README.txt`, `readme.txt`, and `Readme.txt`, in that order.
+Recode opens one README from the first project root with a match.
+Recode checks `README.md`, `readme.md`, `Readme.md`, `README`, `readme`, `Readme`, `README.txt`, `readme.txt`, and `Readme.txt`, in that order.
 These are direct root-level file checks, not a directory scan.
 Other spellings do not match, even on case-insensitive filesystems.
 File-index exclusions do not affect README discovery.
 Adding a folder to an already open project does not open a README.
 Files passed when opening the project and restored tabs take precedence.
 The README opens in a temporary [preview tab](#preview-tabs) when `preview_tabs.enabled` is `true`, or a regular tab otherwise.
-Zed uses your existing file opener settings, without forcing a rendered Markdown preview.
-If no matching README exists, Zed leaves the project's pane empty.
+Recode uses your existing file opener settings, without forcing a rendered Markdown preview.
+If no matching README exists, Recode leaves the project's pane empty.
 
 ## Instrumentation
 
@@ -4501,7 +4501,7 @@ If no matching README exists, Zed leaves the project's pane empty.
 
 ### Performance Profiler
 
-- Description: Collects timing data for foreground and background executor tasks so they can be inspected via the {#action zed::OpenPerformanceProfiler} action. Enabling this may lead to increased memory usage, hence it's disabled by default for regular builds.
+- Description: Collects timing data for foreground and background executor tasks so they can be inspected via the {#action recode::OpenPerformanceProfiler} action. Enabling this may lead to increased memory usage, hence it's disabled by default for regular builds.
 - Setting: `instrumentation.performance_profiler.enabled`
 - Default: `false`
 
@@ -4511,7 +4511,7 @@ If no matching README exists, Zed leaves the project's pane empty.
 
 ## Profiles
 
-- Description: Configuration profiles that can be temporarily applied on top of existing settings or Zed's defaults.
+- Description: Configuration profiles that can be temporarily applied on top of existing settings or Recode's defaults.
 - Setting: `profiles`
 - Default: `{}`
 
@@ -4521,7 +4521,7 @@ Each profile is an object with the following optional fields:
 
 - `base`: What settings to start from before applying the profile's overrides.
   - `"user"` (default): Apply on top of your current user settings.
-  - `"default"`: Apply on top of Zed's default settings, ignoring user customizations.
+  - `"default"`: Apply on top of Recode's default settings, ignoring user customizations.
 - `settings`: The settings overrides for this profile.
 
 Examples:
@@ -4781,7 +4781,7 @@ List of `string` glob patterns
 }
 ```
 
-Use `"..."` to add patterns without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
+Use `"..."` to add patterns without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list.
 
 ```json [settings]
 {
@@ -4797,7 +4797,7 @@ Inherited patterns are inserted at `"..."`, and duplicates keep their first occu
 - Setting: `ssh_connections`
 - Default: `[]`
 
-Zed adds an entry when you connect to a new server from that dialog, and you can edit the entries directly:
+Recode adds an entry when you connect to a new server from that dialog, and you can edit the entries directly:
 
 ```json [settings]
 {
@@ -4806,7 +4806,7 @@ Zed adds an entry when you connect to a new server from that dialog, and you can
       "host": "192.168.1.10",
       "username": "me",
       "nickname": "dev-box",
-      "projects": [{ "paths": ["~/code/zed/zed"] }]
+      "projects": [{ "paths": ["~/code/recode"] }]
     }
   ]
 }
@@ -4919,7 +4919,7 @@ List of strings containing any combination of:
 
 **Options**
 
-1. Restore all workspaces that were open when quitting Zed:
+1. Restore all workspaces that were open when quitting Recode:
 
 ```json [settings]
 {
@@ -5437,7 +5437,7 @@ Positive integer values
 
 ## Use Auto Surround
 
-- Description: Whether to automatically surround selected text when typing opening parenthesis, bracket, brace, single or double quote characters. For example, when you select text and type '(', Zed will surround the text with ().
+- Description: Whether to automatically surround selected text when typing opening parenthesis, bracket, brace, single or double quote characters. For example, when you select text and type '(', Recode will surround the text with ().
 - Setting: `use_auto_surround`
 - Default: `true`
 
@@ -5447,7 +5447,7 @@ Positive integer values
 
 ## Use System Path Prompts
 
-- Description: Whether to use the system provided dialogs for Open and Save As. When set to false, Zed will use the built-in keyboard-first pickers.
+- Description: Whether to use the system provided dialogs for Open and Save As. When set to false, Recode will use the built-in keyboard-first pickers.
 - Setting: `use_system_path_prompts`
 - Default: `true`
 
@@ -5457,7 +5457,7 @@ Positive integer values
 
 ## Use System Prompts
 
-- Description: Whether to use the system provided dialogs for prompts, such as confirmation prompts. When set to false, Zed will use its built-in prompts. Note that on Linux, this option is ignored and Zed will always use the built-in prompts.
+- Description: Whether to use the system provided dialogs for prompts, such as confirmation prompts. When set to false, Recode will use its built-in prompts. Note that on Linux, this option is ignored and Recode will always use the built-in prompts.
 - Setting: `use_system_prompts`
 - Default: `true`
 
@@ -5487,7 +5487,7 @@ List of `integer` column numbers
 
 ## Tasks
 
-- Description: Configuration for tasks that can be run within Zed
+- Description: Configuration for tasks that can be run within Recode
 - Setting: `tasks`
 - Default:
 
@@ -5505,11 +5505,11 @@ List of `integer` column numbers
 
 - `variables`: Custom variables for task configuration
 - `enabled`: Whether tasks are enabled
-- `prefer_lsp`: Whether to prefer LSP-provided tasks over Zed language extension ones
+- `prefer_lsp`: Whether to prefer LSP-provided tasks over Recode language extension ones
 
 ## Telemetry
 
-- Description: Control what info is collected by Zed.
+- Description: Control what info is collected by Recode.
 - Setting: `telemetry`
 - Default:
 
@@ -5537,7 +5537,7 @@ List of `integer` column numbers
 
 ### Metrics
 
-- Description: Setting for sending anonymized usage data, such as what languages you're using Zed with.
+- Description: Setting for sending anonymized usage data, such as what languages you're using Recode with.
 - Setting: `metrics`
 - Default: `true`
 
@@ -5829,7 +5829,7 @@ These settings belong inside the `terminal` object.
 {
   "terminal": {
     "env": {
-      "ZED": "1",
+      "RECODE": "1",
       "KEY": "value1:value2"
     }
   }
@@ -6193,7 +6193,7 @@ Example command to set the title: `echo -e "\e]2;New Title\007";`
   "terminal": {
     "working_directory": {
       "always": {
-        "directory": "~/zed/projects/"
+        "directory": "~/recode/projects/"
       }
     }
   }
@@ -6237,7 +6237,7 @@ Example command to set the title: `echo -e "\e]2;New Title\007";`
 }
 ```
 
-Use `"..."` to add regexes without repeating Zed's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list. Set `[]` to clear it. Omitting this setting keeps the inherited list.
+Use `"..."` to add regexes without repeating Recode's defaults. In project settings, it extends the user or parent configuration value. Omit `"..."` to replace the inherited list. Set `[]` to clear it. Omitting this setting keeps the inherited list.
 
 ```json [settings]
 {
@@ -6310,7 +6310,7 @@ Kernels you pick in the UI and matching Python environments take precedence over
 
 - `output_max_height_lines`: Maximum visible output lines before scrolling, or `0` for no height limit.
 
-The default settings file also lists `output_max_width_columns`, but Zed ignores it.
+The default settings file also lists `output_max_width_columns`, but Recode ignores it.
 Image output width follows `max_columns`.
 
 ## Text Rendering Mode {#text-rendering-mode}
@@ -6325,7 +6325,7 @@ Image output width follows `max_columns`.
 
 Subpixel rendering is used only in opaque windows.
 It is not available on macOS, and on Linux it requires a GPU that supports dual-source blending.
-Where subpixel rendering is unavailable, Zed renders text in grayscale.
+Where subpixel rendering is unavailable, Recode renders text in grayscale.
 
 ## Use Display P3 {#use-display-p3}
 
@@ -6339,7 +6339,7 @@ Where subpixel rendering is unavailable, Zed renders text in grayscale.
 
 ## Theme
 
-- Description: The theme setting can be specified in two forms - either as the name of a theme or as an object containing the `mode`, `dark`, and `light` themes for the Zed UI.
+- Description: The theme setting can be specified in two forms - either as the name of a theme or as an object containing the `mode`, `dark`, and `light` themes for the Recode UI.
 - Setting: `theme`
 - Default:
 
@@ -6415,7 +6415,7 @@ Where subpixel rendering is unavailable, Zed renders text in grayscale.
 
 ### Dark
 
-- Description: The name of the dark Zed theme to use for the UI.
+- Description: The name of the dark Recode theme to use for the UI.
 - Setting: `dark`
 - Default: `One Dark`
 
@@ -6425,7 +6425,7 @@ Run the {#action theme_selector::Toggle} action in the command palette to see a 
 
 ### Light
 
-- Description: The name of the light Zed theme to use for the UI.
+- Description: The name of the light Recode theme to use for the UI.
 - Setting: `light`
 - Default: `One Light`
 
@@ -6469,7 +6469,7 @@ Run the {#action theme_selector::Toggle} action in the command palette to see a 
 - `show_sign_in`: Whether to show the sign in button in the titlebar
 - `show_menus`: Whether to show the menus in the titlebar
 - `open_menus_on_hover`: Whether to open title-bar menus on hover. Once a menu is open, hovering always switches between menus.
-- `button_layout`: The layout of window control buttons in the title bar (Linux only). Can be set to `"platform_default"` to follow the system setting, `"standard"` to use Zed's built-in layout, or a custom format like `"close:minimize,maximize"`
+- `button_layout`: The layout of window control buttons in the title bar (Linux only). Can be set to `"platform_default"` to follow the system setting, `"standard"` to use Recode's built-in layout, or a custom format like `"close:minimize,maximize"`
 
 ## Window Title Format
 
@@ -6492,7 +6492,7 @@ Available variables:
 | `fileStem`     | File name without extension (e.g. `main`)             |
 | `remoteName`   | Display name of the remote connection, if any         |
 | `remoteHost`   | Host of the remote connection, if any                 |
-| `appName`      | Zed release channel name (e.g. `Zed`, `Zed Nightly`)  |
+| `appName`      | Recode release channel name (e.g. `Recode`, `Recode Nightly`)  |
 | `branch`       | Git branch checked out in the active repository       |
 | `separator`    | Separator string, omitted when neighbors are empty    |
 
@@ -6517,13 +6517,13 @@ Available variables:
 
 ## Window Decorations
 
-- Description: Controls whether Zed or the window manager or compositor draws window decorations.
+- Description: Controls whether Recode or the window manager or compositor draws window decorations.
 - Setting: `window_decorations`
 - Default: `"client"`
 
 **Options**
 
-1. To have Zed draw its own window decorations, use `"client"`:
+1. To have Recode draw its own window decorations, use `"client"`:
 
 ```json [settings]
 {
@@ -6539,7 +6539,7 @@ Available variables:
 }
 ```
 
-> Note: This setting only affects Linux. GNOME Wayland does not support server-side decorations. Changes only apply to newly created windows. Restart Zed to apply the setting to all windows.
+> Note: This setting only affects Linux. GNOME Wayland does not support server-side decorations. Changes only apply to newly created windows. Restart Recode to apply the setting to all windows.
 
 ## Vim
 
@@ -6598,7 +6598,7 @@ See [Changing Vim Mode Settings](../vim.md#changing-vim-mode-settings) for a mor
 **Options**
 
 - `enabled`: Whether to show the which-key menu. When enabled, the pending keystrokes indicator remains visible, but its binding preview popover is disabled.
-- `delay_ms`: How long Zed waits before showing the menu, in milliseconds.
+- `delay_ms`: How long Recode waits before showing the menu, in milliseconds.
 
 ## When Closing With No Tabs
 
@@ -7075,7 +7075,7 @@ See [Agent Panel](#agent-panel) for width, flexible sizing, and Threads Sidebar 
 | `max_idle_retained_threads`            | `5`                                             | Maximum eligible idle, reloadable threads retained in memory; `0` unloads every eligible idle thread. |
 | `limit_content_width`                  | `true`                                          | Constrain and center panel content using `max_content_width`.                                         |
 | `max_content_width`                    | `850`                                           | Content-width limit in pixels when `limit_content_width` is enabled.                                  |
-| `default_model.provider`               | `"zed.dev"`                                     | Provider of the default model for new threads.                                                        |
+| `default_model.provider`               | `"recode.dev"`                                     | Provider of the default model for new threads.                                                        |
 | `default_model.model`                  | `"claude-sonnet-4"`                             | Default model for new threads.                                                                        |
 | `default_model.enable_thinking`        | `false`                                         | Enable thinking for the default model.                                                                |
 | `model_parameters`                     | `[]`                                            | Temperature overrides with optional provider/model filters; the last matching entry wins.             |
@@ -7143,7 +7143,7 @@ Local servers use `command`, `args`, and `env`; remote servers use `url` and opt
 }
 ```
 
-For servers installed from extensions, the configuration form Zed shows after installation stores the extension's options in the entry's `settings` object.
+For servers installed from extensions, the configuration form Recode shows after installation stores the extension's options in the entry's `settings` object.
 Any server can be turned off with `"enabled": false`.
 The [MCP documentation](../ai/mcp.md#as-custom-servers) covers authentication and other options.
 
@@ -7214,8 +7214,8 @@ Both types also accept:
 - Default: `[]`
 
 Use a list of adapter names, usually within `languages.<Language>`.
-Zed uses the first listed adapter.
-With an empty list, Zed falls back to the language's preferred adapter.
+Recode uses the first listed adapter.
+With an empty list, Recode falls back to the language's preferred adapter.
 See [Automatic Scenario Creation](../debugger.md#automatic-scenario-creation).
 
 ## Debug Adapter Configuration {#debug-adapter-configuration}
@@ -7236,7 +7236,7 @@ See [Automatic Scenario Creation](../debugger.md#automatic-scenario-creation).
 }
 ```
 
-Each adapter accepts optional `binary`, `args`, and `env` fields to customize how Zed launches it, as described in [Customizing Debug Adapters](../debugger.md#customizing-debug-adapters).
+Each adapter accepts optional `binary`, `args`, and `env` fields to customize how Recode launches it, as described in [Customizing Debug Adapters](../debugger.md#customizing-debug-adapters).
 
 ## Debugger
 
@@ -7261,10 +7261,10 @@ Each adapter accepts optional `binary`, `args`, and `env` fields to customize ho
 **Options**
 
 - `timeout`: Timeout for establishing a TCP connection to a debug adapter, in milliseconds.
-- `log_dap_communications`: Whether to log messages between Zed and active debug adapters.
+- `log_dap_communications`: Whether to log messages between Recode and active debug adapters.
 - `format_dap_log_messages`: Whether to format messages in the debug-adapter log.
 
-See the [debugger page](../debugger.md) for more information about debugging support within Zed.
+See the [debugger page](../debugger.md) for more information about debugging support within Recode.
 
 ## Git Panel
 
@@ -7326,14 +7326,14 @@ See the [debugger page](../debugger.md) for more information about debugging sup
 - Setting: `git.worktree_directory`
 - Default: `"../worktrees"`
 
-When the resolved directory falls outside the project root, the project's directory name is automatically appended so that sibling repos don't collide. For example, with the default `"../worktrees"` and a project at `~/code/zed`, worktrees are created under `~/code/worktrees/zed/`.
+When the resolved directory falls outside the project root, the project's directory name is automatically appended so that sibling repos don't collide. For example, with the default `"../worktrees"` and a project at `~/code/recode`, worktrees are created under `~/code/worktrees/recode/`.
 
 When the resolved directory is inside the project root, no extra component is added (it's already project-scoped).
 
 **Examples**:
 
 - `"../worktrees"` — `~/code/worktrees/<project>/` (default)
-- `".git/zed-worktrees"` — `<project>/.git/zed-worktrees/`
+- `".git/recode-worktrees"` — `<project>/.git/recode-worktrees/`
 - `"my-worktrees"` — `<project>/my-worktrees/`
 
 Trailing slashes are ignored.
@@ -7462,11 +7462,11 @@ Float values between `0.0` and `0.9`, where:
 
 - Description: The name of the font to use for text in the UI.
 - Setting: `ui_font_family`
-- Default: `.ZedSans`. This currently aliases to [IBM Plex](https://www.ibm.com/plex/).
+- Default: `.RecodeSans`. This currently aliases to [IBM Plex](https://www.ibm.com/plex/).
 
 **Options**
 
-The name of any font family installed on the system, `".ZedSans"` to use the Zed-provided default, or `".SystemUIFont"` to use the system's default UI font (on macOS and Windows).
+The name of any font family installed on the system, `".RecodeSans"` to use the Recode-provided default, or `".SystemUIFont"` to use the system's default UI font (on macOS and Windows).
 
 ## UI Font Features
 
@@ -7486,7 +7486,7 @@ The name of any font family installed on the system, `".ZedSans"` to use the Zed
 
 **Options**
 
-Zed supports all OpenType features that can be enabled or disabled for a given UI font, as well as setting values for font features.
+Recode supports all OpenType features that can be enabled or disabled for a given UI font, as well as setting values for font features.
 
 For example, to disable font ligatures, add the following to your settings:
 
@@ -7552,7 +7552,7 @@ For example, to use `Nerd Font` as a fallback, add the following to your setting
 - Default: `{}`
 
 In your `settings.json` file, add the `profiles` object.
-Each key within this object is the name of a settings profile. Each profile has an optional `base` field (`"user"` or `"default"`) and a `settings` object containing any of Zed's settings.
+Each key within this object is the name of a settings profile. Each profile has an optional `base` field (`"user"` or `"default"`) and a `settings` object containing any of Recode's settings.
 
 Example:
 
@@ -7598,7 +7598,7 @@ Apply settings only on a specific operating system or release channel by nesting
 - `stable` or `preview`: applies only to that release channel.
 - `linux`, `macos`, or `windows`: applies only to that operating system.
 
-When the same setting is set in several places, Zed applies them in this order, with later layers taking precedence:
+When the same setting is set in several places, Recode applies them in this order, with later layers taking precedence:
 
 1. Top-level user settings
 2. The block for the current release channel
@@ -7622,7 +7622,7 @@ The [Per-Release Channel Overrides](../configuring-recode.md#per-release-channel
 ## An example configuration:
 
 ```json [settings]
-// ~/.config/zed/settings.json
+// ~/.config/recode/settings.json
 {
   "theme": "cave-light",
   "tab_size": 2,
@@ -7630,7 +7630,7 @@ The [Per-Release Channel Overrides](../configuring-recode.md#per-release-channel
   "soft_wrap": "none",
 
   "buffer_font_size": 18,
-  "buffer_font_family": ".ZedMono",
+  "buffer_font_family": ".RecodeMono",
 
   "autosave": "on_focus_change",
   "format_on_save": "off",

@@ -100,7 +100,7 @@ impl Component for ListBulletItem {
                 "With Link",
                 ListBulletItem::new("")
                     .child(Label::new("Create a Recode account by"))
-                    .child(ButtonLink::new("visiting the website", "https://zed.dev"))
+                    .child(ButtonLink::new("visiting the website", "https://recode.dev"))
                     .into_any_element(),
             ),
         ];

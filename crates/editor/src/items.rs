@@ -67,7 +67,7 @@ use workspace::{
     item::{FollowEvent, ProjectItemKind},
     searchable::SearchOptions,
 };
-use zed_actions::preview::{
+use recode_actions::preview::{
     markdown::OpenPreview as OpenMarkdownPreview, svg::OpenPreview as OpenSvgPreview,
 };
 

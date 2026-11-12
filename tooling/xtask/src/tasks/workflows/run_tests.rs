@@ -1,6 +1,6 @@
 use gh_workflow::{
-    Container, Event, Expression, Input, Job, Level, MergeGroup, Permissions, Port, PullRequest,
-    Push, Run, Step, Strategy, Use, UsesJob, Workflow,
+    Container, Event, Expression, Job, MergeGroup, Port, PullRequest, Push, Run, Step, Use,
+    Workflow,
 };
 use indexmap::IndexMap;
 use indoc::formatdoc;
@@ -15,22 +15,75 @@ use crate::tasks::workflows::{
 };
 
 use super::{
-    deploy_docs,
     runners::{self, Arch, Platform},
     steps::{self, FluentBuilder, NamedJob, named, release_job},
 };
 
+const DOCS_BUILD_OUTPUT_DIR: &str = "target/deploy";
+
+fn check_docs() -> NamedJob {
+    fn lychee_link_check(dir: &str) -> Step<Use> {
+        named::uses(
+            "lycheeverse",
+            "lychee-action",
+            "82202e5e9c2f4ef1a55a3d02563e1cb6041e5332",
+        ) // v2.4.1
+        .add_with((
+            "args",
+            format!("--config .config/lychee.toml --no-progress --exclude '^http' '{dir}'"),
+        ))
+        .add_with(("fail", true))
+        .add_with(("jobSummary", false))
+    }
+
+    fn install_mdbook() -> Step<Use> {
+        named::uses(
+            "peaceiris",
+            "actions-mdbook",
+            "ee69d230fe19748b7abf22df32acaa93833fad08", // v2
+        )
+        .with(("mdbook-version", "0.4.37"))
+    }
+
+    fn build_docs_book() -> Step<Run> {
+        named::bash(indoc::formatdoc! {r#"
+            mkdir -p {DOCS_BUILD_OUTPUT_DIR}
+            mdbook build ./docs --dest-dir=../{DOCS_BUILD_OUTPUT_DIR}/docs/
+        "#})
+        .add_env(("DOCS_CHANNEL", "stable"))
+        .add_env(("MDBOOK_BOOK__SITE_URL", "/docs/"))
+    }
+
+    NamedJob {
+        name: "check_docs".to_owned(),
+        job: steps::use_clang(
+            release_job(&[])
+                .add_step(steps::harden_runner())
+                .add_env(("DOCS_AMPLITUDE_API_KEY", vars::DOCS_AMPLITUDE_API_KEY))
+                .add_env(("DOCS_CONSENT_IO_INSTANCE", vars::DOCS_CONSENT_IO_INSTANCE))
+                .add_step(steps::checkout_repo())
+                .runs_on(runners::LINUX_XL)
+                .add_step(steps::setup_cargo_config(Platform::Linux))
+                .add_step(steps::cache_rust_dependencies_namespace())
+                .map(steps::install_linux_dependencies)
+                .add_step(steps::script("./script/generate-action-metadata"))
+                .add_step(lychee_link_check("./docs/src/**/*"))
+                .add_step(install_mdbook())
+                .add_step(build_docs_book())
+                .add_step(lychee_link_check(&format!("{DOCS_BUILD_OUTPUT_DIR}/docs"))),
+        ),
+    }
+}
+
 pub(crate) fn run_tests() -> Workflow {
     // Specify anything which should potentially skip full test suite in this regex:
     // - docs/
-    // - script/update_top_ranking_issues/
     // - .github/ISSUE_TEMPLATE/
     // - .github/workflows/  (except .github/workflows/ci.yml)
-    // - .wezel/
-    // - extensions/  (these have their own test workflow)
+    // - extensions/
     let should_run_tests = PathCondition::inverted(
         "run_tests",
-        r"^(docs/|script/update_top_ranking_issues/|\.github/(ISSUE_TEMPLATE|workflows/(?!run_tests))|[.]wezel/|extensions/)",
+        r"^(docs/|\.github/(ISSUE_TEMPLATE|workflows/(?!run_tests))|extensions/)",
     );
     let should_check_docs = PathCondition::new("run_docs", r"^(docs/|crates/.*\.rs)");
     let should_check_scripts = PathCondition::new(
@@ -86,7 +139,7 @@ pub(crate) fn run_tests() -> Workflow {
         should_run_tests.and_always().then(check_dependencies()), // could be more specific here?
         should_check_docs
             .and_not_in_merge_queue()
-            .then(deploy_docs::check_docs()),
+            .then(check_docs()),
         should_check_licences
             .and_not_in_merge_queue()
             .then(check_licenses()),
@@ -104,8 +157,7 @@ pub(crate) fn run_tests() -> Workflow {
         };
         jobs.push(condition.then(check_remote_server(platform, arch)));
     }
-    let ext_tests = extension_tests();
-    let tests_pass = tests_pass(&jobs, &[&ext_tests.name]);
+    let tests_pass = tests_pass(&jobs, &[]);
 
     // TODO: For merge queues, this should fail in the merge queue context
     jobs.push(
@@ -139,29 +191,21 @@ pub(crate) fn run_tests() -> Workflow {
             }
             workflow
         })
-        .add_job(ext_tests.name, ext_tests.job.add_need("check_style"))
         .add_job(tests_pass.name, tests_pass.job)
 }
 
 /// Controls which features `orchestrate_impl` includes in the generated script.
 #[derive(PartialEq, Eq)]
 enum OrchestrateTarget {
-    /// For the main Zed repo: includes the cargo package filter and extension
+    /// For the main Recode repo: includes the cargo package filter and extension
     /// change detection, but no working-directory scoping.
-    ZedRepo,
-    /// For individual extension repos: scopes changed-file detection to the
-    /// working directory, with no package filter or extension detection.
-    Extension,
+    RecodeRepo,
 }
 
 // Generates a bash script that checks changed files against regex patterns
 // and sets GitHub output variables accordingly
 pub fn orchestrate(rules: &[&PathCondition]) -> NamedJob {
-    orchestrate_impl(rules, OrchestrateTarget::ZedRepo)
-}
-
-pub fn orchestrate_for_extension(rules: &[&PathCondition]) -> NamedJob {
-    orchestrate_impl(rules, OrchestrateTarget::Extension)
+    orchestrate_impl(rules, OrchestrateTarget::RecodeRepo)
 }
 
 fn orchestrate_impl(rules: &[&PathCondition], target: OrchestrateTarget) -> NamedJob {
@@ -183,19 +227,6 @@ fn orchestrate_impl(rules: &[&PathCondition], target: OrchestrateTarget) -> Name
 
     "#});
 
-    if target == OrchestrateTarget::Extension {
-        script.push_str(indoc::indoc! {r#"
-        # When running from a subdirectory, git diff returns repo-root-relative paths.
-        # Filter to only files within the current working directory and strip the prefix.
-        REPO_SUBDIR="$(git rev-parse --show-prefix)"
-        REPO_SUBDIR="${REPO_SUBDIR%/}"
-        if [ -n "$REPO_SUBDIR" ]; then
-            CHANGED_FILES="$(echo "$CHANGED_FILES" | grep "^${REPO_SUBDIR}/" | sed "s|^${REPO_SUBDIR}/||" || true)"
-        fi
-
-    "#});
-    }
-
     script.push_str(indoc::indoc! {r#"
         check_pattern() {
           local output_name="$1"
@@ -211,7 +242,7 @@ fn orchestrate_impl(rules: &[&PathCondition], target: OrchestrateTarget) -> Name
 
     let mut outputs = IndexMap::new();
 
-    if target == OrchestrateTarget::ZedRepo {
+    if target == OrchestrateTarget::RecodeRepo {
         script.push_str(indoc::indoc! {r#"
         # Check for changes that require full rebuild (no filter)
         # Direct pushes to main/stable/preview always run full suite
@@ -302,7 +333,7 @@ fn orchestrate_impl(rules: &[&PathCondition], target: OrchestrateTarget) -> Name
         ));
     }
 
-    if target == OrchestrateTarget::ZedRepo {
+    if target == OrchestrateTarget::RecodeRepo {
         script.push_str(DETECT_CHANGED_EXTENSIONS_SCRIPT);
         script.push_str("echo \"changed_extensions=$EXTENSIONS_JSON\" >> \"$GITHUB_OUTPUT\"\n");
 
@@ -316,7 +347,7 @@ fn orchestrate_impl(rules: &[&PathCondition], target: OrchestrateTarget) -> Name
         .runs_on(runners::LINUX_SMALL)
         .with_repository_owner_guard()
         .outputs(outputs)
-        .when(target == OrchestrateTarget::ZedRepo, |this| {
+        .when(target == OrchestrateTarget::RecodeRepo, |this| {
             this.add_step(steps::harden_runner())
         })
         .add_step(steps::checkout_repo().with_deep_history_on_non_main())
@@ -415,8 +446,7 @@ pub(crate) fn fetch_ts_query_ls() -> Step<Run> {
 }
 
 pub(crate) enum RunContext {
-    ZedRepository,
-    Extension,
+    RecodeRepository,
 }
 
 pub(crate) fn run_ts_query_ls(context: RunContext) -> Step<Run> {
@@ -425,12 +455,11 @@ pub(crate) fn run_ts_query_ls(context: RunContext) -> Step<Run> {
         "$GITHUB_WORKSPACE/ts_query_ls" format --check {directory} || {{
             echo "Found unformatted queries, please format them with ts_query_ls."
             echo "For easy use, install the Tree-sitter query extension:"
-            echo "zed://extension/tree-sitter-query"
+            echo "recode://extension/tree-sitter-query"
             false
         }}"#,
         directory = match context {
-            RunContext::Extension => "languages",
-            RunContext::ZedRepository => ".",
+            RunContext::RecodeRepository => ".",
         }
     ))
 }
@@ -458,7 +487,7 @@ fn check_style() -> NamedJob {
             .add_step(steps::script("./script/check-keymaps"))
             .add_step(check_for_typos())
             .add_step(fetch_ts_query_ls())
-            .add_step(run_ts_query_ls(RunContext::ZedRepository)),
+            .add_step(run_ts_query_ls(RunContext::RecodeRepository)),
     )
 }
 
@@ -777,9 +806,9 @@ pub(crate) fn check_postgres_and_protobuf_migrations() -> NamedJob {
         release_job(&[])
             .runs_on(runners::LINUX_MEDIUM)
             .add_env(("GIT_AUTHOR_NAME", "Protobuf Action"))
-            .add_env(("GIT_AUTHOR_EMAIL", "ci@zed.dev"))
+            .add_env(("GIT_AUTHOR_EMAIL", "ci@recode.dev"))
             .add_env(("GIT_COMMITTER_NAME", "Protobuf Action"))
-            .add_env(("GIT_COMMITTER_EMAIL", "ci@zed.dev"))
+            .add_env(("GIT_COMMITTER_EMAIL", "ci@recode.dev"))
             .add_step(steps::harden_runner())
             .add_step(steps::checkout_repo().with_full_history())
             .add_step(ensure_fresh_merge())
@@ -908,27 +937,4 @@ pub(crate) fn check_scripts(harden: bool) -> NamedJob {
             .add_step(run_actionlint())
             .add_step(run_zizmor()),
     )
-}
-
-fn extension_tests() -> NamedJob<UsesJob> {
-    let job = Job::default()
-        .needs(vec!["orchestrate".to_owned()])
-        .cond(Expression::new(
-            "needs.orchestrate.outputs.changed_extensions != '[]'",
-        ))
-        .permissions(Permissions::default().contents(Level::Read))
-        .strategy(
-            Strategy::default()
-                .fail_fast(false)
-                // TODO: Remove the limit. We currently need this to workaround the concurrency group issue
-                // where different matrix jobs would be placed in the same concurrency group and thus cancelled.
-                .max_parallel(1u32)
-                .matrix(json!({
-                    "extension": "${{ fromJson(needs.orchestrate.outputs.changed_extensions) }}"
-                })),
-        )
-        .uses_local(".github/workflows/extension_tests.yml")
-        .with(Input::default().add("working-directory", "${{ matrix.extension }}"));
-
-    named::job(job)
 }

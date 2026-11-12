@@ -9,7 +9,7 @@ primary_region = "iad"
 
 [env]
   HTTP_PORT = "8080"
-  ZED_ENVIRONMENT = "production"
+  RECODE_ENVIRONMENT = "production"
   DATABASE_MAX_CONNECTIONS = "5"
   RUST_LOG = "info,collab=debug"
 

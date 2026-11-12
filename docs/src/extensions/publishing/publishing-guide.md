@@ -1,6 +1,6 @@
 ---
 title: Publishing Guide
-description: "Submit and update extensions in the Zed Extension Registry."
+description: "Submit and update extensions in the Recode Extension Registry."
 ---
 
 # Publishing Guide {#publishing-your-extension}
@@ -23,7 +23,7 @@ PRs that do not adhere to these rules will be closed without further feedback. R
 
 1. Fork the `zed-industries/extensions` repository.
 
-> **Note:** It is very helpful if you fork the `zed-industries/extensions` repo to a personal GitHub account instead of a GitHub organization, as this allows Zed staff to push any needed changes to your PR to expedite the publishing process.
+> **Note:** It is very helpful if you fork the `zed-industries/extensions` repo to a personal GitHub account instead of a GitHub organization, as this allows Recode staff to push any needed changes to your PR to expedite the publishing process.
 
 2. Clone the repo to your local machine.
 
@@ -65,13 +65,13 @@ If your extension is in a subdirectory within the submodule, you can use the `pa
 ```toml
 [my-extension]
 submodule = "extensions/my-extension"
-path = "packages/zed"
+path = "packages/recode"
 version = "0.0.1"
 ```
 
 3. Run `pnpm sort-extensions` to ensure `extensions.toml` and `.gitmodules` are sorted.
 
-That's it! Once your PR is accepted and merged, the extension will be packaged and published to the Zed extension registry.
+That's it! Once your PR is accepted and merged, the extension will be packaged and published to the Recode extension registry.
 
 ## Review process {#review-process}
 

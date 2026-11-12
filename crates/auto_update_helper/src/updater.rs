@@ -176,12 +176,9 @@ pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
 
         // Move old files safely (using move_if_exists so missing legacy files never abort)
         Job::move_if_exists(p("Recode.exe"), p("old\\Recode.exe")),
-        Job::move_if_exists(p("Zed.exe"), p("old\\Zed.exe")),
         Job::move_if_exists(p("bin\\recode.exe"), p("old\\bin\\recode.exe")),
         Job::move_if_exists(p("bin\\recode.cmd"), p("old\\bin\\recode.cmd")),
         Job::move_if_exists(p("bin\\recode"), p("old\\bin\\recode")),
-        Job::move_if_exists(p("bin\\Zed.exe"), p("old\\bin\\Zed.exe")),
-        Job::move_if_exists(p("bin\\zed"), p("old\\bin\\zed")),
 
         // Console / DLL backups
         Job::move_if_exists(p("OpenConsole.exe"), p("old\\OpenConsole.exe")),
@@ -193,11 +190,9 @@ pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
 
         // Copy new files from install
         Job::move_if_exists(p("install\\Recode.exe"), p("Recode.exe")),
-        Job::move_if_exists(p("install\\Zed.exe"), p("Recode.exe")),
         Job::move_if_exists(p("install\\bin\\recode.exe"), p("bin\\recode.exe")),
         Job::move_if_exists(p("install\\bin\\recode.cmd"), p("bin\\recode.cmd")),
         Job::move_if_exists(p("install\\bin\\recode"), p("bin\\recode")),
-        Job::move_if_exists(p("install\\bin\\Zed.exe"), p("bin\\recode.exe")),
 
         // OpenConsole new files
         Job::mkdir_if_exists(p("x64"), p("install\\x64")),
@@ -223,18 +218,18 @@ pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
         Job {
             apply: Box::new(|_| {
                 std::thread::sleep(Duration::from_millis(1000));
-                if let Ok(config) = std::env::var("ZED_AUTO_UPDATE") {
+                if let Ok(config) = std::env::var("RECODE_AUTO_UPDATE") {
                     match config.as_str() {
                         "err1" => Err(std::io::Error::other("Simulated error")).context("Anyhow!"),
                         "err2" => Ok(()),
-                        _ => panic!("Unknown ZED_AUTO_UPDATE value: {}", config),
+                        _ => panic!("Unknown RECODE_AUTO_UPDATE value: {}", config),
                     }
                 } else {
                     Ok(())
                 }
             }),
             rollback: Box::new(|_| {
-                unsafe { std::env::set_var("ZED_AUTO_UPDATE_RB", "rollback1") };
+                unsafe { std::env::set_var("RECODE_AUTO_UPDATE_RB", "rollback1") };
                 Ok(())
             }),
         },
@@ -256,11 +251,11 @@ pub(crate) static JOBS: LazyLock<Vec<Job>> = LazyLock::new(|| {
         Job {
             apply: Box::new(|_| {
                 std::thread::sleep(Duration::from_millis(1000));
-                if let Ok(config) = std::env::var("ZED_AUTO_UPDATE") {
+                if let Ok(config) = std::env::var("RECODE_AUTO_UPDATE") {
                     match config.as_str() {
                         "err1" => Ok(()),
                         "err2" => Err(std::io::Error::other("Simulated error")).context("Anyhow!"),
-                        _ => panic!("Unknown ZED_AUTO_UPDATE value: {}", config),
+                        _ => panic!("Unknown RECODE_AUTO_UPDATE value: {}", config),
                     }
                 } else {
                     Ok(())
@@ -284,8 +279,6 @@ fn release_file_handles(app_dir: &Path) -> Result<()> {
         app_dir.join("bin\\recode.exe"),
         app_dir.join("bin\\recode.cmd"),
         app_dir.join("bin\\recode"),
-        app_dir.join("bin\\Zed.exe"),
-        app_dir.join("bin\\zed"),
         app_dir.join("conpty.dll"),
     ];
 
@@ -368,7 +361,7 @@ fn release_file_handles(app_dir: &Path) -> Result<()> {
 }
 
 #[allow(clippy::disallowed_methods, reason = "doesn't run in the main binary")]
-fn zed_launch_command(app_dir: &Path, launch_arguments: &[OsString]) -> std::process::Command {
+fn recode_launch_command(app_dir: &Path, launch_arguments: &[OsString]) -> std::process::Command {
     let mut command = std::process::Command::new(app_dir.join("Recode.exe"));
     command.args(launch_arguments);
     command
@@ -444,7 +437,7 @@ pub(crate) fn perform_update(
 
     if launch {
         #[allow(clippy::disallowed_methods, reason = "doesn't run in the main binary")]
-        let _child = zed_launch_command(app_dir, launch_arguments)
+        let _child = recode_launch_command(app_dir, launch_arguments)
             .spawn()
             .context("Failed to launch Recode after update")?;
     }
@@ -456,15 +449,15 @@ pub(crate) fn perform_update(
 mod test {
     use std::{ffi::OsString, path::Path};
 
-    use super::{perform_update, zed_launch_command};
+    use super::{perform_update, recode_launch_command};
 
     #[test]
-    fn test_zed_launch_command_preserves_arguments() {
+    fn test_recode_launch_command_preserves_arguments() {
         let arguments = vec![
             OsString::from("--user-data-dir"),
             OsString::from(r"C:\Recode Data"),
         ];
-        let command = zed_launch_command(Path::new(r"C:\Program Files\Recode"), &arguments);
+        let command = recode_launch_command(Path::new(r"C:\Program Files\Recode"), &arguments);
 
         assert_eq!(
             command.get_program(),
@@ -488,7 +481,7 @@ mod test {
         let app_dir = tempfile::tempdir().unwrap();
         let app_dir = app_dir.path();
         // Simulate a timeout
-        unsafe { std::env::set_var("ZED_AUTO_UPDATE", "err1") };
+        unsafe { std::env::set_var("RECODE_AUTO_UPDATE", "err1") };
         let ret = perform_update(app_dir, None, false, &[]);
         assert!(
             ret.is_err_and(|e| e.to_string().as_str() == "Autoupdate failed, nothing to rollback")
@@ -497,11 +490,11 @@ mod test {
         let app_dir = tempfile::tempdir().unwrap();
         let app_dir = app_dir.path();
         // Simulate a timeout
-        unsafe { std::env::set_var("ZED_AUTO_UPDATE", "err2") };
+        unsafe { std::env::set_var("RECODE_AUTO_UPDATE", "err2") };
         let ret = perform_update(app_dir, None, false, &[]);
         assert!(
             ret.is_err_and(|e| e.to_string().as_str() == "Autoupdate failed, rollback successful")
         );
-        assert!(std::env::var("ZED_AUTO_UPDATE_RB").is_ok_and(|e| e == "rollback1"));
+        assert!(std::env::var("RECODE_AUTO_UPDATE_RB").is_ok_and(|e| e == "rollback1"));
     }
 }

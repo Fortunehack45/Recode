@@ -120,7 +120,7 @@ export class AuthStore {
 
     if (!default_model && default_provider) {
       const canonicalMap: Record<string, string> = {
-        opencode: "opencode-zen",
+        opencode: "opencode-recode",
         gemini: "gemini-2.5-flash",
         openai: "gpt-4o",
         anthropic: "claude-3-7-sonnet",
@@ -174,7 +174,7 @@ export class AuthStore {
     config.providers[p] = cleanedKey;
     config.default_provider = p;
     const canonicalMap: Record<string, string> = {
-      opencode: "opencode-zen",
+      opencode: "opencode-recode",
       gemini: "gemini-2.5-flash",
       openai: "gpt-4o",
       anthropic: "claude-3-7-sonnet",

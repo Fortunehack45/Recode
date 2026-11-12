@@ -82,7 +82,7 @@ where
     C: 'static + AgentConnection + Send + Clone,
 {
     fn logo(&self) -> ui::IconName {
-        ui::IconName::ZedAgent
+        ui::IconName::RecodeAgent
     }
 
     fn agent_id(&self) -> AgentId {
@@ -141,7 +141,7 @@ pub async fn fake_worktree_created_at(fs: &dyn fs::Fs, worktree_path: &Path) -> 
 /// Records the worktree in the created-worktrees registry with its actual
 /// (fake) creation time, as the worktree creation flow would. Tests that
 /// expect a worktree to be archivable must call this after setting it up.
-pub async fn record_zed_created_worktree(
+pub async fn record_recode_created_worktree(
     fs: &dyn fs::Fs,
     worktree_path: &Path,
     remote: Option<&remote::RemoteConnectionOptions>,

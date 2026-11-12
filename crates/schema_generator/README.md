@@ -1,6 +1,6 @@
 # Recode Schema Generator
 
-Prints various Zed schemas to stdout.
+Prints various Recode schemas to stdout.
 
 ## Usage
 

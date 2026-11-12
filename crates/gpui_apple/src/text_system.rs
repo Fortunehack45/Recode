@@ -901,11 +901,11 @@ mod tests {
         assert_eq!(glyphs(">>>", &[(lilex, 1), (lilex, 2)]), split);
 
         // Distinct font ids that resolve to the same font.
-        let zed_mono = fonts.font_id(&font(".ZedMono")).unwrap();
+        let recode_mono = fonts.font_id(&font(".RecodeMono")).unwrap();
         let mut no_fallbacks = font("Lilex");
         no_fallbacks.fallbacks = Some(FontFallbacks(Arc::new(Vec::new())));
         let no_fallbacks = fonts.font_id(&no_fallbacks).unwrap();
-        for other in [zed_mono, no_fallbacks] {
+        for other in [recode_mono, no_fallbacks] {
             assert_ne!(lilex, other);
             assert_eq!(
                 glyphs(">>>", &[(lilex, 1), (other, 1), (lilex, 1)]),

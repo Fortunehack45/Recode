@@ -52,8 +52,8 @@ pub enum AiSettingItemSource {
 impl AiSettingItemSource {
     fn icon_name(&self) -> IconName {
         match self {
-            Self::Extension => IconName::ZedSrcExtension,
-            Self::Custom => IconName::ZedSrcCustom,
+            Self::Extension => IconName::RecodeSrcExtension,
+            Self::Custom => IconName::RecodeSrcCustom,
             Self::Registry => IconName::AcpRegistry,
         }
     }
@@ -375,7 +375,7 @@ impl Component for AiSettingItem {
                             AiSettingItemSource::Registry,
                         )
                         .icon(
-                            Icon::new(IconName::ZedAssistant)
+                            Icon::new(IconName::RecodeAssistant)
                                 .size(IconSize::Small)
                                 .color(Color::Muted),
                         ),

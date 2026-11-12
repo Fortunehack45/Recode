@@ -28,9 +28,9 @@ All activity in Recode forums is subject to our Code of Conduct.
 
 ## Contributor License Agreement & Terms
 
-By submitting a Pull Request, issue patch, or contribution to Recode, you agree to the [Recode Contributor License Agreement (CLA)](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md) and acknowledge that:
-1. Recode is governed by the [Recode Source-Available & Anti-Forking License](LICENSE.md).
-2. The source code is made publicly available for personal use, inspection, and upstream contributions; creating downstream forks, rebranding the software, or publishing competing distributions is strictly prohibited under our [Trademark Policy](legal/TRADEMARK_POLICY.md).
+By submitting a Pull Request, issue patch, or contribution to Recode, you agree to our open-source [Contributor License Agreement (CLA)](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md) and acknowledge that:
+1. Recode is open source under `GPL-3.0-or-later` and `Apache-2.0` as detailed in [LICENSE.md](LICENSE.md).
+2. Any modified or third-party binary redistributions must adhere to our [Trademark Policy](legal/TRADEMARK_POLICY.md) and replace Recode brand marks and identifiers.
 
 ## Building from Source
 

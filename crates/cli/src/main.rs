@@ -36,7 +36,7 @@ const URL_PREFIX: [&'static str; 5] = ["recode://", "http://", "https://", "file
 struct Detect;
 
 trait InstalledApp {
-    fn zed_version_string(&self) -> String;
+    fn recode_version_string(&self) -> String;
     fn launch(&self, ipc_url: String, user_data_dir: Option<&str>) -> anyhow::Result<()>;
     fn run_foreground(
         &self,
@@ -107,13 +107,13 @@ struct Args {
     #[arg(long)]
     foreground: bool,
     /// Custom path to Recode.app or the recode binary
-    #[arg(long, alias = "recode")]
-    zed: Option<PathBuf>,
-    /// Run zed in dev-server mode
+    #[arg(long)]
+    recode: Option<PathBuf>,
+    /// Run recode in dev-server mode
     #[arg(long)]
     dev_server_token: Option<String>,
     /// The username and WSL distribution to use when opening paths. If not specified,
-    /// Zed will attempt to open the paths directly.
+    /// Recode will attempt to open the paths directly.
     ///
     /// The username is optional, and if not specified, the default user for the distribution
     /// will be used.
@@ -124,7 +124,7 @@ struct Args {
     #[cfg(target_os = "windows")]
     #[arg(long, value_name = "USER@DISTRO")]
     wsl: Option<String>,
-    /// Not supported in Zed CLI, only supported on Zed binary
+    /// Not supported in Recode CLI, only supported on Recode binary
     /// Will attempt to give the correct command to run
     #[arg(long)]
     system_specs: bool,
@@ -150,14 +150,14 @@ struct Args {
     uninstall: bool,
 
     /// Used for SSH/Git password authentication, to remove the need for netcat as a dependency,
-    /// by having Zed act like netcat communicating over a Unix socket.
+    /// by having Recode act like netcat communicating over a Unix socket.
     #[arg(long, hide = true)]
     askpass: Option<String>,
 }
 
 /// Returns whether a `--diff` argument refers to an existing path, allowing a
-/// trailing `:line:column` suffix (parsed later by the Zed side, matching how
-/// regular `zed path:line:column` arguments are handled).
+/// trailing `:line:column` suffix (parsed later by the Recode side, matching how
+/// regular `recode path:line:column` arguments are handled).
 fn diff_path_exists(diff_path: &str) -> bool {
     Path::new(diff_path).exists() || PathWithPosition::parse_str(diff_path).path.exists()
 }
@@ -458,14 +458,14 @@ fn run() -> Result<()> {
 
     // Must happen before clap — SSH invokes cli.exe directly as SSH_ASKPASS
     // and passes the socket path via env var to avoid argument parsing.
-    if let Ok(socket) = std::env::var("ZED_ASKPASS_SOCKET") {
+    if let Ok(socket) = std::env::var("RECODE_ASKPASS_SOCKET") {
         askpass::main_from_args(&socket, std::env::args().skip(1));
         return Ok(());
     }
 
     let args = Args::parse();
 
-    // `zed --askpass` Makes zed operate in nc/netcat mode for use with askpass
+    // `recode --askpass` Makes recode operate in nc/netcat mode for use with askpass
     if let Some(socket) = &args.askpass {
         askpass::main(socket);
         return Ok(());
@@ -480,7 +480,7 @@ fn run() -> Result<()> {
     #[cfg(target_os = "linux")]
     let args = flatpak::set_bin_if_no_escape(args);
 
-    let app = Detect::detect(args.zed.as_deref()).context("Bundle detection")?;
+    let app = Detect::detect(args.recode.as_deref()).context("Bundle detection")?;
 
     if let Some(shell) = &args.completions {
         let file_path = std::env::current_exe()?;
@@ -497,7 +497,7 @@ fn run() -> Result<()> {
     }
 
     if args.version {
-        println!("{}", app.zed_version_string());
+        println!("{}", app.recode_version_string());
         return Ok(());
     }
 
@@ -527,7 +527,7 @@ fn run() -> Result<()> {
 
         let status = std::process::Command::new("sh")
             .arg(&script_path)
-            .env("ZED_CHANNEL", &*release_channel::RELEASE_CHANNEL_NAME)
+            .env("RECODE_CHANNEL", &*release_channel::RELEASE_CHANNEL_NAME)
             .status()
             .context("Failed to execute uninstall script")?;
 
@@ -557,7 +557,7 @@ fn run() -> Result<()> {
         {
             use collections::HashMap;
 
-            // On Linux, the desktop entry uses `cli` to spawn `zed`.
+            // On Linux, the desktop entry uses `cli` to spawn `recode`.
             // We need to handle env vars correctly since std::env::vars() may not contain
             // project-specific vars (e.g. those set by direnv).
             // By setting env to None here, the LSP will use worktree env vars instead,
@@ -612,7 +612,7 @@ fn run() -> Result<()> {
     let (expanded_diff_paths, temp_dirs) = expand_directory_diff_pairs(diff_paths)?;
     diff_paths = expanded_diff_paths;
     // Prevent automatic cleanup of temp directories containing empty stub files
-    // for directory diffs. The CLI process may exit before Zed has read these
+    // for directory diffs. The CLI process may exit before Recode has read these
     // files (e.g., when RPC-ing into an already-running instance). The files
     // live in the OS temp directory and will be cleaned up on reboot.
     for temp_dir in temp_dirs {
@@ -662,7 +662,7 @@ fn run() -> Result<()> {
             let exit_status = exit_status.clone();
             let user_data_dir_for_thread = user_data_dir.clone();
             move || {
-                let (_, handshake) = server.accept().context("Handshake after Zed spawn")?;
+                let (_, handshake) = server.accept().context("Handshake after Recode spawn")?;
                 let (tx, rx) = (handshake.requests, handshake.responses);
 
                 #[cfg(target_os = "windows")]
@@ -794,7 +794,7 @@ fn anonymous_fd(path: &str) -> Option<fs::File> {
 }
 
 /// Shows an interactive prompt asking the user to choose the default open
-/// behavior for `zed <path>`. Returns `None` if the prompt cannot be shown
+/// behavior for `recode <path>`. Returns `None` if the prompt cannot be shown
 /// (e.g. stdin is not a terminal) or the user cancels.
 fn prompt_open_behavior() -> Option<cli::CliBehaviorSetting> {
     if !std::io::stdin().is_terminal() {
@@ -859,10 +859,10 @@ mod linux {
                 let cli = env::current_exe()?;
                 let dir = cli.parent().context("no parent path for cli")?;
 
-                // libexec is the standard, lib/zed is for Arch (and other non-libexec distros),
-                // ./zed is for the target directory in development builds.
+                // libexec is the standard, lib/recode is for Arch (and other non-libexec distros),
+                // ./recode is for the target directory in development builds.
                 let possible_locations =
-                    ["../libexec/recode-editor", "../libexec/zed-editor", "../lib/recode/recode-editor", "../lib/zed/zed-editor", "./recode", "./zed"];
+                    ["../libexec/recode-editor", "../lib/recode/recode-editor", "./recode"];
                 possible_locations
                     .iter()
                     .find_map(|p| dir.join(p).canonicalize().ok().filter(|path| path != &cli))
@@ -876,7 +876,7 @@ mod linux {
     }
 
     impl InstalledApp for App {
-        fn zed_version_string(&self) -> String {
+        fn recode_version_string(&self) -> String {
             format!(
                 "Recode {}{}{} – {}",
                 if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
@@ -885,7 +885,7 @@ mod linux {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
                 option_env!("RELEASE_VERSION").unwrap_or_default(),
-                match option_env!("ZED_COMMIT_SHA") {
+                match option_env!("RECODE_COMMIT_SHA") {
                     Some(commit_sha) => format!(" {commit_sha} "),
                     None => "".to_string(),
                 },
@@ -899,7 +899,7 @@ mod linux {
                 .unwrap_or_else(|| paths::data_dir().clone());
 
             let sock_path = data_dir.join(format!(
-                "zed-{}.sock",
+                "recode-{}.sock",
                 *release_channel::RELEASE_CHANNEL_NAME
             ));
             let sock = UnixDatagram::unbound()?;
@@ -986,16 +986,16 @@ mod flatpak {
     use std::process::Command;
     use std::{env, process};
 
-    const EXTRA_LIB_ENV_NAME: &str = "ZED_FLATPAK_LIB_PATH";
-    const NO_ESCAPE_ENV_NAME: &str = "ZED_FLATPAK_NO_ESCAPE";
+    const EXTRA_LIB_ENV_NAME: &str = "RECODE_FLATPAK_LIB_PATH";
+    const NO_ESCAPE_ENV_NAME: &str = "RECODE_FLATPAK_NO_ESCAPE";
 
     fn restart_cli_args(flatpak_dir: &Path, invocation_args: &[OsString]) -> Vec<OsString> {
         let mut args = Vec::with_capacity(invocation_args.len() + 2);
 
-        if !invocation_args.iter().any(|arg| arg == "--zed") {
+        if !invocation_args.iter().any(|arg| arg == "--recode") {
             // Positional paths consume all following arguments, so launcher options must precede them.
-            args.push("--zed".into());
-            args.push(flatpak_dir.join("libexec").join("zed-editor").into());
+            args.push("--recode".into());
+            args.push(flatpak_dir.join("libexec").join("recode-editor").into());
         }
 
         args.extend_from_slice(invocation_args);
@@ -1022,7 +1022,7 @@ mod flatpak {
         if let Some(flatpak_dir) = get_flatpak_dir() {
             let mut args = vec!["/usr/bin/flatpak-spawn".into(), "--host".into()];
             args.append(&mut get_xdg_env_args());
-            args.push("--env=ZED_UPDATE_EXPLANATION=Please use flatpak to update zed".into());
+            args.push("--env=RECODE_UPDATE_EXPLANATION=Please use flatpak to update recode".into());
             args.push(
                 format!(
                     "--env={EXTRA_LIB_ENV_NAME}={}",
@@ -1030,7 +1030,7 @@ mod flatpak {
                 )
                 .into(),
             );
-            args.push(flatpak_dir.join("bin").join("zed").into());
+            args.push(flatpak_dir.join("bin").join("recode").into());
 
             let invocation_args = env::args_os().skip(1).collect::<Vec<_>>();
             args.extend(restart_cli_args(&flatpak_dir, &invocation_args));
@@ -1043,11 +1043,11 @@ mod flatpak {
 
     pub fn set_bin_if_no_escape(mut args: super::Args) -> super::Args {
         if env::var(NO_ESCAPE_ENV_NAME).is_ok()
-            && env::var("FLATPAK_ID").is_ok_and(|id| id.starts_with("dev.zed.Zed"))
-            && args.zed.is_none()
+            && env::var("FLATPAK_ID").is_ok_and(|id| id.starts_with("dev.recode.Recode"))
+            && args.recode.is_none()
         {
-            args.zed = Some("/app/libexec/zed-editor".into());
-            unsafe { env::set_var("ZED_UPDATE_EXPLANATION", "Please use flatpak to update zed") };
+            args.recode = Some("/app/libexec/recode-editor".into());
+            unsafe { env::set_var("RECODE_UPDATE_EXPLANATION", "Please use flatpak to update recode") };
         }
         args
     }
@@ -1058,7 +1058,7 @@ mod flatpak {
         }
 
         if let Ok(flatpak_id) = env::var("FLATPAK_ID") {
-            if !flatpak_id.starts_with("dev.zed.Zed") {
+            if !flatpak_id.starts_with("dev.recode.Recode") {
                 return None;
             }
 
@@ -1101,13 +1101,13 @@ mod flatpak {
             let flatpak_dir = Path::new("/flatpak");
             let args = restart_cli_args(flatpak_dir, &["project".into()]);
             let parsed =
-                crate::Args::try_parse_from(std::iter::once(OsString::from("zed")).chain(args))
+                crate::Args::try_parse_from(std::iter::once(OsString::from("recode")).chain(args))
                     .unwrap();
 
-            assert_eq!(parsed.zed, Some(flatpak_dir.join("libexec/zed-editor")));
+            assert_eq!(parsed.recode, Some(flatpak_dir.join("libexec/recode-editor")));
             assert_eq!(parsed.paths_with_position, ["project"]);
 
-            let invocation_args = ["--zed".into(), "/custom/zed-editor".into()];
+            let invocation_args = ["--recode".into(), "/custom/recode-editor".into()];
             assert_eq!(
                 restart_cli_args(flatpak_dir, &invocation_args),
                 invocation_args
@@ -1153,7 +1153,7 @@ mod windows {
     struct App(PathBuf);
 
     impl InstalledApp for App {
-        fn zed_version_string(&self) -> String {
+        fn recode_version_string(&self) -> String {
             format!(
                 "Recode {}{}{} – {}",
                 if *release_channel::RELEASE_CHANNEL_NAME == "stable" {
@@ -1162,7 +1162,7 @@ mod windows {
                     format!("{} ", *release_channel::RELEASE_CHANNEL_NAME)
                 },
                 option_env!("RELEASE_VERSION").unwrap_or_default(),
-                match option_env!("ZED_COMMIT_SHA") {
+                match option_env!("RECODE_COMMIT_SHA") {
                     Some(commit_sha) => format!(" {commit_sha} "),
                     None => "".to_string(),
                 },
@@ -1227,9 +1227,9 @@ mod windows {
                 let cli = std::env::current_exe()?;
                 let dir = cli.parent().context("no parent path for cli")?;
 
-                // ../Zed.exe is the standard, lib/zed is for MSYS2, ./zed.exe is for the target
+                // ../Recode.exe is the standard, lib/recode is for MSYS2, ./recode.exe is for the target
                 // directory in development builds.
-                let possible_locations = ["../Recode.exe", "../Zed.exe", "../lib/recode/recode-editor.exe", "../lib/zed/zed-editor.exe", "./recode.exe", "./zed.exe"];
+                let possible_locations = ["../Recode.exe", "../lib/recode/recode-editor.exe", "./recode.exe"];
                 possible_locations
                     .iter()
                     .find_map(|p| dir.join(p).canonicalize().ok().filter(|path| path != &cli))
@@ -1327,7 +1327,7 @@ mod mac_os {
     }
 
     impl InstalledApp for Bundle {
-        fn zed_version_string(&self) -> String {
+        fn recode_version_string(&self) -> String {
             format!("Recode {} – {}", self.version(), self.path().display(),)
         }
 
@@ -1346,7 +1346,7 @@ mod mac_os {
                             kCFStringEncodingUTF8,
                             ptr::null(),
                         ));
-                        // equivalent to: open zed-cli:... -a /Applications/Zed\ Preview.app
+                        // equivalent to: open recode-cli:... -a /Applications/Recode\ Preview.app
                         let urls_to_open =
                             CFArray::from_copyable(&[url_to_open.as_concrete_TypeRef()]);
                         LSOpenFromURLSpec(
@@ -1364,7 +1364,7 @@ mod mac_os {
                     anyhow::ensure!(
                         status == 0,
                         "cannot start app bundle {}",
-                        self.zed_version_string()
+                        self.recode_version_string()
                     );
                 }
 
@@ -1407,7 +1407,7 @@ mod mac_os {
             let path = match self {
                 Bundle::App { app_bundle, .. } => {
             let recode_bin = app_bundle.join("Contents/MacOS/recode");
-            if recode_bin.exists() { recode_bin } else { app_bundle.join("Contents/MacOS/zed") }
+            if recode_bin.exists() { recode_bin } else { app_bundle.join("Contents/MacOS/recode") }
         },
                 Bundle::LocalPath { executable, .. } => executable.clone(),
             };
@@ -1422,7 +1422,7 @@ mod mac_os {
 
         fn path(&self) -> PathBuf {
             match self {
-                Bundle::App { app_bundle, .. } => app_bundle.join("Contents/MacOS/zed"),
+                Bundle::App { app_bundle, .. } => app_bundle.join("Contents/MacOS/recode"),
                 Bundle::LocalPath { executable, .. } => executable.clone(),
             }
         }

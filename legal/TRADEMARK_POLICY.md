@@ -1,59 +1,45 @@
-# RECODE TRADEMARK & BRAND PROTECTION POLICY
+# Recode Trademark & Brand Policy
 
 **Effective Date:** November 12, 2026  
-**Entity:** Recode Technologies Inc. ("Recode")  
-**Website:** https://recode.dev  
+**Project:** Recode (<https://github.com/Fortunehack45/Recode>)
 
 ---
 
-## 1. Overview & Purpose
+## 1. Purpose & Open Source Compatibility
 
-The purpose of this Trademark Policy is to protect the integrity of the **Recode** brand, ensure that users know they are running genuine Recode software, and strictly prevent unauthorized forks, clones, repackaged binaries, and rebranded distributions.
-
-The trademarks, service marks, logos, trade dress, and product names of Recode (collectively, the "Recode Marks") represent significant goodwill and engineering value. 
+Recode is distributed as **Open Source Software** under `GPL-3.0-or-later` ([`LICENSE-GPL`](../LICENSE-GPL)) and `Apache-2.0` ([`LICENSE-APACHE`](../LICENSE-APACHE)). This policy works alongside those licenses — explicitly permitted under **GPL-3.0 Section 7(e)** and **Apache-2.0 Section 6** — to protect users from confusion between official Recode releases and third-party builds or forks.
 
 ---
 
-## 2. Protected Marks
+## 2. Protected Recode Trademarks & Brand Assets
 
-Protected marks include, but are not limited to:
-- **Word Marks:** "Recode", "Recode Core", "Recode Terminal", "Recode AI", "Recode IDE", "Recode SDK"
-- **Graphic Marks & Logos:** The Recode hexagon emblem, application icons, tray icons, splash artwork, and mascot designs
-- **Trade Dress:** The distinctive user interface layout, semantic color palettes, default theme tokens, and typography pairing ("Recode Mono" and "Recode Sans")
+The following marks and identifiers are reserved for official Recode releases:
+- **Word Marks:** "Recode", "Recode Editor", "Recode CLI", and "Recode AI"
+- **Visual Marks:** The Recode logo, application icon (`app-icon`), installer graphics, and brand badges
+- **Official Identifiers:** Application ID `dev.recode.editor`, publisher domain `recode.dev`, and official GitHub release channels under `Fortunehack45/Recode`
 
 ---
 
-## 3. Prohibited Uses
+## 3. Guidelines for Forks & Third-Party Distributions
 
-Without prior express written consent from Recode Technologies Inc., you may **NOT**:
-1. **Rebranding / White-Labeling:** Slap another product name onto Recode's source code, binary builds, or interfaces.
-2. **Confusingly Similar Names:** Use any name, domain, product title, or social media handle that incorporates "Recode" or any confusingly similar phonetic variation (e.g., "Re-Code", "Recoded", "RecodeIDE", "RecodeFork") in connection with software development tools, editors, or AI coding assistants.
-3. **Cloning & Fork Redistribution:** Distribute any modified version of Recode that continues to use the Recode Marks or implies endorsement by Recode.
-4. **Third-Party Binary Publishing:** Use the Recode Marks in connection with any third-party build, custom compilation, or unofficial binary distribution. If you compile the source code for personal use under the Recode Source-Available License, you may not distribute that binary publicly under the Recode name or any other name.
-5. **Domain Names & Social Handles:** Register or operate domains (e.g., `recode-editor.com`, `recodeide.io`) or accounts that misrepresent an affiliation with the official Recode project.
+Under `GPL-3.0-or-later` and `Apache-2.0`, anyone is free to study, compile, modify, and redistribute the source code. If you distribute modified builds or maintain a fork:
+
+1. **Rebrand Modified Builds:** Change the product name, application icon assets, Windows/macOS/Linux bundle identifiers (`dev.recode.editor`), and update endpoints before publishing binaries.
+2. **State Provenance Clearly:** Make clear to your users that your distribution is an independent build or fork and is not endorsed, signed, or supported by Recode.
+3. **Preserve Open Source Notices:** Never strip copyright notices, [`LICENSE-GPL`](../LICENSE-GPL), [`LICENSE-APACHE`](../LICENSE-APACHE), or required third-party attributions.
 
 ---
 
 ## 4. Permitted Nominative Fair Use
 
-You may use the word mark "Recode" in plain text solely for truthful, nominative statements, such as:
-- *"This extension is built for the Recode editor."*
-- *"Compatible with Recode v1.30+."*
-- *"A tutorial on writing code with Recode."*
-
-In all such cases:
-- The Recode word mark must not be the most prominent element.
-- You must not use the official Recode logo or application icon without written approval.
-- You must include the following attribution notice:  
-  *"`Recode` is a registered trademark of Recode Technologies Inc."*
+You may truthfully use the name "Recode" in plain text to describe compatibility, tutorials, extensions, or open-source provenance, such as:
+- *"Extension compatible with Recode."*
+- *"Built from Recode open-source code, distributed independently as `<YourName>`."*
 
 ---
 
-## 5. Violations & Enforcement
+## 5. Contact
 
-Recode actively monitors public code hosts (including GitHub, GitLab, and Bitbucket), package registries (npm, Crates.io, PyPI), and app stores.
-
-Any unauthorized fork, repository, or package that infringes the Recode Marks or violates the Recode Source-Available License will receive an immediate formal Digital Millennium Copyright Act (DMCA) takedown notice and trademark cease-and-desist demand.
-
-To report trademark violations or request commercial licensing permission, contact:  
-📧 **Legal & Brand Protection:** [legal@recode.dev](mailto:legal@recode.dev)
+For trademark permissions, brand inquiries, or reporting impersonating distributions:  
+📧 **Legal:** [legal@recode.dev](mailto:legal@recode.dev)  
+🌐 **Repository:** <https://github.com/Fortunehack45/Recode>

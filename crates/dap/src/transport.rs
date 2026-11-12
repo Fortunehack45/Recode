@@ -703,7 +703,7 @@ pub struct StdioTransport {
 }
 
 impl StdioTransport {
-    // #[allow(dead_code, reason = "This is used in non test builds of Zed")]
+    // #[allow(dead_code, reason = "This is used in non test builds of Recode")]
     async fn start(
         binary: &DebugAdapterBinary,
         log_handlers: LogHandlers,
@@ -711,7 +711,7 @@ impl StdioTransport {
     ) -> Result<Self> {
         let Some(binary_command) = &binary.command else {
             bail!(
-                "When using the `stdio` transport, the path to a debug adapter binary must be set by Zed."
+                "When using the `stdio` transport, the path to a debug adapter binary must be set by Recode."
             );
         };
         let mut command = util::command::new_std_command(&binary_command);
@@ -1081,7 +1081,7 @@ mod tests {
             ("".into(), json!("wrong")),
             ("{name".into(), json!("wrong")),
             ("msg".into(), json!("boom")),
-            ("name".into(), json!("zed")),
+            ("name".into(), json!("recode")),
             ("number".into(), json!(42)),
             ("enabled".into(), json!(true)),
         ]);
@@ -1089,7 +1089,7 @@ mod tests {
         assert_eq!(interpolate_message("{msg}".into(), &variables), "boom");
         assert_eq!(
             interpolate_message("{name} says {msg}, {name}".into(), &variables),
-            "zed says boom, zed"
+            "recode says boom, zed"
         );
         assert_eq!(
             interpolate_message("{number} {enabled}".into(), &variables),

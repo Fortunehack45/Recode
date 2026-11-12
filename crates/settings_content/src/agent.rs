@@ -361,7 +361,7 @@ pub struct AgentSettingsContent {
     ///
     /// Default: true
     pub expand_terminal_card: Option<bool>,
-    /// Command to automatically run when Zed creates a Terminal Thread shell in the agent panel.
+    /// Command to automatically run when Recode creates a Terminal Thread shell in the agent panel.
     /// The command is sent to the shell as if typed, so it is interpreted by your
     /// configured shell (including on Windows and remote/WSL projects).
     /// An empty string disables this behavior.
@@ -753,7 +753,7 @@ impl JsonSchema for LanguageModelProviderSetting {
                         "vercel_ai_gateway",
                         "x_ai",
                         "x_ai_subscribed",
-                        "zed.dev"
+                        "recode.dev"
                     ]
                 },
                 {
@@ -913,7 +913,7 @@ pub enum CustomAgentServerSettings {
 /// path string (`"/tmp/x"`, a legacy/hand-authored entry with no resolved
 /// target) or an object (`{ "requested": "/tmp/x", "resolved": "/tmp/real" }`).
 /// Serializes back as a bare string when `resolved` is `None` and as an object
-/// otherwise, so hand-authored bare strings round-trip and Zed-written grants
+/// otherwise, so hand-authored bare strings round-trip and Recode-written grants
 /// are objects.
 #[derive(Clone, Debug, Default, PartialEq, MergeFrom)]
 pub struct GrantedWritePathContent {
@@ -1046,7 +1046,7 @@ pub struct SandboxPermissionsContent {
 
     /// Directory subtrees that sandboxed terminal commands may always write
     /// to without prompting. Each entry is either a bare path string or an
-    /// object `{requested, resolved}`; Zed writes objects (the canonical,
+    /// object `{requested, resolved}`; Recode writes objects (the canonical,
     /// symlink-resolved target established at approval time), while
     /// hand-authored entries may be bare path strings. Paths written by Zed
     /// are absolute.

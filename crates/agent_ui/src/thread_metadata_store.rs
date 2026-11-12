@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use agent::{ThreadStore, ZED_AGENT_ID};
+use agent::{ThreadStore, RECODE_AGENT_ID};
 use agent_client_protocol::v2::schema as acp;
 use anyhow::Context as _;
 use chrono::{DateTime, Utc};
@@ -127,7 +127,7 @@ fn migrate_thread_metadata(cx: &mut App) -> Task<anyhow::Result<()>> {
                     Some(ThreadMetadata {
                         thread_id: ThreadId::new(),
                         session_id: Some(entry.id),
-                        agent_id: ZED_AGENT_ID.clone(),
+                        agent_id: RECODE_AGENT_ID.clone(),
                         title: if entry.title.is_empty()
                             || entry.title.as_ref() == DEFAULT_THREAD_TITLE
                         {
@@ -471,8 +471,8 @@ pub struct ArchivedGitWorktree {
     /// the files.
     pub main_repo_path: PathBuf,
     /// Branch that was checked out in the worktree at archive time. `None` if
-    /// the worktree was in detached HEAD state, which isn't supported in Zed, but
-    /// could happen if the user made a detached one outside of Zed.
+    /// the worktree was in detached HEAD state, which isn't supported in Recode, but
+    /// could happen if the user made a detached one outside of Recode.
     /// On restore, we try to switch to this branch. If that fails (e.g. it's
     /// checked out elsewhere), we auto-generate a new one.
     pub branch_name: Option<String>,
@@ -1494,7 +1494,7 @@ impl ThreadMetadataDb {
     /// then flow through this same upsert path.
     pub async fn save(&self, row: ThreadMetadata) -> anyhow::Result<()> {
         let session_id = row.session_id.as_ref().map(|s| s.0.clone());
-        let agent_id = if row.agent_id.as_ref() == ZED_AGENT_ID.as_ref() {
+        let agent_id = if row.agent_id.as_ref() == RECODE_AGENT_ID.as_ref() {
             None
         } else {
             Some(row.agent_id.to_string())
@@ -1722,7 +1722,7 @@ impl Column for ThreadMetadata {
 
         let agent_id = agent_id
             .map(|id| AgentId::new(id))
-            .unwrap_or(ZED_AGENT_ID.clone());
+            .unwrap_or(RECODE_AGENT_ID.clone());
 
         let updated_at = DateTime::parse_from_rfc3339(&updated_at_str)?.with_timezone(&Utc);
         let created_at = created_at_str
@@ -1863,7 +1863,7 @@ mod tests {
             thread_id: ThreadId::new(),
             archived: false,
             session_id: Some(acp::SessionId::new(session_id)),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: if title.is_empty() {
                 None
             } else {
@@ -2206,7 +2206,7 @@ mod tests {
         let moved_metadata = ThreadMetadata {
             thread_id: session1_thread_id,
             session_id: Some(acp::SessionId::new("session-1")),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: Some("First Thread".into()),
             title_override: None,
             updated_at: updated_time,
@@ -2291,7 +2291,7 @@ mod tests {
         let existing_metadata = ThreadMetadata {
             thread_id: ThreadId::new(),
             session_id: Some(acp::SessionId::new("a-session-0")),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: Some("Existing Metadata".into()),
             title_override: None,
             updated_at: now - chrono::Duration::seconds(10),
@@ -2366,7 +2366,7 @@ mod tests {
         assert_eq!(list.len(), 4);
         assert!(
             list.iter()
-                .all(|metadata| metadata.agent_id.as_ref() == agent::ZED_AGENT_ID.as_ref())
+                .all(|metadata| metadata.agent_id.as_ref() == agent::RECODE_AGENT_ID.as_ref())
         );
 
         let existing_metadata = list
@@ -2417,7 +2417,7 @@ mod tests {
         let existing_metadata = ThreadMetadata {
             thread_id: ThreadId::new(),
             session_id: Some(acp::SessionId::new("existing-session")),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: Some("Existing Metadata".into()),
             title_override: None,
             updated_at: existing_updated_at,
@@ -3162,7 +3162,7 @@ mod tests {
             thread_id: ThreadId::new(),
             archived: false,
             session_id: Some(acp::SessionId::new("local-linked")),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: Some("Local Linked".into()),
             title_override: None,
             updated_at: now,
@@ -3176,7 +3176,7 @@ mod tests {
             thread_id: ThreadId::new(),
             archived: false,
             session_id: Some(acp::SessionId::new("remote-linked")),
-            agent_id: agent::ZED_AGENT_ID.clone(),
+            agent_id: agent::RECODE_AGENT_ID.clone(),
             title: Some("Remote Linked".into()),
             title_override: None,
             updated_at: now - chrono::Duration::seconds(1),
@@ -3961,7 +3961,7 @@ mod tests {
         //   2. Add cloud
         //   3. Remove zed
 
-        let mut paths = make_worktree_paths(&[("/projects/zed", "/worktrees/selectric/zed")]);
+        let mut paths = make_worktree_paths(&[("/projects/recode", "/worktrees/selectric/recode")]);
 
         // Step 2: add cloud
         paths.add_path(Path::new("/projects/cloud"), Path::new("/projects/cloud"));
@@ -3970,17 +3970,17 @@ mod tests {
         assert_eq!(
             paths.folder_path_list(),
             &PathList::new(&[
-                Path::new("/worktrees/selectric/zed"),
+                Path::new("/worktrees/selectric/recode"),
                 Path::new("/projects/cloud"),
             ])
         );
         assert_eq!(
             paths.main_worktree_path_list(),
-            &PathList::new(&[Path::new("/projects/zed"), Path::new("/projects/cloud"),])
+            &PathList::new(&[Path::new("/projects/recode"), Path::new("/projects/cloud"),])
         );
 
         // Step 3: remove zed
-        paths.remove_main_path(Path::new("/projects/zed"));
+        paths.remove_main_path(Path::new("/projects/recode"));
 
         assert_eq!(paths.ordered_pairs().count(), 1);
         assert_eq!(
@@ -3995,16 +3995,16 @@ mod tests {
 
     #[test]
     fn test_thread_worktree_paths_add_is_idempotent() {
-        let mut paths = make_worktree_paths(&[("/projects/zed", "/projects/zed")]);
+        let mut paths = make_worktree_paths(&[("/projects/recode", "/projects/recode")]);
 
-        paths.add_path(Path::new("/projects/zed"), Path::new("/projects/zed"));
+        paths.add_path(Path::new("/projects/recode"), Path::new("/projects/recode"));
 
         assert_eq!(paths.ordered_pairs().count(), 1);
     }
 
     #[test]
     fn test_thread_worktree_paths_remove_nonexistent_is_noop() {
-        let mut paths = make_worktree_paths(&[("/projects/zed", "/worktrees/selectric/zed")]);
+        let mut paths = make_worktree_paths(&[("/projects/recode", "/worktrees/selectric/recode")]);
 
         paths.remove_main_path(Path::new("/projects/nonexistent"));
 
@@ -4014,10 +4014,10 @@ mod tests {
     #[test]
     fn test_thread_worktree_paths_from_path_lists_preserves_association() {
         let folder = PathList::new(&[
-            Path::new("/worktrees/selectric/zed"),
+            Path::new("/worktrees/selectric/recode"),
             Path::new("/projects/cloud"),
         ]);
-        let main = PathList::new(&[Path::new("/projects/zed"), Path::new("/projects/cloud")]);
+        let main = PathList::new(&[Path::new("/projects/recode"), Path::new("/projects/cloud")]);
 
         let paths = WorktreePaths::from_path_lists(main, folder).unwrap();
 
@@ -4027,8 +4027,8 @@ mod tests {
             .collect();
         assert_eq!(pairs.len(), 2);
         assert!(pairs.contains(&(
-            PathBuf::from("/projects/zed"),
-            PathBuf::from("/worktrees/selectric/zed")
+            PathBuf::from("/projects/recode"),
+            PathBuf::from("/worktrees/selectric/recode")
         )));
         assert!(pairs.contains(&(
             PathBuf::from("/projects/cloud"),
@@ -4042,8 +4042,8 @@ mod tests {
         // deduplicates because PathList stores unique sorted paths, but
         // ordered_pairs still has both entries.
         let paths = make_worktree_paths(&[
-            ("/projects/zed", "/worktrees/selectric/zed"),
-            ("/projects/zed", "/worktrees/feature/zed"),
+            ("/projects/recode", "/worktrees/selectric/recode"),
+            ("/projects/recode", "/worktrees/feature/recode"),
         ]);
 
         // main_worktree_path_list has the duplicate main path twice
@@ -4052,23 +4052,23 @@ mod tests {
         assert_eq!(
             paths.folder_path_list(),
             &PathList::new(&[
-                Path::new("/worktrees/selectric/zed"),
-                Path::new("/worktrees/feature/zed"),
+                Path::new("/worktrees/selectric/recode"),
+                Path::new("/worktrees/feature/recode"),
             ])
         );
         assert_eq!(
             paths.main_worktree_path_list(),
-            &PathList::new(&[Path::new("/projects/zed"), Path::new("/projects/zed"),])
+            &PathList::new(&[Path::new("/projects/recode"), Path::new("/projects/recode"),])
         );
     }
 
     #[test]
     fn test_thread_worktree_paths_mismatched_lengths_returns_error() {
         let folder = PathList::new(&[
-            Path::new("/worktrees/selectric/zed"),
+            Path::new("/worktrees/selectric/recode"),
             Path::new("/projects/cloud"),
         ]);
-        let main = PathList::new(&[Path::new("/projects/zed")]);
+        let main = PathList::new(&[Path::new("/projects/recode")]);
 
         let result = WorktreePaths::from_path_lists(main, folder);
         assert!(result.is_err());

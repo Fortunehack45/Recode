@@ -39,7 +39,7 @@ pub enum MentionUri {
     },
     /// Deprecated: kept so threads from before rules became skills still
     /// deserialize. `id` (an opaque `prompt_store::PromptId`) is preserved
-    /// verbatim so re-saved threads stay loadable by older Zed versions.
+    /// verbatim so re-saved threads stay loadable by older Recode versions.
     Rule {
         #[serde(default = "default_deprecated_rule_id")]
         id: serde_json::Value,
@@ -275,7 +275,7 @@ impl MentionUri {
                         skill_file_path: skill_file_path.context("missing skill file path")?,
                     })
                 } else {
-                    bail!("invalid zed url: {:?}", input);
+                    bail!("invalid recode url: {:?}", input);
                 }
             }
             "http" | "https" => Ok(MentionUri::Fetch { url }),
@@ -813,7 +813,7 @@ fn default_include_errors() -> bool {
     true
 }
 
-/// Placeholder rule `id` for legacy mentions missing one, shaped so older Zed
+/// Placeholder rule `id` for legacy mentions missing one, shaped so older Recode
 /// versions can still deserialize it as a `prompt_store::PromptId`.
 fn default_deprecated_rule_id() -> serde_json::Value {
     serde_json::json!({ "User": { "uuid": "00000000-0000-0000-0000-000000000000" } })
@@ -1372,7 +1372,7 @@ mod tests {
 
     #[test]
     fn test_legacy_rule_mention_preserves_id() {
-        // The `id` older Zed versions require must survive a load + save.
+        // The `id` older Recode versions require must survive a load + save.
         let json = r#"{"Rule":{"id":{"User":{"uuid":"d8694ff2-90d5-4b6f-be33-33c1763acd52"}},"name":"Some rule"}}"#;
         let parsed: MentionUri = serde_json::from_str(json).unwrap();
         match &parsed {
@@ -1555,11 +1555,11 @@ mod tests {
 
     #[test]
     fn test_parse_absolute_windows_path() {
-        let file_path = "C:\\Users\\zed\\project\\main.rs";
+        let file_path = "C:\\Users\\user\\project\\main.rs";
         let parsed = MentionUri::parse(file_path, PathStyle::Windows).unwrap();
         match &parsed {
             MentionUri::File { abs_path } => {
-                assert_eq!(abs_path, Path::new("C:\\Users\\zed\\project\\main.rs"));
+                assert_eq!(abs_path, Path::new("C:\\Users\\user\\project\\main.rs"));
             }
             _ => panic!("Expected File variant"),
         }
@@ -1567,7 +1567,7 @@ mod tests {
 
     #[test]
     fn test_parse_absolute_windows_file_path_with_row() {
-        let file_path = "C:\\Users\\zed\\project\\main.rs:42";
+        let file_path = "C:\\Users\\user\\project\\main.rs:42";
         let parsed = MentionUri::parse(file_path, PathStyle::Windows).unwrap();
         match &parsed {
             MentionUri::Selection {
@@ -1577,7 +1577,7 @@ mod tests {
             } => {
                 assert_eq!(
                     path.as_ref().unwrap(),
-                    Path::new("C:\\Users\\zed\\project\\main.rs")
+                    Path::new("C:\\Users\\user\\project\\main.rs")
                 );
                 assert_eq!(line_range.start(), &41);
                 assert_eq!(line_range.end(), &41);
@@ -1588,7 +1588,7 @@ mod tests {
 
     #[test]
     fn test_parse_absolute_windows_file_path_with_fragment_line() {
-        let file_path = "C:\\Users\\zed\\project\\main.rs#L42";
+        let file_path = "C:\\Users\\user\\project\\main.rs#L42";
         let parsed = MentionUri::parse(file_path, PathStyle::Windows).unwrap();
         match &parsed {
             MentionUri::Selection {
@@ -1598,7 +1598,7 @@ mod tests {
             } => {
                 assert_eq!(
                     path.as_ref().unwrap(),
-                    Path::new("C:\\Users\\zed\\project\\main.rs")
+                    Path::new("C:\\Users\\user\\project\\main.rs")
                 );
                 assert_eq!(line_range.start(), &41);
                 assert_eq!(line_range.end(), &41);
@@ -1639,7 +1639,7 @@ mod tests {
 
     #[test]
     fn test_parse_backticked_absolute_windows_file_path_with_fragment_line() {
-        let file_path = "`C:\\Users\\zed\\project\\main.rs#L42`";
+        let file_path = "`C:\\Users\\user\\project\\main.rs#L42`";
         let parsed = MentionUri::parse(file_path, PathStyle::Windows).unwrap();
         match &parsed {
             MentionUri::Selection {
@@ -1649,7 +1649,7 @@ mod tests {
             } => {
                 assert_eq!(
                     path.as_ref().unwrap(),
-                    Path::new("C:\\Users\\zed\\project\\main.rs")
+                    Path::new("C:\\Users\\user\\project\\main.rs")
                 );
                 assert_eq!(line_range.start(), &41);
                 assert_eq!(line_range.end(), &41);

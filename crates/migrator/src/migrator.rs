@@ -719,14 +719,14 @@ mod tests {
             indoc! {r#"
                 {
                     "features": {
-                        "inline_completion_provider": "zed"
+                        "inline_completion_provider": "recode"
                     },
                 }
             "#},
             Some(indoc! {r#"
                 {
                     "edit_predictions": {
-                        "provider": "zed"
+                        "provider": "recode"
                     }
                 }
             "#}),
@@ -1098,7 +1098,7 @@ mod tests {
         "default_width": 640,
         "default_height": 320,
         "default_model": {
-            "provider": "zed.dev",
+            "provider": "recode.dev",
             "model": "claude-sonnet-4"
         }
     }
@@ -1120,7 +1120,7 @@ mod tests {
         "default_width": 640,
         "default_height": 320,
         "default_model": {
-            "provider": "zed.dev",
+            "provider": "recode.dev",
             "model": "claude-sonnet-4"
         }
     }
@@ -2648,7 +2648,7 @@ mod tests {
             indoc! {r#"
                 {
                     "features": {
-                        "edit_prediction_provider": "zed"
+                        "edit_prediction_provider": "recode"
                     },
                     "edit_predictions": {
                         "mode": "eager"
@@ -2658,7 +2658,7 @@ mod tests {
             Some(indoc! {r#"
                 {
                     "edit_predictions": {
-                        "provider": "zed",
+                        "provider": "recode",
                         "mode": "eager"
                     }
                 }
@@ -2695,7 +2695,7 @@ mod tests {
             indoc! {r#"
                 {
                     "edit_predictions": {
-                        "provider": "zed"
+                        "provider": "recode"
                     }
                 }
             "#},
@@ -2789,7 +2789,7 @@ mod tests {
                     },
                     "macos": {
                         "features": {
-                            "edit_prediction_provider": "zed"
+                            "edit_prediction_provider": "recode"
                         }
                     },
                     "profiles": {
@@ -2808,7 +2808,7 @@ mod tests {
                     },
                     "macos": {
                         "edit_predictions": {
-                            "provider": "zed"
+                            "provider": "recode"
                         }
                     },
                     "profiles": {
@@ -2906,7 +2906,7 @@ mod tests {
             indoc! {r#"
                 {
                     "edit_predictions": {
-                        "provider": "zed"
+                        "provider": "recode"
                     }
                 }
             "#},
@@ -2929,7 +2929,7 @@ mod tests {
             Some(indoc! {r#"
                 {
                     "edit_predictions": {
-                        "provider": "zed"
+                        "provider": "recode"
                     }
                 }
             "#}),
@@ -3534,7 +3534,7 @@ mod tests {
             Some(&"{\n    \"agent\": {\n        \n    }\n}\n"),
         );
 
-        // Project-local settings (.zed/settings.json) with always_allow_tool_actions
+        // Project-local settings (.recode/settings.json) with always_allow_tool_actions
         // These files have no platform/channel overrides or root-level profiles.
         assert_migrate_with_migrations(
             &[MigrationType::Json(
@@ -5305,8 +5305,8 @@ mod tests {
             indoc! {r#"
                 {
                     "markdown_preview_font_size": 15,
-                    "markdown_preview_font_family": "Zed Sans",
-                    "markdown_preview_code_font_family": "Zed Mono",
+                    "markdown_preview_font_family": "Recode Sans",
+                    "markdown_preview_code_font_family": "Recode Mono",
                     "markdown_preview_theme": "One Dark",
                     "markdown_preview": {
                         "font_size": 18,
@@ -5319,8 +5319,8 @@ mod tests {
                 {
                     "markdown_preview": {
                         "theme": "One Dark",
-                        "code_font_family": "Zed Mono",
-                        "font_family": "Zed Sans",
+                        "code_font_family": "Recode Mono",
+                        "font_family": "Recode Sans",
                         "font_size": 18,
                         "limit_content_width": false,
                         "max_width": 900
@@ -5401,8 +5401,8 @@ mod tests {
             indoc! {r#"
                 {
                     "markdown_preview_font_size": 15,
-                    "markdown_preview_font_family": "Zed Sans",
-                    "markdown_preview_code_font_family": "Zed Mono",
+                    "markdown_preview_font_family": "Recode Sans",
+                    "markdown_preview_code_font_family": "Recode Mono",
                     "markdown_preview_theme": "One Dark"
                 }
             "#},
@@ -5410,8 +5410,8 @@ mod tests {
                 {
                     "markdown_preview": {
                         "font_size": 15,
-                        "font_family": "Zed Sans",
-                        "code_font_family": "Zed Mono",
+                        "font_family": "Recode Sans",
+                        "code_font_family": "Recode Mono",
                         "theme": "One Dark"
                     }
                 }

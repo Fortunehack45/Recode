@@ -87,10 +87,10 @@ impl<T: InventoryContents> InventoryFor<T> {
         worktree: WorktreeId,
     ) -> impl '_ + Iterator<Item = (TaskSourceKind, T)> {
         let worktree_dirs = self.worktree.get(&worktree);
-        let has_zed_dir = worktree_dirs
+        let has_recode_dir = worktree_dirs
             .map(|dirs| {
                 dirs.keys()
-                    .any(|dir| dir.file_name().is_some_and(|name| name == ".zed"))
+                    .any(|dir| dir.file_name().is_some_and(|name| name == paths::local_settings_folder_name()))
             })
             .unwrap_or(false);
 
@@ -98,7 +98,7 @@ impl<T: InventoryContents> InventoryFor<T> {
             .into_iter()
             .flatten()
             .filter(move |(directory, _)| {
-                !(has_zed_dir && directory.file_name().is_some_and(|name| name == ".vscode"))
+                !(has_recode_dir && directory.file_name().is_some_and(|name| name == ".vscode"))
             })
             .flat_map(|(directory, templates)| {
                 templates.iter().map(move |template| (directory, template))
@@ -147,13 +147,13 @@ impl<T> Default for InventoryFor<T> {
 pub enum TaskSourceKind {
     /// bash-like commands spawned by users, not associated with any path
     UserInput,
-    /// Tasks from the worktree's .zed/task.json
+    /// Tasks from the worktree's .recode/tasks.json
     Worktree {
         id: WorktreeId,
         directory_in_worktree: Arc<RelPath>,
         id_base: Cow<'static, str>,
     },
-    /// ~/.config/zed/task.json - like global files with task definitions, applicable to any path
+    /// ~/.config/recode/task.json - like global files with task definitions, applicable to any path
     AbsPath {
         id_base: Cow<'static, str>,
         abs_path: PathBuf,
@@ -507,13 +507,13 @@ impl Inventory {
         });
         let buffer = location.map(|location| location.buffer.clone());
 
-        let worktrees_with_zed_tasks: HashSet<WorktreeId> = self
+        let worktrees_with_recode_tasks: HashSet<WorktreeId> = self
             .templates_from_settings
             .worktree
             .iter()
             .filter(|(_, dirs)| {
                 dirs.keys()
-                    .any(|dir| dir.file_name().is_some_and(|name| name == ".zed"))
+                    .any(|dir| dir.file_name().is_some_and(|name| name == paths::local_settings_folder_name()))
             })
             .map(|(id, _)| *id)
             .collect();
@@ -533,7 +533,7 @@ impl Inventory {
                     ..
                 } = task_kind
                 {
-                    !(worktrees_with_zed_tasks.contains(id)
+                    !(worktrees_with_recode_tasks.contains(id)
                         && dir.file_name().is_some_and(|name| name == ".vscode"))
                 } else {
                     true
@@ -1139,9 +1139,9 @@ mod tests {
 
     fn greeting_template() -> TaskTemplate {
         TaskTemplate {
-            label: "echo $ZED_CUSTOM_GREETING".to_string(),
+            label: "echo $RECODE_CUSTOM_GREETING".to_string(),
             command: "echo".to_string(),
-            args: vec!["$ZED_CUSTOM_GREETING".to_string()],
+            args: vec!["$RECODE_CUSTOM_GREETING".to_string()],
             ..TaskTemplate::default()
         }
     }

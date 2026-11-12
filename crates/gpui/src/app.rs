@@ -3865,11 +3865,11 @@ mod test {
     #[gpui::test]
     async fn test_restart_preserves_path_and_arguments(cx: &mut TestAppContext) {
         #[cfg(unix)]
-        let user_data_dir = OsString::from_vec(b"/tmp/zed data/\xff".to_vec());
+        let user_data_dir = OsString::from_vec(b"/tmp/recode data/\xff".to_vec());
         #[cfg(not(unix))]
-        let user_data_dir = OsString::from("C:\\zed data");
+        let user_data_dir = OsString::from("C:\\recode data");
         let arguments = vec![OsString::from("--user-data-dir"), user_data_dir];
-        let restart_path = PathBuf::from("updated-zed");
+        let restart_path = PathBuf::from("updated-recode");
         let _application =
             super::Application(cx.app.clone()).with_restart_arguments(arguments.clone());
         let restart = cx.expect_restart();

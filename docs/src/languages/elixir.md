@@ -1,6 +1,6 @@
 ---
 title: Elixir
-description: "Configure Elixir language support in Zed, including language servers, formatting, and debugging."
+description: "Configure Elixir language support in Recode, including language servers, formatting, and debugging."
 ---
 
 # Elixir
@@ -22,7 +22,7 @@ Furthermore, the extension provides support for [EEx](https://hexdocs.pm/eex/EEx
 
 ## Language Servers
 
-The Elixir extension offers language server support for ElixirLS, Expert, Dexter, Next LS, and Lexical. By default, only ElixirLS is enabled. You can change or disable the enabled language servers in your settings ({#kb zed::OpenSettings}) under Languages > Elixir/EEx/HEEx or directly within your settings file.
+The Elixir extension offers language server support for ElixirLS, Expert, Dexter, Next LS, and Lexical. By default, only ElixirLS is enabled. You can change or disable the enabled language servers in your settings ({#kb recode::OpenSettings}) under Languages > Elixir/EEx/HEEx or directly within your settings file.
 
 The extension will try to find and use local binaries in your `$PATH` for the enabled language servers. If it cannot find them there, it will fallback to installing them for you instead.
 
@@ -170,7 +170,7 @@ Enable Next LS by adding the following to your settings file:
 
 Next LS can accept initialization options.
 
-Completions are an experimental feature within Next LS, and are enabled by default in Zed. Disable them by adding the following to your settings file:
+Completions are an experimental feature within Next LS, and are enabled by default in Recode. Disable them by adding the following to your settings file:
 
 ```json [settings]
   "lsp": {
@@ -296,7 +296,7 @@ The Elixir extension also provides a debug adapter via ElixirLS. Like the langua
 
 Alternatively, you can provide your own custom binary by passing the path and arguments in your settings file via `dap.ElixirLS.binary` and `dap.ElixirLS.args` respectively.
 
-Refer to the [Debugger](../debugger.md#getting-started) documentation for more information on how debugging works in Zed.
+Refer to the [Debugger](../debugger.md#getting-started) documentation for more information on how debugging works in Recode.
 
 ### Using ElixirLS
 
@@ -308,7 +308,7 @@ The following example allows you to debug the test files of a project:
     "label": "Debug tests",
     "adapter": "ElixirLS",
     "request": "launch",
-    "projectDir": "$ZED_WORKTREE_ROOT",
+    "projectDir": "$RECODE_WORKTREE_ROOT",
     "task": "test",
     "taskArgs": ["--trace"],
     "requireFiles": ["test/**/test_helper.exs", "test/**/*_test.exs"]
@@ -324,7 +324,7 @@ The following example allows you to debug a Phoenix server:
     "label": "Debug Phoenix server",
     "adapter": "ElixirLS",
     "request": "launch",
-    "projectDir": "$ZED_WORKTREE_ROOT",
+    "projectDir": "$RECODE_WORKTREE_ROOT",
     "task": "phx.server",
     "debugAutoInterpretAllModules": false,
     "debugInterpretModulesPatterns": ["MyApp*", "MyAppWeb*"],

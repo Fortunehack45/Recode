@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn github_api_requests_have_a_total_deadline() {
         let request =
-            github_api_request("https://api.github.com/repos/zed-industries/zed/releases").unwrap();
+            github_api_request("https://api.github.com/repos/Fortunehack45/Recode/releases").unwrap();
 
         assert_eq!(
             request.extensions().get::<RequestTimeout>(),

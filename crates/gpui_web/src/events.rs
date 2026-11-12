@@ -681,7 +681,7 @@ impl WebWindowInner {
     }
 
     /// Browsers only expose dropped files as `File` objects, never as
-    /// filesystem paths, so no `FileDrop` input can be synthesized: GPUI's
+    /// filesystem paths, so no `FileDrop` input can be synthesirecode: GPUI's
     /// `ExternalPaths` consumers would try to read paths that don't exist.
     /// The events are still intercepted so the browser doesn't navigate to
     /// the dropped file. Delivering actual file drops would require plumbing

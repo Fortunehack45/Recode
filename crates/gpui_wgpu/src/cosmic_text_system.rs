@@ -1273,11 +1273,11 @@ mod tests {
 
     #[test]
     fn cached_font_resolution_does_not_wait_for_cold_lookups() -> Result<()> {
-        for family in [".ZedSans", "Missing Font"] {
+        for family in [".RecodeSans", "Missing Font"] {
             let platform_text_system = Arc::new(text_system()?);
             let text_system = gpui::TextSystem::new(platform_text_system.clone());
             let cached = gpui::font(family);
-            let expected = platform_text_system.font_id(&gpui::font(".ZedSans"))?;
+            let expected = platform_text_system.font_id(&gpui::font(".RecodeSans"))?;
             assert_eq!(text_system.resolve_font(&cached), expected);
             let (sender, receiver) = mpsc::channel();
 
@@ -1312,7 +1312,7 @@ mod tests {
         let platform_text_system = Arc::new(CosmicTextSystem::new_without_system_fonts("Lilex"));
         let text_system = gpui::TextSystem::new(platform_text_system.clone());
         text_system.add_fonts(vec![Cow::Borrowed(IBM_PLEX)])?;
-        let original_fallback = platform_text_system.font_id(&gpui::font(".ZedSans"))?;
+        let original_fallback = platform_text_system.font_id(&gpui::font(".RecodeSans"))?;
         let requests = [
             gpui::Font::default(),
             gpui::font("Lilex"),
@@ -1323,11 +1323,11 @@ mod tests {
         }
         assert_eq!(
             text_system.get_font_for_id(original_fallback),
-            Some(gpui::font(".ZedSans"))
+            Some(gpui::font(".RecodeSans"))
         );
 
         text_system.add_fonts(vec![Cow::Borrowed(LILEX)])?;
-        for (requested, resolved) in requests.iter().zip([".SystemUIFont", "Lilex", ".ZedMono"]) {
+        for (requested, resolved) in requests.iter().zip([".SystemUIFont", "Lilex", ".RecodeMono"]) {
             let installed = platform_text_system.font_id(&gpui::font(resolved))?;
             assert_ne!(installed, original_fallback);
             assert_eq!(text_system.resolve_font(requested), installed);
@@ -1603,7 +1603,7 @@ mod tests {
     /// advances to position glyphs, so a trailing zero-advance glyph (here a
     /// zero-width space) can land a few ulps past the width. When that glyph is a
     /// wrap boundary, the row before it extends past the line's width, and hit
-    /// testing in that sliver used to panic (ZED-BW8, ZED-75K, ZED-81Z).
+    /// testing in that sliver used to panic (RECODE-BW8, RECODE-75K, RECODE-81Z).
     #[test]
     fn index_for_position_past_line_width() -> Result<()> {
         let text_system = Arc::new(gpui::TextSystem::new(Arc::new(text_system()?)));

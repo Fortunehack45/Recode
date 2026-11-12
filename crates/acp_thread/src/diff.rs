@@ -58,7 +58,7 @@ impl DiffPatch {
                 hunks: Vec::new(),
             })
             .collect::<Vec<_>>();
-        // A patch in a format Zed doesn't recognize renders as if it were omitted.
+        // A patch in a format Recode doesn't recognize renders as if it were omitted.
         if source
             .patch
             .as_ref()

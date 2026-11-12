@@ -37,7 +37,7 @@ use workspace::{
     item::{Item, ItemEvent, ItemHandle, SaveOptions},
     searchable::SearchableItemHandle,
 };
-use zed_actions::git as git_actions;
+use recode_actions::git as git_actions;
 
 actions!(
     git,
@@ -981,7 +981,7 @@ pub(crate) fn render_send_review_to_agent_button(
         format!("Send Review to Agent ({})", review_count),
     )
     .start_icon(
-        Icon::new(IconName::ZedAssistant)
+        Icon::new(IconName::RecodeAssistant)
             .size(IconSize::Small)
             .color(Color::Muted),
     )
@@ -1030,7 +1030,7 @@ mod tests {
         });
     }
 
-    use zed_actions::git as git_actions;
+    use recode_actions::git as git_actions;
 
     use crate::branch_diff::BranchDiff;
     use crate::project_diff::{self, ProjectDiff};

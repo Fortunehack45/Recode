@@ -220,7 +220,7 @@ pub struct AbortMessageLocation {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct InitCrashHandler {
     pub session_id: String,
-    pub zed_version: String,
+    pub recode_version: String,
     pub binary: String,
     pub release_channel: String,
     pub commit_sha: String,
@@ -797,8 +797,8 @@ mod tests {
             r#"{
                 "init": {
                     "session_id": "session-1",
-                    "zed_version": "1.2.3",
-                    "binary": "zed",
+                    "recode_version": "1.2.3",
+                    "binary": "recode",
                     "release_channel": "stable",
                     "commit_sha": "abc123"
                 },

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::ZedPredictUpsell;
+use crate::RecodePredictUpsell;
 use ai_onboarding::EditPredictionOnboarding;
 use client::{Client, UserStore};
 use db::kvp::Dismissable;
@@ -24,8 +24,8 @@ macro_rules! onboarding_event {
     };
 }
 
-/// Introduces user to Zed's Edit Prediction feature
-pub struct ZedPredictModal {
+/// Introduces user to Recode's Edit Prediction feature
+pub struct RecodePredictModal {
     onboarding: Entity<EditPredictionOnboarding>,
     focus_handle: FocusHandle,
 }
@@ -42,7 +42,7 @@ pub(crate) fn set_edit_prediction_provider(provider: EditPredictionProvider, cx:
     });
 }
 
-impl ZedPredictModal {
+impl RecodePredictModal {
     pub fn toggle(
         workspace: &mut Workspace,
         user_store: Entity<UserStore>,
@@ -60,8 +60,8 @@ impl ZedPredictModal {
                         Arc::new({
                             let this = weak_entity.clone();
                             move |_window, cx| {
-                                ZedPredictUpsell::set_dismissed(true, cx);
-                                set_edit_prediction_provider(EditPredictionProvider::Zed, cx);
+                                RecodePredictUpsell::set_dismissed(true, cx);
+                                set_edit_prediction_provider(EditPredictionProvider::Recode, cx);
                                 this.update(cx, |_, cx| cx.emit(DismissEvent)).ok();
                             }
                         }),
@@ -74,31 +74,31 @@ impl ZedPredictModal {
     }
 
     fn cancel(&mut self, _: &menu::Cancel, _: &mut Window, cx: &mut Context<Self>) {
-        ZedPredictUpsell::set_dismissed(true, cx);
+        RecodePredictUpsell::set_dismissed(true, cx);
         cx.emit(DismissEvent);
     }
 }
 
-impl EventEmitter<DismissEvent> for ZedPredictModal {}
+impl EventEmitter<DismissEvent> for RecodePredictModal {}
 
-impl Focusable for ZedPredictModal {
+impl Focusable for RecodePredictModal {
     fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
 
-impl ModalView for ZedPredictModal {
+impl ModalView for RecodePredictModal {
     fn on_before_dismiss(
         &mut self,
         _window: &mut Window,
         cx: &mut Context<Self>,
     ) -> workspace::DismissDecision {
-        ZedPredictUpsell::set_dismissed(true, cx);
+        RecodePredictUpsell::set_dismissed(true, cx);
         workspace::DismissDecision::Dismiss(true)
     }
 }
 
-impl Render for ZedPredictModal {
+impl Render for RecodePredictModal {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let window_height = window.viewport_size().height;
         let max_height = window_height - px(200.);
@@ -106,7 +106,7 @@ impl Render for ZedPredictModal {
 
         v_flex()
             .id("edit-prediction-onboarding")
-            .key_context("ZedPredictModal")
+            .key_context("RecodePredictModal")
             .relative()
             .w(px(550.))
             .h_full()

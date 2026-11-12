@@ -1,5 +1,5 @@
 use crate::multibuffer_hint::MultibufferHint;
-use client::{Client, UserStore, zed_urls};
+use client::{Client, UserStore, recode_urls};
 use db::kvp::KeyValueStore;
 use fs::Fs;
 use gpui::{
@@ -27,7 +27,7 @@ use workspace::{
     notifications::NotifyResultExt as _,
     open_new, register_serializable_item, with_active_or_new_workspace,
 };
-use zed_actions::OpenOnboarding;
+use recode_actions::OpenOnboarding;
 
 mod base_keymap_picker;
 mod basics_page;
@@ -36,7 +36,7 @@ mod theme_preview;
 
 /// Imports settings from Visual Studio Code.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, JsonSchema, Action)]
-#[action(namespace = zed)]
+#[action(namespace = recode)]
 #[serde(deny_unknown_fields)]
 pub struct ImportVsCodeSettings {
     #[serde(default)]
@@ -45,7 +45,7 @@ pub struct ImportVsCodeSettings {
 
 /// Imports settings from Cursor editor.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, JsonSchema, Action)]
-#[action(namespace = zed)]
+#[action(namespace = recode)]
 #[serde(deny_unknown_fields)]
 pub struct ImportCursorSettings {
     #[serde(default)]
@@ -61,7 +61,7 @@ actions!(
         Finish,
         /// Sign in while in the onboarding flow.
         SignIn,
-        /// Open the user account in zed.dev while in the onboarding flow.
+        /// Open the user account in recode.dev while in the onboarding flow.
         OpenAccount,
         /// Resets the welcome screen hints to their initial state.
         ResetHints
@@ -222,7 +222,7 @@ impl Onboarding {
             .clone();
         let client = Client::global(cx);
         let status = *client.status().borrow();
-        let zed_agent_state = if status.is_signed_out()
+        let recode_agent_state = if status.is_signed_out()
             || matches!(
                 status,
                 client::Status::AuthenticationError | client::Status::ConnectionError
@@ -240,7 +240,7 @@ impl Onboarding {
             .collect::<Vec<_>>();
         telemetry::event!(
             "Welcome Agent Setup Viewed",
-            zed_agent = zed_agent_state,
+            recode_agent = recode_agent_state,
             agents_installed = agents_installed,
         );
 
@@ -284,7 +284,7 @@ impl Onboarding {
     }
 
     fn handle_open_account(_: &OpenAccount, _: &mut Window, cx: &mut App) {
-        cx.open_url(&zed_urls::account_url(cx))
+        cx.open_url(&recode_urls::account_url(cx))
     }
 
     fn render_page(&mut self, cx: &mut Context<Self>) -> AnyElement {
@@ -338,7 +338,7 @@ impl Render for Onboarding {
                                     .child(
                                         h_flex()
                                             .gap_4()
-                                            .child(Vector::square(VectorName::ZedLogo, rems(2.5)))
+                                            .child(Vector::square(VectorName::RecodeLogo, rems(2.5)))
                                             .child(
                                                 v_flex()
                                                     .child(

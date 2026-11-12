@@ -668,7 +668,7 @@ export class UI {
       { cmd: "/chat <id|#>", desc: "Resume saved chat session by ID or index" },
       { cmd: "/compact", desc: "Prune and compact conversation context tokens" },
       { cmd: "/channel [room]", desc: "Team collaboration channels (wss://recode-collab)" },
-      { cmd: "/model [name]", desc: "Switch AI model (e.g. opencode-zen, gemini-2.5-flash)" },
+      { cmd: "/model [name]", desc: "Switch AI model (e.g. opencode-recode, gemini-2.5-flash)" },
       { cmd: "/models", desc: "List all supported models across all providers" },
       { cmd: "/connect [p] [k]", desc: "Set API keys (OpenCode, Gemini, OpenAI, Claude)" },
       { cmd: "/mode [build|plan]", desc: "Toggle Build (read/write/exec) vs Plan (read-only)" },
@@ -702,7 +702,7 @@ export class UI {
     console.log(`\n  ${theme.accent(glyphs.tl + glyphs.horiz)} ${theme.bold(theme.text("Connect an AI Provider (BYOK — Bring Your Own Key)"))} ${theme.accent(glyphs.horiz.repeat(20) + glyphs.tr)}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.dim("Recode is 100% provider-agnostic. Connect your preferred key:")}`);
     console.log(`  ${theme.border(glyphs.vert)}`);
-    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[1] OpenCode API"))}     ${theme.dim("opencode-zen, opencode-go, glm-5, deepseek, sonnet")}`);
+    console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[1] OpenCode API"))}     ${theme.dim("opencode-recode, opencode-go, glm-5, deepseek, sonnet")}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[2] Google Gemini"))}     ${theme.dim("gemini-2.5-flash, gemini-2.5-pro (Generous free tier, 1M ctx)")}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[3] OpenAI"))}            ${theme.dim("gpt-4o, gpt-4o-mini, o3-mini")}`);
     console.log(`  ${theme.border(glyphs.vert)}  ${theme.accent(theme.bold("[4] Anthropic Claude"))}  ${theme.dim("claude-3-7-sonnet, claude-3-5-sonnet")}`);

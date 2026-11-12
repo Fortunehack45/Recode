@@ -10,7 +10,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
-$tomlPath = Join-Path $repoRoot "crates/zed/Cargo.toml"
+$tomlPath = Join-Path $repoRoot "crates/recode/Cargo.toml"
 
 $content = Get-Content $tomlPath -Raw
 if ($content -notmatch '(?m)^version\s*=\s*"([^"]+)"') {
@@ -46,7 +46,7 @@ if (-not $TargetVersion) {
 $TargetVersion = $TargetVersion.TrimStart('v')
 Write-Host "New version: $TargetVersion" -ForegroundColor Green
 
-# Update crates/zed/Cargo.toml
+# Update crates/recode/Cargo.toml
 $newContent = $content -replace '(?m)^version\s*=\s*"[^"]+"', "version = `"$TargetVersion`""
 Set-Content -Path $tomlPath -Value $newContent -NoNewline
 

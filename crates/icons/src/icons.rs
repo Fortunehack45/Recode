@@ -29,7 +29,6 @@ pub enum IconName {
     AiVercel,
     AiXAi,
     AiRecode,
-    AiZed,
     Archive,
     ArrowCircle,
     ArrowDown,
@@ -308,16 +307,6 @@ pub enum IconName {
     RecodePredictUp,
     RecodeSrcCustom,
     RecodeSrcExtension,
-    ZedAgent,
-    ZedAgentTwo,
-    ZedAssistant,
-    ZedPredict,
-    ZedPredictDisabled,
-    ZedPredictDown,
-    ZedPredictError,
-    ZedPredictUp,
-    ZedSrcCustom,
-    ZedSrcExtension,
 }
 
 impl IconName {

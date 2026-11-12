@@ -12,7 +12,7 @@ pub(crate) fn use_clang(job: Job) -> Job {
         .add_env(Env::new("CXX", "clang++"))
 }
 
-const SCCACHE_R2_BUCKET: &str = "sccache-zed";
+const SCCACHE_R2_BUCKET: &str = "sccache-recode";
 
 pub(crate) const BASH_SHELL: &str = "bash -euxo pipefail {0}";
 // https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
@@ -353,7 +353,7 @@ pub struct NamedJob<J: JobType = RunJob> {
 // }
 
 pub(crate) const DEFAULT_REPOSITORY_OWNER_GUARD: &str =
-    "(github.repository_owner == 'zed-industries' || github.repository_owner == 'zed-extensions')";
+    "(github.repository_owner == 'Fortunehack45')";
 
 pub fn repository_owner_guard_expression(trigger_always: bool) -> Expression {
     Expression::new(format!(
@@ -550,19 +550,19 @@ pub mod named {
     }
 }
 
-const ZED_ZIPPY_GIT_USER_NAME: &str = "zed-zippy[bot]";
-const ZED_ZIPPY_GIT_USER_EMAIL: &str = "234243425+zed-zippy[bot]@users.noreply.github.com";
+const RECODE_BOT_GIT_USER_NAME: &str = "recode-bot[bot]";
+const RECODE_BOT_GIT_USER_EMAIL: &str = "recode-bot[bot]@users.noreply.github.com";
 
-pub(crate) trait ZippyGitIdentity {
-    fn with_zippy_git_identity(self) -> Self;
+pub(crate) trait BotGitIdentity {
+    fn with_bot_git_identity(self) -> Self;
 }
 
-impl ZippyGitIdentity for Step<Run> {
-    fn with_zippy_git_identity(self) -> Self {
-        self.add_env(("GIT_AUTHOR_NAME", ZED_ZIPPY_GIT_USER_NAME))
-            .add_env(("GIT_AUTHOR_EMAIL", ZED_ZIPPY_GIT_USER_EMAIL))
-            .add_env(("GIT_COMMITTER_NAME", ZED_ZIPPY_GIT_USER_NAME))
-            .add_env(("GIT_COMMITTER_EMAIL", ZED_ZIPPY_GIT_USER_EMAIL))
+impl BotGitIdentity for Step<Run> {
+    fn with_bot_git_identity(self) -> Self {
+        self.add_env(("GIT_AUTHOR_NAME", RECODE_BOT_GIT_USER_NAME))
+            .add_env(("GIT_AUTHOR_EMAIL", RECODE_BOT_GIT_USER_EMAIL))
+            .add_env(("GIT_COMMITTER_NAME", RECODE_BOT_GIT_USER_NAME))
+            .add_env(("GIT_COMMITTER_EMAIL", RECODE_BOT_GIT_USER_EMAIL))
     }
 }
 
@@ -897,8 +897,8 @@ pub(crate) fn generate_token<'a>(
     generate_token_with_job_name(app_id_source, app_secret_source)
 }
 
-pub fn authenticate_as_zippy() -> GenerateAppToken<'static> {
-    generate_token_with_job_name(vars::ZED_ZIPPY_APP_ID, vars::ZED_ZIPPY_APP_PRIVATE_KEY)
+pub fn authenticate_as_bot() -> GenerateAppToken<'static> {
+    generate_token_with_job_name(vars::RECODE_BOT_APP_ID, vars::RECODE_BOT_APP_PRIVATE_KEY)
 }
 
 fn generate_token_with_job_name<'a>(
@@ -1075,8 +1075,8 @@ pub(crate) fn update_ref(
     }
 }
 
-const ZED_ZIPPY_COMMITTER: &str =
-    "zed-zippy[bot] <234243425+zed-zippy[bot]@users.noreply.github.com>";
+const RECODE_BOT_COMMITTER: &str =
+    "recode-bot[bot] <recode-bot[bot]@users.noreply.github.com>";
 
 pub(crate) struct CreatePrStep {
     title: String,
@@ -1144,8 +1144,8 @@ impl From<CreatePrStep> for Step<Use> {
             .add_with(("body", step.body))
             .add_with(("commit-message", step.title))
             .add_with(("branch", step.branch))
-            .add_with(("committer", ZED_ZIPPY_COMMITTER))
-            .add_with(("author", ZED_ZIPPY_COMMITTER))
+            .add_with(("committer", RECODE_BOT_COMMITTER))
+            .add_with(("author", RECODE_BOT_COMMITTER))
             .add_with(("base", step.base))
             .add_with(("delete-branch", true))
             .add_with(("token", step.token))

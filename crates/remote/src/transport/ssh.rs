@@ -352,7 +352,7 @@ impl MasterProcess {
 
 #[cfg(windows)]
 impl MasterProcess {
-    const CONNECTION_ESTABLISHED_MAGIC: &str = "ZED_SSH_CONNECTION_ESTABLISHED";
+    const CONNECTION_ESTABLISHED_MAGIC: &str = "RECODE_SSH_CONNECTION_ESTABLISHED";
 
     pub fn new(
         askpass_script_path: &std::ffi::OsStr,
@@ -376,7 +376,7 @@ impl MasterProcess {
             .stderr(Stdio::piped())
             .env("SSH_ASKPASS_REQUIRE", "force")
             .env("SSH_ASKPASS", askpass_script_path)
-            .env("ZED_ASKPASS_SOCKET", askpass_socket_path)
+            .env("RECODE_ASKPASS_SOCKET", askpass_socket_path)
             .args(additional_args)
             .arg("-t")
             .args(destination_args)
@@ -638,7 +638,7 @@ impl RemoteConnection for SshRemoteConnection {
         delegate: Arc<dyn RemoteClientDelegate>,
         cx: &mut AsyncApp,
     ) -> Task<Result<i32>> {
-        const VARS: [&str; 3] = ["RUST_LOG", "RUST_BACKTRACE", "ZED_GENERATE_MINIDUMPS"];
+        const VARS: [&str; 3] = ["RUST_LOG", "RUST_BACKTRACE", "RECODE_GENERATE_MINIDUMPS"];
         delegate.set_status(Some("Starting proxy"), cx);
 
         let Some(remote_binary_path) = self.remote_binary_path.clone() else {
@@ -721,7 +721,7 @@ impl RemoteConnection for SshRemoteConnection {
 }
 
 /// Check if the user already has an active SSH ControlMaster session for the
-/// given destination. See: https://github.com/zed-industries/zed/issues/45271
+/// given destination. See: https://github.com/recode-industries/recode/issues/45271
 #[cfg(not(windows))]
 async fn find_existing_control_master(
     connection_options: &SshConnectionOptions,
@@ -810,7 +810,7 @@ impl SshRemoteConnection {
         use askpass::AskPassResult;
 
         let temp_dir = tempfile::Builder::new()
-            .prefix("zed-ssh-session")
+            .prefix("recode-ssh-session")
             .tempdir()?;
 
         // On non-Windows, check if the user already has an active ControlMaster
@@ -1027,7 +1027,7 @@ impl SshRemoteConnection {
             _ => version.to_string(),
         };
         let binary_name = format!(
-            "zed-remote-server-{}-{}{}",
+            "recode-remote-server-{}-{}{}",
             release_channel.dev_name(),
             version_str,
             if self.ssh_platform.os.is_windows() {
@@ -1082,7 +1082,7 @@ impl SshRemoteConnection {
             ReleaseChannel::Nightly => Ok(None),
             ReleaseChannel::Dev => {
                 anyhow::bail!(
-                    "ZED_BUILD_REMOTE_SERVER is not set and no remote server exists at ({:?})",
+                    "RECODE_BUILD_REMOTE_SERVER is not set and no remote server exists at ({:?})",
                     dst_path
                 )
             }
@@ -1518,7 +1518,7 @@ impl SshSocket {
             _proxy.script_path().as_ref().display().to_string(),
         );
         envs.insert(
-            "ZED_ASKPASS_SOCKET".into(),
+            "RECODE_ASKPASS_SOCKET".into(),
             _proxy.socket_path().as_ref().display().to_string(),
         );
 
@@ -2318,7 +2318,7 @@ mod tests {
                     port: Some(2222),
                     ..SshConnectionOptions::default()
                 },
-                socket_path: PathBuf::from("/tmp/zed-test.sock"),
+                socket_path: PathBuf::from("/tmp/recode-test.sock"),
                 envs: HashMap::from_iter([(
                     String::from("SSH_ASKPASS_REQUIRE"),
                     String::from("force"),
@@ -2356,68 +2356,68 @@ mod tests {
         );
 
         connection.remote_binary_path = Some(Arc::from(RelPath::from_unix_str(
-            ".local/share/zed/remote server",
+            ".local/share/recode/remote server",
         )?));
         for (home_dir, working_dir, shell_kind, expected_exec) in [
             (
                 None,
                 Some("~/project"),
                 ShellKind::Posix,
-                "cd \"$HOME\"/project && exec \"$HOME\"/'.local/share/zed/remote server' exec",
+                "cd \"$HOME\"/project && exec \"$HOME\"/'.local/share/recode/remote server' exec",
             ),
             (
                 None,
                 Some("/srv/project!"),
                 ShellKind::Tcsh,
-                "cd '/srv/project'\\! && exec \"$HOME\"/'.local/share/zed/remote server' exec",
+                "cd '/srv/project'\\! && exec \"$HOME\"/'.local/share/recode/remote server' exec",
             ),
             (
                 Some("/home/user/"),
                 Some("~/project"),
                 ShellKind::Posix,
-                "cd \"$HOME\"/project && exec '/home/user/.local/share/zed/remote server' exec",
+                "cd \"$HOME\"/project && exec '/home/user/.local/share/recode/remote server' exec",
             ),
             (
                 Some("/home/bang!user"),
                 Some("/srv/project!"),
                 ShellKind::Tcsh,
-                "cd '/srv/project'\\! && exec '/home/bang'\\!'user/.local/share/zed/remote server' exec",
+                "cd '/srv/project'\\! && exec '/home/bang'\\!'user/.local/share/recode/remote server' exec",
             ),
             (
                 Some("/home/user/"),
                 Some("/srv/project 'x'"),
                 ShellKind::Fish,
-                "cd \"/srv/project 'x'\" && exec '/home/user/.local/share/zed/remote server' exec",
+                "cd \"/srv/project 'x'\" && exec '/home/user/.local/share/recode/remote server' exec",
             ),
             (
                 Some("/home/user/"),
                 Some("/srv/project"),
                 ShellKind::Nushell,
-                "cd /srv/project ; exec '/home/user/.local/share/zed/remote server' exec",
+                "cd /srv/project ; exec '/home/user/.local/share/recode/remote server' exec",
             ),
             (
                 None,
                 Some("~/project 'x'"),
                 ShellKind::Nushell,
-                "cd ($env.HOME | path join \"project 'x'\") ; exec ($env.HOME | path join '.local/share/zed/remote server') exec",
+                "cd ($env.HOME | path join \"project 'x'\") ; exec ($env.HOME | path join '.local/share/recode/remote server') exec",
             ),
             (
                 None,
                 Some("~/"),
                 ShellKind::Nushell,
-                "cd $env.HOME ; exec ($env.HOME | path join '.local/share/zed/remote server') exec",
+                "cd $env.HOME ; exec ($env.HOME | path join '.local/share/recode/remote server') exec",
             ),
             (
                 Some("/home/a^b"),
                 Some("/srv/O'Brien $x"),
                 ShellKind::Nushell,
-                "cd \"/srv/O'Brien $x\" ; exec '/home/a^b/.local/share/zed/remote server' exec",
+                "cd \"/srv/O'Brien $x\" ; exec '/home/a^b/.local/share/recode/remote server' exec",
             ),
             (
                 Some("/home/user/"),
                 None,
                 ShellKind::Posix,
-                "cd && exec '/home/user/.local/share/zed/remote server' exec",
+                "cd && exec '/home/user/.local/share/recode/remote server' exec",
             ),
         ] {
             connection.ssh_home_dir = home_dir.map(String::from);
@@ -2435,7 +2435,7 @@ mod tests {
                     "-o",
                     "ControlMaster=no",
                     "-o",
-                    "ControlPath=/tmp/zed-test.sock",
+                    "ControlPath=/tmp/recode-test.sock",
                     "-o",
                     "LogLevel=ERROR",
                     "-T",
@@ -2524,7 +2524,7 @@ mod tests {
         {
             let socket = smol::block_on(SshSocket::new(
                 SshConnectionOptions::default(),
-                PathBuf::from("/tmp/zed-test.sock"),
+                PathBuf::from("/tmp/recode-test.sock"),
             ))?;
             let command = socket.environment_posix_command();
             let remote_command = command
@@ -3046,9 +3046,9 @@ mod tests {
         assert_eq!(
             sftp_put_command(
                 "/tmp/Zed Repro/remote_server",
-                ".zed_server/downloaded server",
+                ".recode_server/downloaded server",
             ),
-            "put \"/tmp/Zed Repro/remote_server\" \".zed_server/downloaded server\"\n"
+            "put \"/tmp/Zed Repro/remote_server\" \".recode_server/downloaded server\"\n"
         );
     }
 
@@ -3057,9 +3057,9 @@ mod tests {
         assert_eq!(
             sftp_put_command(
                 r#"/tmp/Zed "Nightly"/remote_server"#,
-                ".zed_server/remote_server",
+                ".recode_server/remote_server",
             ),
-            "put \"/tmp/Zed \\\"Nightly\\\"/remote_server\" \".zed_server/remote_server\"\n"
+            "put \"/tmp/Zed \\\"Nightly\\\"/remote_server\" \".recode_server/remote_server\"\n"
         );
     }
 
@@ -3075,10 +3075,10 @@ mod tests {
     fn test_sftp_put_command_doubles_source_backslashes_for_posix_glob() {
         assert_eq!(
             sftp_put_command(
-                r"/tmp/zed\server/remote_server",
-                ".zed_server/remote_server",
+                r"/tmp/recode\server/remote_server",
+                ".recode_server/remote_server",
             ),
-            "put \"/tmp/zed\\\\server/remote_server\" \".zed_server/remote_server\"\n"
+            "put \"/tmp/recode\\\\server/remote_server\" \".recode_server/remote_server\"\n"
         );
     }
 
@@ -3087,9 +3087,9 @@ mod tests {
         assert_eq!(
             sftp_put_command(
                 r"C:\Users\Smit\Zed Repro\remote_server",
-                ".zed_server/remote_server",
+                ".recode_server/remote_server",
             ),
-            "put \"C:\\\\Users\\\\Smit\\\\Zed Repro\\\\remote_server\" \".zed_server/remote_server\"\n"
+            "put \"C:\\\\Users\\\\Smit\\\\Zed Repro\\\\remote_server\" \".recode_server/remote_server\"\n"
         );
     }
 

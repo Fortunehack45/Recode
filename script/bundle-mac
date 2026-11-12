@@ -4,7 +4,7 @@ set -euo pipefail
 source script/lib/blob-store.sh
 
 build_flag="--release"
-zed_features=""
+recode_features=""
 remote_server_features=""
 target_dir="release"
 open_result=false
@@ -12,7 +12,7 @@ local_install=false
 can_code_sign=false
 
 # This must match the team in the provisioning profile.
-IDENTITY="Zed Industries, Inc."
+IDENTITY="Recode"
 APPLE_NOTARIZATION_TEAM="MQ55VZLNZQ"
 
 # Function for displaying help info
@@ -36,7 +36,7 @@ do
         d)
             export CARGO_INCREMENTAL=true
             build_flag="";
-            zed_features="--features util/debug-embed"
+            recode_features="--features util/debug-embed"
             remote_server_features="--features debug-embed"
             target_dir="debug"
             ;;
@@ -67,12 +67,12 @@ export MACOSX_DEPLOYMENT_TARGET=12.0
 echo "Using macOS SDK $sdk_version at $SDKROOT (deployment target 12.0)"
 
 # Get release channel
-pushd crates/zed
+pushd crates/recode
 channel=$(<RELEASE_CHANNEL)
-export ZED_RELEASE_CHANNEL="${channel}"
+export RECODE_RELEASE_CHANNEL="${channel}"
 popd
 
-export ZED_BUNDLE=true
+export RECODE_BUNDLE=true
 export CARGO_BUNDLE_SKIP_BUILD=true
 
 cargo_bundle_version=$(cargo -q bundle --help 2>&1 | head -n 1 || echo "")
@@ -105,19 +105,19 @@ script/generate-licenses
 
 rustup target add $target_triple
 
-echo "Compiling zed binaries"
+echo "Compiling recode binaries"
 if [[ "$target_dir" = "release" ]]; then
-    cargo --config .cargo/bundle-config.toml rustc ${build_flag} ${zed_features} --package zed --bin zed --target $target_triple -- -C 'link-arg=-Wl,-unexported_symbol,__R*'
+    cargo --config .cargo/bundle-config.toml rustc ${build_flag} ${recode_features} --package recode --bin recode --target $target_triple -- -C 'link-arg=-Wl,-unexported_symbol,__R*'
     cargo --config .cargo/bundle-config.toml build ${build_flag} --package cli --target $target_triple
 else
-    cargo --config .cargo/bundle-config.toml build ${build_flag} ${zed_features} --package zed --package cli --target $target_triple
+    cargo --config .cargo/bundle-config.toml build ${build_flag} ${recode_features} --package recode --package cli --target $target_triple
 fi
 # Build remote_server in separate invocation to prevent feature unification from other crates
 # from influencing dynamic libraries required by it.
 cargo --config .cargo/bundle-config.toml build ${build_flag} ${remote_server_features} --package remote_server --target $target_triple
 
 echo "Creating application bundle"
-pushd crates/zed
+pushd crates/recode
 cp Cargo.toml Cargo.toml.backup
 sed \
     -i.backup \
@@ -132,7 +132,7 @@ echo "Bundled ${app_path}"
 
 # DocumentTypes.plist references CFBundleTypeIconFile "Document", so the bundle must contain Document.icns.
 # We use the app icon as a placeholder document icon for now.
-document_icon_source="crates/zed/resources/Document.icns"
+document_icon_source="crates/recode/resources/Document.icns"
 document_icon_target="${app_path}/Contents/Resources/Document.icns"
 if [[ -f "${document_icon_source}" ]]; then
     mkdir -p "$(dirname "${document_icon_target}")"
@@ -145,20 +145,20 @@ if [[ -n "${MACOS_CERTIFICATE:-}" && -n "${MACOS_CERTIFICATE_PASSWORD:-}" && -n 
     can_code_sign=true
 
     echo "Setting up keychain for code signing..."
-    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" zed.keychain || echo ""
-    security default-keychain -s zed.keychain
-    security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" zed.keychain
+    security create-keychain -p "$MACOS_CERTIFICATE_PASSWORD" recode.keychain || echo ""
+    security default-keychain -s recode.keychain
+    security unlock-keychain -p "$MACOS_CERTIFICATE_PASSWORD" recode.keychain
     # Calling set-keychain-settings without `-t` disables the auto-lock timeout
-    security set-keychain-settings zed.keychain
-    echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/zed-certificate.p12
-    security import /tmp/zed-certificate.p12 -k zed.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-    rm /tmp/zed-certificate.p12
-    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" zed.keychain
+    security set-keychain-settings recode.keychain
+    echo "$MACOS_CERTIFICATE" | base64 --decode > /tmp/recode-certificate.p12
+    security import /tmp/recode-certificate.p12 -k recode.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+    rm /tmp/recode-certificate.p12
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PASSWORD" recode.keychain
 
     function cleanup() {
         echo "Cleaning up keychain"
         security default-keychain -s login.keychain
-        security delete-keychain zed.keychain
+        security delete-keychain recode.keychain
     }
 
     trap cleanup EXIT
@@ -220,15 +220,15 @@ function sign_app_binaries() {
     download_git "${target_triple}" "${app_path}/Contents/MacOS/git"
 
     # Note: The app identifier for our development builds is the same as the app identifier for nightly.
-    cp crates/zed/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
+    cp crates/recode/contents/$channel/embedded.provisionprofile "${app_path}/Contents/"
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing binaries"
         # sequence of codesign commands modeled after this example: https://developer.apple.com/forums/thread/701514
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/cli" -v
         /usr/bin/codesign --deep --force --timestamp --options runtime --sign "$IDENTITY" "${app_path}/Contents/MacOS/git" -v
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/zed" -v
-        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${app_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/recode/resources/recode.entitlements --sign "$IDENTITY" "${app_path}/Contents/MacOS/recode" -v
+        /usr/bin/codesign --force --timestamp --options runtime --entitlements crates/recode/resources/recode.entitlements --sign "$IDENTITY" "${app_path}" -v
     else
         echo "One or more of the following variables are missing: MACOS_CERTIFICATE, MACOS_CERTIFICATE_PASSWORD, APPLE_NOTARIZATION_KEY, APPLE_NOTARIZATION_KEY_ID, APPLE_NOTARIZATION_ISSUER_ID"
 
@@ -241,7 +241,7 @@ function sign_app_binaries() {
         # - get a signing key for the MQ55VZLNZQ team from Nathan.
         # - create your own signing key, and update references to MQ55VZLNZQ to your own team ID
         # then comment out this line.
-        cat crates/zed/resources/recode.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/recode.entitlements"
+        cat crates/recode/resources/recode.entitlements | sed '/com.apple.developer.associated-domains/,+1d' > "${app_path}/Contents/Resources/recode.entitlements"
 
         codesign --force --deep --entitlements "${app_path}/Contents/Resources/recode.entitlements" --sign ${MACOS_SIGNING_KEY:- -} "${app_path}" -v
     fi
@@ -269,7 +269,7 @@ function sign_app_binaries() {
     else
         dmg_target_directory="target/${target_triple}/${target_dir}"
         dmg_source_directory="${dmg_target_directory}/dmg"
-        dmg_file_path="${dmg_target_directory}/Zed-${arch_suffix}.dmg"
+        dmg_file_path="${dmg_target_directory}/Recode-${arch_suffix}.dmg"
         xcode_bin_dir_path="$(xcode-select -p)/usr/bin"
 
         rm -rf ${dmg_source_directory}
@@ -281,10 +281,10 @@ function sign_app_binaries() {
         ln -s /Applications ${dmg_source_directory}
 
         echo "Creating final DMG at ${dmg_file_path} using ${dmg_source_directory}"
-        hdiutil create -volname Zed -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
+        hdiutil create -volname Recode -srcfolder "${dmg_source_directory}" -ov -format UDZO "${dmg_file_path}"
 
         # If someone runs this bundle script locally, a symlink will be placed in `dmg_source_directory`.
-        # This symlink causes CPU issues with Zed if the Zed codebase is the project being worked on, so we simply remove it for now.
+        # This symlink causes CPU issues with Recode if the Recode codebase is the project being worked on, so we simply remove it for now.
         echo "Removing symlink to /Applications from ${dmg_source_directory}"
         rm ${dmg_source_directory}/Applications
 
@@ -312,7 +312,7 @@ function sign_binary() {
 
     if [[ $can_code_sign = true ]]; then
         echo "Code signing executable $binary_path"
-        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/zed/resources/recode.entitlements --sign "$IDENTITY" "${binary_path}" -v
+        /usr/bin/codesign --deep --force --timestamp --options runtime --entitlements crates/recode/resources/recode.entitlements --sign "$IDENTITY" "${binary_path}" -v
     fi
 }
 
@@ -322,7 +322,7 @@ function extract_debug_symbols() {
         return
     fi
     debug_symbols_extracted=true
-    if ! dsymutil --flat "target/${target_triple}/${target_dir}/zed" 2> target/dsymutil.log; then
+    if ! dsymutil --flat "target/${target_triple}/${target_dir}/recode" 2> target/dsymutil.log; then
         echo "dsymutil failed"
         cat target/dsymutil.log
         exit 1
@@ -338,13 +338,13 @@ function upload_debug_symbols() {
     if [ "$local_install" = true ]; then
         echo "local install; skipping sentry upload."
     elif [[ -n "${SENTRY_AUTH_TOKEN:-}" ]]; then
-        echo "Uploading zed debug symbols to sentry..."
+        echo "Uploading recode debug symbols to sentry..."
         extract_debug_symbols
         # Try uploading up to 3 times
         for attempt in 1 2 3; do
             echo "Sentry upload attempt $attempt..."
-            if sentry-cli debug-files upload --include-sources --wait -p zed -o zed-dev \
-                "target/${target_triple}/${target_dir}/zed.dwarf" \
+            if sentry-cli debug-files upload --include-sources --wait -p recode -o recode-dev \
+                "target/${target_triple}/${target_dir}/recode.dwarf" \
                 "target/${target_triple}/${target_dir}/remote-server.dwarf"; then
                 break
             else
@@ -362,19 +362,19 @@ function upload_debug_symbols() {
 
 upload_debug_symbols
 
-# Sentry receives the extracted zed.dwarf, not the binary, so debug symbols
+# Sentry receives the extracted recode.dwarf, not the binary, so debug symbols
 # must be extracted before the binaries are stripped below. The .dwarf files
 # also keep symbols recoverable when the sentry upload is skipped.
 if [[ "$target_dir" == "release" && "$local_install" != true ]]; then
     extract_debug_symbols
-    strip -x "target/${target_triple}/${target_dir}/zed"
+    strip -x "target/${target_triple}/${target_dir}/recode"
     strip -x "target/${target_triple}/${target_dir}/cli"
     strip -x "target/${target_triple}/${target_dir}/remote-server"
 fi
 
-cp target/${target_triple}/${target_dir}/zed "${app_path}/Contents/MacOS/zed"
+cp target/${target_triple}/${target_dir}/recode "${app_path}/Contents/MacOS/recode"
 cp target/${target_triple}/${target_dir}/cli "${app_path}/Contents/MacOS/cli"
 sign_app_binaries
 
 sign_binary "target/$target_triple/release/remote-server"
-gzip -f --stdout --best target/$target_triple/release/remote-server > target/zed-remote-server-macos-$arch_suffix.gz
+gzip -f --stdout --best target/$target_triple/release/remote-server > target/recode-remote-server-macos-$arch_suffix.gz

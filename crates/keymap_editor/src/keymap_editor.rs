@@ -44,7 +44,7 @@ use workspace::{
 };
 
 pub use ui_components::*;
-use zed_actions::{ChangeKeybinding, OpenKeymap};
+use recode_actions::{ChangeKeybinding, OpenKeymap};
 
 use crate::{
     action_completion_provider::ActionCompletionProvider,
@@ -232,7 +232,7 @@ impl FilterState {
 #[derive(Default, PartialEq, Eq, Copy, Clone)]
 struct SourceFilters {
     user: bool,
-    zed_defaults: bool,
+    recode_defaults: bool,
     vim_defaults: bool,
 }
 
@@ -242,7 +242,7 @@ impl SourceFilters {
             Some(KeybindSource::User) => self.user,
             Some(KeybindSource::Vim) => self.vim_defaults,
             Some(KeybindSource::Base | KeybindSource::Default | KeybindSource::Unknown) | None => {
-                self.zed_defaults
+                self.recode_defaults
             }
         }
     }
@@ -629,7 +629,7 @@ impl KeymapEditor {
             filter_state: FilterState::default(),
             source_filters: SourceFilters {
                 user: true,
-                zed_defaults: true,
+                recode_defaults: true,
                 vim_defaults: true,
             },
             show_no_action_bindings: true,
@@ -834,7 +834,7 @@ impl KeymapEditor {
 
     fn process_bindings(
         json_language: Arc<Language>,
-        zed_keybind_context_language: Arc<Language>,
+        recode_keybind_context_language: Arc<Language>,
         humanized_action_names: &HumanizedActionNameCache,
         cx: &mut App,
     ) -> (
@@ -878,7 +878,7 @@ impl KeymapEditor {
                 .map(|predicate| {
                     KeybindContextString::Local(
                         predicate.to_string().into(),
-                        zed_keybind_context_language.clone(),
+                        recode_keybind_context_language.clone(),
                     )
                 })
                 .unwrap_or(KeybindContextString::Global);
@@ -938,14 +938,14 @@ impl KeymapEditor {
         let workspace = self.workspace.clone();
         cx.spawn_in(window, async move |this, cx| {
             let json_language = load_json_language(workspace.clone(), cx).await;
-            let zed_keybind_context_language =
+            let recode_keybind_context_language =
                 load_keybind_context_language(workspace.clone(), cx).await;
 
             let (action_query, keystroke_query) = this.update(cx, |this, cx| {
                 let (key_bindings, string_match_candidates, actions_with_schemas) =
                     Self::process_bindings(
                         json_language,
-                        zed_keybind_context_language,
+                        recode_keybind_context_language,
                         &this.humanized_action_names,
                         cx,
                     );
@@ -1534,8 +1534,8 @@ impl KeymapEditor {
         self.on_query_changed(cx);
     }
 
-    fn toggle_zed_defaults_filter(&mut self, cx: &mut Context<Self>) {
-        self.source_filters.zed_defaults = !self.source_filters.zed_defaults;
+    fn toggle_recode_defaults_filter(&mut self, cx: &mut Context<Self>) {
+        self.source_filters.recode_defaults = !self.source_filters.recode_defaults;
         self.on_query_changed(cx);
     }
 
@@ -1675,12 +1675,12 @@ impl KeymapEditor {
                             ))
                             .map(add_filter(
                                 "Default",
-                                source_filters.zed_defaults,
+                                source_filters.recode_defaults,
                                 None,
                                 &focus_handle,
                                 &keymap_editor,
                                 Some(|editor, cx| {
-                                    editor.toggle_zed_defaults_filter(cx);
+                                    editor.toggle_recode_defaults_filter(cx);
                                 }),
                             ))
                             .map(add_filter(
@@ -2100,12 +2100,12 @@ impl Render for KeymapEditor {
                                     .child(
                                         Button::new("edit-in-json", "Edit in JSON")
                                             .key_binding(
-                                                ui::KeyBinding::for_action_in(&zed_actions::OpenKeymapFile, &focus_handle, cx)
+                                                ui::KeyBinding::for_action_in(&recode_actions::OpenKeymapFile, &focus_handle, cx)
                                                     .map(|kb| kb.size(rems_from_px(10_f32))),
                                             )
                                             .on_click(|_, window, cx| {
                                                 window.dispatch_action(
-                                                    zed_actions::OpenKeymapFile.boxed_clone(),
+                                                    recode_actions::OpenKeymapFile.boxed_clone(),
                                                     cx,
                                                 );
                                             })
@@ -3611,21 +3611,21 @@ async fn load_keybind_context_language(
                 .project()
                 .read(cx)
                 .languages()
-                .language_for_name("Zed Keybind Context")
+                .language_for_name("Recode Keybind Context")
         })
-        .context("Failed to load Zed Keybind Context language")
+        .context("Failed to load Recode Keybind Context language")
         .log_err();
     let language = match language_task {
         Some(task) => task
             .await
-            .context("Failed to load Zed Keybind Context language")
+            .context("Failed to load Recode Keybind Context language")
             .log_err(),
         None => None,
     };
     language.unwrap_or_else(|| {
         Arc::new(Language::new(
             LanguageConfig {
-                name: "Zed Keybind Context".into(),
+                name: "Recode Keybind Context".into(),
                 ..Default::default()
             },
             Some(tree_sitter_rust::LANGUAGE.into()),
@@ -4169,8 +4169,8 @@ mod tests {
     #[gpui::test]
     async fn test_modifier_search_keeps_matching_shortcuts_after_release(cx: &mut TestAppContext) {
         let keymap_content = r#"[{"bindings": {
-            "ctrl-k": "zed::OpenKeymap",
-            "ctrl": "zed::OpenKeymap"
+            "ctrl-k": "recode::OpenKeymap",
+            "ctrl": "recode::OpenKeymap"
         }}]"#;
         let (_fs, keymap_editor, mut cx) = setup_keymap_editor(cx, keymap_content).await;
         let workspace = keymap_editor.read_with(&cx, |editor, _| editor.workspace.clone());
@@ -4199,7 +4199,7 @@ mod tests {
         cx.simulate_modifiers_change(gpui::Modifiers::control());
         cx.run_until_parked();
         keymap_editor.read_with(&cx, |editor, cx| {
-            assert_eq!(visible_rows_for_action(editor, "zed::OpenKeymap").len(), 1);
+            assert_eq!(visible_rows_for_action(editor, "recode::OpenKeymap").len(), 1);
             let query = editor.current_keystroke_query(cx);
             assert_eq!(query.len(), 1);
             assert!(query[0].key().is_empty());
@@ -4215,7 +4215,7 @@ mod tests {
             assert_eq!(query[0].key(), "control");
             assert!(!query[0].modifiers().modified());
             assert_eq!(
-                visible_rows_for_action(editor, "zed::OpenKeymap").len(),
+                visible_rows_for_action(editor, "recode::OpenKeymap").len(),
                 2,
                 "Control must find both the standalone binding and Ctrl-K; query: {:?}",
                 query
@@ -4228,7 +4228,7 @@ mod tests {
         });
         cx.run_until_parked();
         keymap_editor.read_with(&cx, |editor, _| {
-            let rows = visible_rows_for_action(editor, "zed::OpenKeymap");
+            let rows = visible_rows_for_action(editor, "recode::OpenKeymap");
             assert_eq!(rows.len(), 1);
             let binding = &editor.keybindings[editor.matches[rows[0]].candidate_id];
             let keystrokes = binding.keystrokes().expect("binding has keystrokes");
@@ -4242,7 +4242,7 @@ mod tests {
         });
         cx.run_until_parked();
         keymap_editor.read_with(&cx, |editor, _| {
-            assert_eq!(visible_rows_for_action(editor, "zed::OpenKeymap").len(), 2);
+            assert_eq!(visible_rows_for_action(editor, "recode::OpenKeymap").len(), 2);
         });
     }
 
@@ -4251,12 +4251,12 @@ mod tests {
         let keymap_content = r#"[
     {
         "bindings": {
-            "alt-cmd-shift-c": "zed::OpenKeymap"
+            "alt-cmd-shift-c": "recode::OpenKeymap"
         }
     },
     {
         "bindings": {
-            "alt-cmd-shift-c": "zed::OpenKeymap"
+            "alt-cmd-shift-c": "recode::OpenKeymap"
         }
     }
 ]"#;
@@ -4264,7 +4264,7 @@ mod tests {
         let cx = &mut cx;
 
         let rows = keymap_editor.read_with(cx, |editor, _| {
-            visible_rows_for_action(editor, "zed::OpenKeymap")
+            visible_rows_for_action(editor, "recode::OpenKeymap")
         });
         assert_eq!(
             rows.len(),
@@ -4290,7 +4290,7 @@ mod tests {
         cx.run_until_parked();
 
         let rows = keymap_editor.read_with(cx, |editor, _| {
-            visible_rows_for_action(editor, "zed::OpenKeymap")
+            visible_rows_for_action(editor, "recode::OpenKeymap")
         });
         assert_eq!(rows.len(), 1, "expected one row remaining after deletion");
     }
@@ -4518,7 +4518,7 @@ mod tests {
 
     #[test]
     fn binding_is_unbound_by_unbind_respects_precedence() {
-        let binding = gpui::KeyBinding::new("tab", zed_actions::OpenKeymap, None);
+        let binding = gpui::KeyBinding::new("tab", recode_actions::OpenKeymap, None);
         let unbind =
             gpui::KeyBinding::new("tab", gpui::Unbind(binding.action().name().into()), None);
 

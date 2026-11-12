@@ -48,7 +48,7 @@ impl TestingContext {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "zed-extension")]
+#[command(name = "recode-extension")]
 struct Args {
     /// The path to the extension directory
     #[arg(long)]
@@ -95,7 +95,7 @@ async fn main() -> Result<()> {
     log::info!("compiling extension");
 
     let user_agent = format!(
-        "Zed Extension CLI/{} ({}; {})",
+        "Recode Extension CLI/{} ({}; {})",
         env!("CARGO_PKG_VERSION"),
         std::env::consts::OS,
         std::env::consts::ARCH
@@ -415,7 +415,7 @@ fn test_languages(
                         let query_source = fs::read_to_string(&file_path)?;
                         let _query = Query::new(grammar, &query_source)?;
                     } else if file_name.ends_with(".scm") {
-                        bail!("query {file_name} is not supported by Zed and should be removed")
+                        bail!("query {file_name} is not supported by Recode and should be removed")
                     } else if !context.is_known_resource(&file_path) {
                         bail!(
                             "'{file_name}' is not a supported file in a language directory and should be removed"
@@ -546,7 +546,7 @@ mod tests {
             version: "1.0.0".into(),
             schema_version: SchemaVersion::ZERO,
             description: Some("A test extension".to_string()),
-            repository: Some("https://github.com/zed-industries/zed".to_string()),
+            repository: Some("https://github.com/Fortunehack45/Recode".to_string()),
             authors: vec!["Zed".to_string()],
             lib: Default::default(),
             themes: Vec::new(),

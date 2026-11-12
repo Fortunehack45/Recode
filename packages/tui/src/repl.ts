@@ -598,7 +598,7 @@ export class Repl {
     // If no provider given, present an interactive choice
     if (!provider) {
       console.log(`\n  ${this.theme.bold(this.theme.text("Select an AI Provider to connect:"))}`);
-      console.log(`  [1] OpenCode API    ${this.theme.dim("(OpenCode Zen, Go, GLM-5, DeepSeek, Sonnet — Fast)")}`);
+      console.log(`  [1] OpenCode API    ${this.theme.dim("(OpenCode Recode, Go, GLM-5, DeepSeek, Sonnet — Fast)")}`);
       console.log(`  [2] Google Gemini   ${this.theme.dim("(Generous free tier, 1M context — Recommended)")}`);
       console.log(`  [3] OpenAI          ${this.theme.dim("(GPT-4o, o3-mini)")}`);
       console.log(`  [4] Anthropic       ${this.theme.dim("(Claude 3.7 / 3.5 Sonnet)")}`);

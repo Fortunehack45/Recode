@@ -9,7 +9,7 @@ license = "GPL-3.0-or-later"
 workspace = true
 
 [[bin]]
-name = "zed-extension"
+name = "recode-extension"
 path = "src/main.rs"
 
 [dependencies]

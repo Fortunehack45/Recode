@@ -15,7 +15,7 @@ use crate::*;
 
 const BASE_URL: &str = "https://crates.io/api/v1";
 // User agent and request rate requirements: https://crates.io/data-access
-const USER_AGENT: &str = "Zed GPUI releases (https://github.com/zed-industries/zed)";
+const USER_AGENT: &str = "Recode GPUI releases (https://github.com/Fortunehack45/Recode)";
 pub(crate) const MIN_REQUEST_INTERVAL: Duration = Duration::from_secs(1);
 const MAX_PER_PAGE: usize = 100;
 const GITHUB_CONFIGS_PATH: &str = "/trusted_publishing/github_configs";

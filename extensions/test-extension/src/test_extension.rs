@@ -76,7 +76,7 @@ impl TestExtension {
         // if every platform uses .tar.gz.
         //
         // ext = "zip";
-        // download_type = zed::DownloadedFileType::Zip;
+        // download_type = recode::DownloadedFileType::Zip;
 
         let asset_name = format!(
             "gleam-{version}-{arch}-{os}.{ext}",
@@ -193,7 +193,7 @@ zed::register_extension!(TestExtension);
 /// Removes newlines from the completion detail.
 ///
 /// The Gleam LSP can return types containing newlines, which causes formatting
-/// issues within the Zed completions menu.
+/// issues within the Recode completions menu.
 fn strip_newlines_from_detail(detail: &str) -> String {
     let without_newlines = detail
         .replace("->\n  ", "-> ")

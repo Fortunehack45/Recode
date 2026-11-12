@@ -1,6 +1,6 @@
 ---
 title: Emmet
-description: "Configure Emmet language support in Zed, including language servers, formatting, and debugging."
+description: "Configure Emmet language support in Recode, including language servers, formatting, and debugging."
 ---
 
 # Emmet
@@ -45,5 +45,5 @@ The action has no default keybinding. To add one, bind it in your keymap:
 ```
 
 <!--
-TBD: Document Emmet usage in zed with: HTML, PHP, ERB, Javascript, TSX, CSS
+TBD: Document Emmet usage in recode with: HTML, PHP, ERB, Javascript, TSX, CSS
 -->

@@ -22,7 +22,7 @@ use project::agent_server_store::AllAgentServersSettings;
 use project::{AgentId, ProjectItem};
 use serde::{Deserialize, Serialize};
 
-use zed_actions::{
+use recode_actions::{
     DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
     agent::{
         AddSelectionToThread, ConflictContent, LogoutAgent, OpenSettings, ReauthenticateAgent,
@@ -939,7 +939,7 @@ pub struct CreateThreadOptions {
     /// Agent to use. Defaults to the panel's selected agent.
     pub agent: Option<Agent>,
     /// Model override, as `provider/model-id`. Only applied when the thread
-    /// uses the native Zed agent.
+    /// uses the native Recode agent.
     pub model: Option<String>,
     /// Working directories to attach to the new thread (e.g., the path of a
     /// freshly-created sibling worktree). When `None`, the thread inherits
@@ -3577,8 +3577,8 @@ impl AgentPanel {
         cx: &mut Context<Self>,
     ) {
         window.dispatch_action(
-            Box::new(zed_actions::OpenSettingsAt {
-                path: zed_actions::AGENT_SKILLS_SETTINGS_PATH.to_string(),
+            Box::new(recode_actions::OpenSettingsAt {
+                path: recode_actions::AGENT_SKILLS_SETTINGS_PATH.to_string(),
                 target: None,
             }),
             cx,
@@ -3746,7 +3746,7 @@ impl AgentPanel {
 
     pub(crate) fn open_configuration(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         window.dispatch_action(
-            Box::new(zed_actions::OpenSettingsPage {
+            Box::new(recode_actions::OpenSettingsPage {
                 page: "AI".to_string(),
                 target: None,
             }),
@@ -4858,7 +4858,7 @@ impl agent::SiblingThreadHost for AgentPanelSiblingHost {
         cx.spawn(async move |cx| {
             let agent_choice = match request.agent_id.as_deref() {
                 None => None,
-                Some(id) if id == agent::ZED_AGENT_ID.as_ref() => Some(Agent::NativeAgent),
+                Some(id) if id == agent::RECODE_AGENT_ID.as_ref() => Some(Agent::NativeAgent),
                 Some(id) => {
                     // Reject unknown agent ids up front so the model gets a
                     // structured error pointing at `list_agents_and_models`,
@@ -4920,12 +4920,12 @@ impl agent::SiblingThreadHost for AgentPanelSiblingHost {
                 // detached HEAD state — the agent can attach to a branch via
                 // git afterwards.
                 let branch_target = match request.base_ref.as_ref() {
-                    Some(ref_name) => zed_actions::NewWorktreeBranchTarget::ExistingBranch {
+                    Some(ref_name) => recode_actions::NewWorktreeBranchTarget::ExistingBranch {
                         name: ref_name.clone(),
                     },
-                    None => zed_actions::NewWorktreeBranchTarget::CurrentBranch,
+                    None => recode_actions::NewWorktreeBranchTarget::CurrentBranch,
                 };
-                let action = zed_actions::CreateWorktree {
+                let action = recode_actions::CreateWorktree {
                     worktree_name: request.worktree_name.clone(),
                     branch_target,
                 };
@@ -5134,7 +5134,7 @@ impl Panel for AgentPanel {
     }
 
     fn icon(&self, _window: &Window, cx: &App) -> Option<IconName> {
-        (self.enabled(cx) && AgentSettings::get_global(cx).button).then_some(IconName::ZedAssistant)
+        (self.enabled(cx) && AgentSettings::get_global(cx).button).then_some(IconName::RecodeAssistant)
     }
 
     fn icon_tooltip(&self, _window: &Window, _cx: &App) -> Option<&'static str> {
@@ -5766,16 +5766,16 @@ impl AgentPanel {
                                 .header("MCP Servers")
                                 .action(
                                     "Add Server…",
-                                    Box::new(zed_actions::OpenSettingsAt {
+                                    Box::new(recode_actions::OpenSettingsAt {
                                         path: "context_servers".to_string(),
                                         target: None,
                                     }),
                                 )
                                 .action(
                                     "Install New Servers…",
-                                    Box::new(zed_actions::Extensions {
+                                    Box::new(recode_actions::Extensions {
                                         category_filter: Some(
-                                            zed_actions::ExtensionCategoryFilter::ContextServers,
+                                            recode_actions::ExtensionCategoryFilter::ContextServers,
                                         ),
                                         id: None,
                                     }),
@@ -5940,7 +5940,7 @@ impl AgentPanel {
                                     !showing_terminal && is_agent_selected(Agent::NativeAgent),
                                     |this| this.action(Box::new(NewThread)),
                                 )
-                                .icon(IconName::ZedAgent)
+                                .icon(IconName::RecodeAgent)
                                 .icon_color(Color::Muted)
                                 .handler({
                                     let workspace = workspace.clone();
@@ -6094,7 +6094,7 @@ impl AgentPanel {
                                 .handler({
                                     move |window, cx| {
                                         window
-                                            .dispatch_action(Box::new(zed_actions::AcpRegistry), cx)
+                                            .dispatch_action(Box::new(recode_actions::AcpRegistry), cx)
                                     }
                                 }),
                         )
@@ -6303,12 +6303,12 @@ impl AgentPanel {
             return false;
         }
 
-        let has_configured_non_zed_providers = LanguageModelRegistry::read_global(cx)
+        let has_configured_non_recode_providers = LanguageModelRegistry::read_global(cx)
             .visible_providers()
             .iter()
             .any(|provider| {
                 provider.is_authenticated(cx)
-                    && provider.id() != language_model::ZED_CLOUD_PROVIDER_ID
+                    && provider.id() != language_model::RECODE_CLOUD_PROVIDER_ID
             });
 
         match &self.base_view {
@@ -6316,7 +6316,7 @@ impl AgentPanel {
             BaseView::AgentThread { conversation_view } => {
                 if conversation_view.read(cx).as_native_thread(cx).is_some() {
                     let history_is_empty = ThreadStore::global(cx).read(cx).is_empty();
-                    history_is_empty || !has_configured_non_zed_providers
+                    history_is_empty || !has_configured_non_recode_providers
                 } else {
                     false
                 }
@@ -7129,7 +7129,7 @@ mod tests {
 
     impl AgentConnection for SessionTrackingConnection {
         fn agent_id(&self) -> AgentId {
-            agent::ZED_AGENT_ID.clone()
+            agent::RECODE_AGENT_ID.clone()
         }
 
         fn telemetry_id(&self) -> SharedString {
@@ -7412,7 +7412,7 @@ mod tests {
             acp::ContentChunk::new("New response".into()),
         )]);
         user_message_editor.update_in(cx, |_editor, window, cx| {
-            window.dispatch_action(Box::new(zed_actions::agent::Chat), cx);
+            window.dispatch_action(Box::new(recode_actions::agent::Chat), cx);
         });
         cx.update(|window, cx| window.blur(cx));
         cx.run_until_parked();
@@ -9412,7 +9412,7 @@ mod tests {
 
     impl AgentServer for DelayedSelectionAgentServer {
         fn logo(&self) -> IconName {
-            IconName::ZedAgent
+            IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -14136,7 +14136,7 @@ mod tests {
 
     impl AgentConnection for DisassociationTrackingConnection {
         fn agent_id(&self) -> AgentId {
-            agent::ZED_AGENT_ID.clone()
+            agent::RECODE_AGENT_ID.clone()
         }
 
         fn telemetry_id(&self) -> SharedString {
@@ -14554,7 +14554,7 @@ mod tests {
             "fresh destination panel should accept source content"
         );
 
-        // Verify the panel was initialized: the base_view should now be an
+        // Verify the panel was initialirecode: the base_view should now be an
         // AgentThread (not Uninitialized) and a draft_thread should be set.
         // We can't check the message editor text directly because the thread
         // needs a connected server session (not available in unit tests without

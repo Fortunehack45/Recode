@@ -44,15 +44,15 @@ struct ExplorerCommandInjector;
 impl IExplorerCommand_Impl for ExplorerCommandInjector_Impl {
     fn GetTitle(&self, _: Ref<IShellItemArray>) -> Result<windows_core::PWSTR> {
         let command_description =
-            retrieve_command_description().unwrap_or(HSTRING::from("Open with Zed"));
+            retrieve_command_description().unwrap_or(HSTRING::from("Open with Recode"));
         unsafe { SHStrDupW(&command_description) }
     }
 
     fn GetIcon(&self, _: Ref<IShellItemArray>) -> Result<windows_core::PWSTR> {
-        let Some(zed_exe) = get_zed_exe_path() else {
+        let Some(recode_exe) = get_recode_exe_path() else {
             return Err(E_FAIL.into());
         };
-        unsafe { SHStrDupW(&HSTRING::from(zed_exe)) }
+        unsafe { SHStrDupW(&HSTRING::from(recode_exe)) }
     }
 
     fn GetToolTip(&self, _: Ref<IShellItemArray>) -> Result<windows_core::PWSTR> {
@@ -69,7 +69,7 @@ impl IExplorerCommand_Impl for ExplorerCommandInjector_Impl {
 
     fn Invoke(&self, psiitemarray: Ref<IShellItemArray>, _: Ref<IBindCtx>) -> Result<()> {
         let items = psiitemarray.ok()?;
-        let Some(zed_exe) = get_zed_exe_path() else {
+        let Some(recode_exe) = get_recode_exe_path() else {
             return Ok(());
         };
 
@@ -78,7 +78,7 @@ impl IExplorerCommand_Impl for ExplorerCommandInjector_Impl {
             let item = unsafe { items.GetItemAt(idx)? };
             let item_path = unsafe { item.GetDisplayName(SIGDN_FILESYSPATH)?.to_string()? };
             #[allow(clippy::disallowed_methods, reason = "no async context in sight..")]
-            std::process::Command::new(&zed_exe)
+            std::process::Command::new(&recode_exe)
                 .arg(&item_path)
                 .spawn()
                 .map_err(|_| E_INVALIDARG)?;
@@ -156,7 +156,7 @@ extern "system" fn DllGetClassObject(
     }
 }
 
-fn get_zed_install_folder() -> Option<PathBuf> {
+fn get_recode_install_folder() -> Option<PathBuf> {
     let mut buf = vec![0u16; MAX_PATH as usize];
     unsafe { GetModuleFileNameW(Some(DLL_INSTANCE.into()), &mut buf) };
 
@@ -173,17 +173,17 @@ fn get_zed_install_folder() -> Option<PathBuf> {
 }
 
 #[inline]
-fn get_zed_exe_path() -> Option<String> {
-    get_zed_install_folder().map(|path| path.join("Zed.exe").to_string_lossy().into_owned())
+fn get_recode_exe_path() -> Option<String> {
+    get_recode_install_folder().map(|path| path.join("Recode.exe").to_string_lossy().into_owned())
 }
 
 #[inline]
 fn retrieve_command_description() -> Result<HSTRING> {
     const REG_PATH: &str = cfg_select! {
-        feature = "stable" => { r#"Software\Classes\ZedContextMenu"# },
-        feature = "preview" => { r#"Software\Classes\ZedPreviewContextMenu"# },
-        feature = "nightly" => { r#"Software\Classes\ZedNightlyContextMenu"# },
-        _ => { r#"Software\Classes\ZedDevContextMenu"# },
+        feature = "stable" => { r#"Software\Classes\RecodeContextMenu"# },
+        feature = "preview" => { r#"Software\Classes\RecodePreviewContextMenu"# },
+        feature = "nightly" => { r#"Software\Classes\RecodeNightlyContextMenu"# },
+        _ => { r#"Software\Classes\RecodeDevContextMenu"# },
     };
 
     let key = windows_registry::CURRENT_USER.open(REG_PATH)?;

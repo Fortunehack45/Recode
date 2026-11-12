@@ -29,11 +29,11 @@ pub fn home_dir() -> &'static PathBuf {
     HOME_DIR.get_or_init(|| {
         if cfg!(test) {
             if cfg!(target_os = "macos") {
-                PathBuf::from("/Users/zed")
+                PathBuf::from("/Users/recode")
             } else if cfg!(target_os = "windows") {
-                PathBuf::from("C:\\Users\\zed")
+                PathBuf::from("C:\\Users\\recode")
             } else {
-                PathBuf::from("/home/zed")
+                PathBuf::from("/home/recode")
             }
         } else {
             dirs::home_dir().expect("failed to determine home directory")
@@ -2996,7 +2996,7 @@ mod tests {
 
     // #[perf]
     // fn project_search() {
-    //     let path = Path::new("/Users/someonetoignore/work/zed/zed.dev/node_modules");
+    //     let path = Path::new("/Users/someonetoignore/work/zed/recode.dev/node_modules");
     //     let path_matcher =
     //         PathMatcher::new(&["**/node_modules/**".to_owned()], PathStyle::Unix).unwrap();
     //     assert!(

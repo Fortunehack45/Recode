@@ -19,7 +19,7 @@ use ui::{
 };
 use unicode_segmentation::UnicodeSegmentation;
 use util::ResultExt as _;
-use zed_actions::agent::ToggleModelSelector;
+use recode_actions::agent::ToggleModelSelector;
 
 use crate::model_search;
 use crate::ui::documentation_aside_side;
@@ -1734,7 +1734,7 @@ mod tests {
 
     impl AgentServer for TestAgentServer {
         fn logo(&self) -> IconName {
-            IconName::ZedAssistant
+            IconName::RecodeAssistant
         }
 
         fn agent_id(&self) -> AgentId {

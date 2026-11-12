@@ -98,14 +98,23 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Path dist/portable -Force | Out-Null
+          New-Item -ItemType Directory -Path dist/portable/bin -Force | Out-Null
+          New-Item -ItemType Directory -Path dist/portable/tools -Force | Out-Null
           Copy-Item target/release/recode.exe dist/portable/Recode.exe -Force
           if (Test-Path target/release/cli.exe) {
-            Copy-Item target/release/cli.exe dist/portable/recode-cli.exe -Force
+            Copy-Item target/release/cli.exe dist/portable/bin/recode.exe -Force
           }
           if (Test-Path target/release/auto-update-helper.exe) {
-            Copy-Item target/release/auto-update-helper.exe dist/portable/auto_update_helper.exe -Force
+            Copy-Item target/release/auto-update-helper.exe dist/portable/tools/auto_update_helper.exe -Force
           }
-          Copy-Item crates/zed/resources/windows/app-icon.ico dist/portable/app-icon.ico -Force
+          if (Test-Path target/release/conpty.dll) {
+            Copy-Item target/release/conpty.dll dist/portable/conpty.dll -Force
+          }
+          if (Test-Path target/release/OpenConsole.exe) {
+            New-Item -ItemType Directory -Path dist/portable/x64 -Force | Out-Null
+            Copy-Item target/release/OpenConsole.exe dist/portable/x64/OpenConsole.exe -Force
+          }
+          Copy-Item crates/recode/resources/windows/app-icon.ico dist/portable/app-icon.ico -Force
           Compress-Archive -Path dist/portable\* -DestinationPath dist/Recode-windows-x64-portable.zip -Force
 
       - name: Upload Windows Artifacts
@@ -295,8 +304,8 @@ jobs:
             VERSION="${TAG#v}"
             TAG="v${VERSION}"
           else
-            BASE_VERSION=$(grep -m1 '^version' crates/zed/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            VERSION="${BASE_VERSION:-1.29.6}"
+            BASE_VERSION=$(grep -m1 '^version' crates/recode/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            VERSION="${BASE_VERSION:-1.30.7}"
             TAG="v${VERSION}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"

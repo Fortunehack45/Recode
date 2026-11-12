@@ -400,7 +400,7 @@ impl TestScheduler {
                     state.runnables.remove(candidate_indices[selected_idx])
                 }
             } else {
-                // Non-randomized: just take the first candidate task
+                // Non-randomirecode: just take the first candidate task
                 state.runnables.remove(candidate_indices[0])
             }
         };

@@ -464,8 +464,8 @@ async fn test_tail_proximity_bonus_prefers_later_match(cx: &mut TestAppContext) 
         .insert_tree(
             path!("/root"),
             json!({
-                "zzz": { "zed": { "Cargo.toml": "" } },
-                "zed": { "zzz": { "Cargo.toml": "" } },
+                "zzz": { "recode": { "Cargo.toml": "" } },
+                "recode": { "zzz": { "Cargo.toml": "" } },
             }),
         )
         .await;
@@ -477,7 +477,7 @@ async fn test_tail_proximity_bonus_prefers_later_match(cx: &mut TestAppContext) 
         .update_in(cx, |picker, window, cx| {
             picker
                 .delegate
-                .update_matches("zed cargo".to_string(), window, cx)
+                .update_matches("recode cargo".to_string(), window, cx)
         })
         .await;
 
@@ -485,8 +485,8 @@ async fn test_tail_proximity_bonus_prefers_later_match(cx: &mut TestAppContext) 
         assert_eq!(
             collect_search_matches(picker).search_paths_only(),
             vec![
-                rel_path("zzz/zed/Cargo.toml").into(),
-                rel_path("zed/zzz/Cargo.toml").into(),
+                rel_path("zzz/recode/Cargo.toml").into(),
+                rel_path("recode/zzz/Cargo.toml").into(),
             ],
         );
     });
@@ -926,7 +926,7 @@ async fn test_line_range_query_outside_file_clamps_to_eof(cx: &mut TestAppContex
     });
 }
 
-// Regression test for https://github.com/zed-industries/zed/issues/55551.
+// Regression test for https://github.com/recode-industries/recode/issues/55551.
 //
 // Typing `path:line` for an already-open file must keep the file selected
 // rather than offering to create one or skipping past it to a fuzzy neighbor.
@@ -5707,7 +5707,7 @@ async fn test_exact_filename_stem_preferred(cx: &mut TestAppContext) {
                     }
                 },
                 "crates": {
-                    "zed": {
+                    "recode": {
                         "resources": {
                             "app-icon-nightly@2x.png": "",
                             "app-icon-preview@2x.png": "",

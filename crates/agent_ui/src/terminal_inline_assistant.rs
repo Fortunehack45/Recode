@@ -322,7 +322,7 @@ impl TerminalInlineAssistant {
                     )
                 };
 
-                // Fire Zed telemetry
+                // Fire Recode telemetry
                 telemetry::event!(
                     event_type,
                     kind = "inline_terminal",

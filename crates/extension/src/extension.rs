@@ -15,7 +15,7 @@ use async_trait::async_trait;
 use gpui::{App, EntityId, Task};
 use language::LanguageName;
 use semver::Version;
-use task::{SpawnInTerminal, ZedDebugConfig};
+use task::{SpawnInTerminal, RecodeDebugConfig};
 use util::{paths::normalize_path, rel_path::RelPath};
 
 pub use crate::capabilities::*;
@@ -174,7 +174,7 @@ pub trait Extension: Send + Sync + 'static {
         config: serde_json::Value,
     ) -> Result<StartDebuggingRequestArgumentsRequest>;
 
-    async fn dap_config_to_scenario(&self, config: ZedDebugConfig) -> Result<DebugScenario>;
+    async fn dap_config_to_scenario(&self, config: RecodeDebugConfig) -> Result<DebugScenario>;
 
     async fn dap_locator_create_scenario(
         &self,

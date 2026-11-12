@@ -1464,7 +1464,7 @@ impl Render for LspButton {
                 .anchor(Anchor::BottomLeft)
                 .with_handle(self.popover_menu_handle.clone())
                 .trigger_with_tooltip(
-                    IconButton::new("zed-lsp-tool-button", IconName::BoltOutlined)
+                    IconButton::new("recode-lsp-tool-button", IconName::BoltOutlined)
                         .when_some(indicator, IconButton::indicator)
                         .icon_size(IconSize::Small)
                         .tab_index(0isize)
@@ -1643,14 +1643,14 @@ mod tests {
         let node_server = lsp::LanguageServerBinary {
             path: "/usr/bin/node".into(),
             arguments: vec![
-                "/zed/languages/basedpyright/langserver.index.js".into(),
+                "/recode/languages/basedpyright/langserver.index.js".into(),
                 "--stdio".into(),
             ],
             env: None,
         };
         assert_eq!(
             tooltip_for_server_binary(&node_server, PathStyle::Unix),
-            "/zed/languages/basedpyright/langserver.index.js (node)"
+            "/recode/languages/basedpyright/langserver.index.js (node)"
         );
 
         let node_server_windows = lsp::LanguageServerBinary {
@@ -1668,12 +1668,12 @@ mod tests {
 
         let python_server = lsp::LanguageServerBinary {
             path: "/usr/bin/python3".into(),
-            arguments: vec!["/zed/languages/pylsp/pylsp".into(), "--stdio".into()],
+            arguments: vec!["/recode/languages/pylsp/pylsp".into(), "--stdio".into()],
             env: None,
         };
         assert_eq!(
             tooltip_for_server_binary(&python_server, PathStyle::Unix),
-            "/zed/languages/pylsp/pylsp (python)"
+            "/recode/languages/pylsp/pylsp (python)"
         );
 
         let standalone_server = lsp::LanguageServerBinary {
@@ -1690,14 +1690,14 @@ mod tests {
             path: "/usr/bin/node".into(),
             arguments: vec![
                 "--max-old-space-size=8192".into(),
-                "/zed/languages/eslint/server.js".into(),
+                "/recode/languages/eslint/server.js".into(),
                 "--stdio".into(),
             ],
             env: None,
         };
         assert_eq!(
             tooltip_for_server_binary(&flagged_node_server, PathStyle::Unix),
-            "/zed/languages/eslint/server.js (node)"
+            "/recode/languages/eslint/server.js (node)"
         );
     }
 }

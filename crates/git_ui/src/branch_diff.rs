@@ -39,7 +39,7 @@ use workspace::{
     notifications::NotifyTaskExt,
     searchable::SearchableItemHandle,
 };
-use zed_actions::agent::ReviewBranchDiff;
+use recode_actions::agent::ReviewBranchDiff;
 
 /// The workspace item for a branch (merge-base) diff: "Changes since {branch}".
 /// It wraps a single [`DiffMultibuffer`] over [`DiffBase::Merge`] and delegates
@@ -872,7 +872,7 @@ impl Render for BranchDiffToolbar {
                 this.child(Divider::vertical()).child(
                     Button::new("review-diff", "Review Diff")
                         .start_icon(
-                            Icon::new(IconName::ZedAssistant)
+                            Icon::new(IconName::RecodeAssistant)
                                 .size(IconSize::Small)
                                 .color(Color::Muted),
                         )

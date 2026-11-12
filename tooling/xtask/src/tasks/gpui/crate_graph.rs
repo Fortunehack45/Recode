@@ -33,7 +33,7 @@ pub fn gpui_crates(graph: &PackageGraph) -> Result<PackageSet<'_>> {
         // we do not need dev dependencies for releases
         .resolve_with_fn(|_, link| !link.dev_only());
 
-    // Keep all workspace crates and Zed forks
+    // Keep all workspace crates and Recode forks
     Ok(
         dependencies.filter(DependencyDirection::Reverse, |package| {
             package.in_workspace() || is_zed_fork(package.source())
@@ -412,7 +412,7 @@ mod tests {
             "git+https://github.com/zed-industries/fork?rev=abc#abc",
             "git+https://github.com/zed-industries/fork.git?branch=main#abc",
             "git+ssh://git@github.com/zed-industries/fork?tag=v1#abc",
-            "git+https://github.com/Zed-Industries/fork#abc",
+            "git+https://github.com/Recode-Industries/fork#abc",
         ] {
             assert!(is_zed_fork(PackageSource::External(source)), "{source}");
         }

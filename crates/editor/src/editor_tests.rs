@@ -26789,7 +26789,7 @@ async fn test_toggle_block_comment(cx: &mut TestAppContext) {
     cx.update_editor(|editor, window, cx| {
         editor.toggle_comments(&ToggleComments::default(), window, cx)
     });
-    // TODO this is how it actually worked in Zed Stable, which is not very ergonomic.
+    // TODO this is how it actually worked in Recode Stable, which is not very ergonomic.
     // Uncommenting and commenting from this position brings in even more wrong artifacts.
     cx.assert_editor_state(
         &r#"
@@ -29455,7 +29455,7 @@ async fn check_completion_additional_edits(
 
 // rust-analyzer's ref-match completions (`&some_str`) deliver the `&` as a
 // zero-width additionalTextEdit at the primary edit's start.
-// Ref: https://github.com/zed-industries/zed/issues/56973
+// Ref: https://github.com/Fortunehack45/Recode/issues/56973
 #[gpui::test]
 async fn test_completions_with_zero_width_additional_edit_at_primary_edit_start(
     cx: &mut TestAppContext,
@@ -29489,7 +29489,7 @@ async fn test_completions_with_zero_width_additional_edit_at_primary_edit_start(
 
 // Additional edits which overlap the primary completion edit must be skipped
 // while non-overlapping edits from the same completion are still applied.
-// Ref: https://github.com/zed-industries/zed/pull/1871
+// Ref: https://github.com/Fortunehack45/Recode/pull/1871
 #[gpui::test]
 async fn test_completions_skip_additional_edits_overlapping_primary_edit(cx: &mut TestAppContext) {
     check_completion_additional_edits(
@@ -29528,7 +29528,7 @@ async fn test_completions_skip_additional_edits_overlapping_primary_edit(cx: &mu
 // start at the very beginning of the file, the additional edit must not be
 // treated as overlapping. This payload shape matches what
 // typescript-language-server actually sends for auto-imports at file start.
-// Ref: https://github.com/zed-industries/zed/issues/26136
+// Ref: https://github.com/Fortunehack45/Recode/issues/26136
 #[gpui::test]
 async fn test_completions_with_file_start_auto_import_additional_edit(cx: &mut TestAppContext) {
     check_completion_additional_edits(
@@ -31220,7 +31220,7 @@ struct Row10;"#};
         &mut cx,
     );
 
-    // Deletion hunks are ephemeral, so it's impossible to place the caret into them — Zed triggers reverts for lines, adjacent to carets and selections.
+    // Deletion hunks are ephemeral, so it's impossible to place the caret into them — Recode triggers reverts for lines, adjacent to carets and selections.
     assert_hunk_revert(
         indoc! {r#"struct Row;
                    ˇstruct Row2;
@@ -35007,7 +35007,7 @@ async fn test_find_all_references_cleanup_after_edit(cx: &mut TestAppContext) {
     });
 }
 
-/// End-to-end regression test for ZED-79W ("cannot summarize backward"):
+/// End-to-end regression test for RECODE-79W ("cannot summarize backward"):
 /// language servers can return a location whose range is reversed (start
 /// after end). `GetReferences::response_from_lsp` used to convert the
 /// endpoints individually, bypassing `range_from_lsp`'s normalization, so
@@ -43825,7 +43825,7 @@ async fn test_paste_url_from_other_app_creates_markdown_link_over_selected_text(
 ) {
     init_test(cx, |_| {});
 
-    let url = "https://zed.dev";
+    let url = "https://recode.dev";
 
     let markdown_language = Arc::new(Language::new(
         LanguageConfig {
@@ -43983,7 +43983,7 @@ async fn test_paste_url_from_zed_copy_creates_markdown_link_over_selected_text(
 ) {
     init_test(cx, |_| {});
 
-    let url = "https://zed.dev";
+    let url = "https://recode.dev";
 
     let markdown_language = Arc::new(Language::new(
         LanguageConfig {
@@ -44022,7 +44022,7 @@ async fn test_paste_url_from_other_app_replaces_existing_url_without_creating_ma
 ) {
     init_test(cx, |_| {});
 
-    let url = "https://zed.dev";
+    let url = "https://recode.dev";
 
     let markdown_language = Arc::new(Language::new(
         LanguageConfig {
@@ -44108,7 +44108,7 @@ async fn test_paste_url_from_other_app_without_creating_markdown_link_in_non_mar
 ) {
     init_test(cx, |_| {});
 
-    let url = "https://zed.dev";
+    let url = "https://recode.dev";
 
     let markdown_language = Arc::new(Language::new(
         LanguageConfig {
@@ -44138,7 +44138,7 @@ async fn test_paste_url_from_other_app_creates_markdown_link_selectively_in_mult
 ) {
     init_test(cx, |_| {});
 
-    let url = "https://zed.dev";
+    let url = "https://recode.dev";
 
     let markdown_language = Arc::new(Language::new(
         LanguageConfig {
@@ -46923,7 +46923,7 @@ async fn test_local_worktree_trust(cx: &mut TestAppContext) {
     fs.insert_tree(
         path!("/project"),
         json!({
-            ".zed": {
+            ".recode": {
                 "settings.json": r#"{"languages":{"Rust":{"language_servers":["override-rust-analyzer"]}}}"#
             },
             "main.rs": "fn main() {}"
@@ -47022,7 +47022,7 @@ async fn test_local_worktree_trust(cx: &mut TestAppContext) {
             [language::language_settings::ConfiguredLanguageServer::new(
                 "..."
             )],
-            "local .zed/settings.json must not apply before trust approval"
+            "local .recode/settings.json must not apply before trust approval"
         )
     });
 
@@ -47057,7 +47057,7 @@ async fn test_local_worktree_trust(cx: &mut TestAppContext) {
             [language::language_settings::ConfiguredLanguageServer::new(
                 "override-rust-analyzer"
             )],
-            "local .zed/settings.json should apply after trust approval"
+            "local .recode/settings.json should apply after trust approval"
         )
     });
     let _fake_language_server = fake_language_server.await.unwrap();
@@ -50750,7 +50750,7 @@ async fn test_lsp_show_document_external(cx: &mut TestAppContext) {
         .server
         .request::<lsp::request::ShowDocument>(
             lsp::ShowDocumentParams {
-                uri: "https://zed.dev/docs".parse::<lsp::Uri>().unwrap(),
+                uri: "https://recode.dev/docs".parse::<lsp::Uri>().unwrap(),
                 external: Some(true),
                 take_focus: None,
                 selection: None,
@@ -50761,7 +50761,7 @@ async fn test_lsp_show_document_external(cx: &mut TestAppContext) {
         .into_response()
         .expect("show document request should not error");
     assert_eq!(response, lsp::ShowDocumentResult { success: true });
-    assert_eq!(cx.opened_url(), Some("https://zed.dev/docs".to_string()));
+    assert_eq!(cx.opened_url(), Some("https://recode.dev/docs".to_string()));
     cx.run_until_parked();
     cx.update_workspace(|workspace, _, cx| {
         assert_eq!(
@@ -51262,13 +51262,13 @@ async fn test_soft_wrap_indent_updated_on_file_move_between_directories(
         root,
         serde_json::json!({
             "dir_a": {
-                ".zed": {
+                ".recode": {
                     "settings.json": "{\n  \"soft_wrap_indent\": \"same\"\n}"
                 },
                 "test.txt": "    let a_long_variable = 123456789;\n"
             },
             "dir_b": {
-                ".zed": {
+                ".recode": {
                     "settings.json": "{\n  \"soft_wrap_indent\": \"none\"\n}"
                 }
             }

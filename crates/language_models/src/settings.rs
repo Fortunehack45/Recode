@@ -14,8 +14,8 @@ use crate::provider::{
 };
 
 #[derive(Default, Clone, Debug, PartialEq)]
-pub struct ZedDotDevSettings {
-    pub available_models: Vec<settings::ZedDotDevAvailableModel>,
+pub struct RecodeDotDevSettings {
+    pub available_models: Vec<settings::RecodeDotDevAvailableModel>,
 }
 
 #[derive(Debug, RegisterSetting)]
@@ -35,7 +35,7 @@ pub struct AllLanguageModelSettings {
     pub openai_compatible: HashMap<Arc<str>, OpenAiCompatibleSettings>,
     pub vercel_ai_gateway: VercelAiGatewaySettings,
     pub x_ai: XAiSettings,
-    pub zed_dot_dev: ZedDotDevSettings,
+    pub recode_dot_dev: RecodeDotDevSettings,
 }
 
 fn custom_headers_from(
@@ -69,7 +69,7 @@ impl settings::Settings for AllLanguageModelSettings {
         let openai_compatible = language_models.openai_compatible.unwrap();
         let vercel_ai_gateway = language_models.vercel_ai_gateway.unwrap();
         let x_ai = language_models.x_ai.unwrap();
-        let zed_dot_dev = language_models.zed_dot_dev.unwrap();
+        let recode_dot_dev = language_models.recode_dot_dev.unwrap();
         Self {
             anthropic: AnthropicSettings {
                 api_url: anthropic.api_url.unwrap(),
@@ -210,8 +210,8 @@ impl settings::Settings for AllLanguageModelSettings {
                 available_models: x_ai.available_models.unwrap_or_default(),
                 custom_headers: custom_headers_from("xAI", x_ai.custom_headers, &[]),
             },
-            zed_dot_dev: ZedDotDevSettings {
-                available_models: zed_dot_dev.available_models.unwrap_or_default(),
+            recode_dot_dev: RecodeDotDevSettings {
+                available_models: recode_dot_dev.available_models.unwrap_or_default(),
             },
         }
     }

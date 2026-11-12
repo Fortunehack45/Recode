@@ -1413,7 +1413,7 @@ mod tests {
                 .debug_bounds("inline-provider-description")
                 .expect("provider description should be rendered");
             let configuration_bounds = visual_context
-                .debug_bounds("zed-ai-configuration")
+                .debug_bounds("recode-ai-configuration")
                 .expect("Recode AI configuration should be rendered");
 
             assert!(

@@ -49,7 +49,7 @@ The only exception are the ID restrictions: since an extension's ID cannot chang
 
 ## Do I have to maintain my extension? {#do-i-have-to-maintain-my-extension}
 
-No. After your extension has been published, there are no further requirements from our side. Thank you for enriching the Zed extension collection, we really appreciate it!
+No. After your extension has been published, there are no further requirements from our side. Thank you for enriching the Recode extension collection, we really appreciate it!
 
 That said, no extension is perfect on day one - bugs may surface and improvement requests may come in. While maintenance is never required, it helps everyone if you respond to those reports within a reasonable timeframe.
 
@@ -73,7 +73,7 @@ Note that you may also just keep your extension around - many extensions have re
 We don't want published extensions to go stale, since that leaves their users with a poor experience. So if an extension owner can no longer be reached:
 
 - a contributor may fork the extension and propose their fork as a replacement for the current extension, or
-- Zed staff can fork the extension into the [`zed-extensions`](https://github.com/zed-extensions) organization, where maintenance continues as a joint effort of the community and Zed staff.
+- Recode staff can fork the extension into the [`zed-extensions`](https://github.com/zed-extensions) organization, where maintenance continues as a joint effort of the community and Recode staff.
 
 We will only take either action if one of the following requirements is met:
 
@@ -94,4 +94,4 @@ First of all, thank you for reading through these!
 
 While all of these policies were added with good reason, not all of them are entirely set in stone - we value open discussion around all of this.
 
-If anything here seems off to you or you have questions, feel free to open a discussion in the [`zed-industries/zed`](https://github.com/zed-industries/zed) repository and ping @MrSubidubi there - we would much rather talk it through than leave you frustrated.
+If anything here seems off to you or you have questions, feel free to open a discussion in the [`Fortunehack45/Recode`](https://github.com/Fortunehack45/Recode) repository and ping @MrSubidubi there - we would much rather talk it through than leave you frustrated.

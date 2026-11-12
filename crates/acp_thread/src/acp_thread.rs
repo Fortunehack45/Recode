@@ -123,11 +123,11 @@ pub fn meta_with_tool_name(tool_name: &str) -> acp_v2::Meta {
 pub const COMMAND_CATEGORY_META_KEY: &str = "command_category";
 
 /// The source category of a slash command, used to group commands in the
-/// completion popup. Only the native Zed agent annotates its commands; commands
+/// completion popup. Only the native Recode agent annotates its commands; commands
 /// from external ACP agents carry no category and are grouped on their own.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CommandCategory {
-    /// Built-in Zed agent commands (e.g. `/compact`).
+    /// Built-in Recode agent commands (e.g. `/compact`).
     Native,
     /// Commands sourced from MCP server prompts.
     Mcp,
@@ -1514,7 +1514,7 @@ impl ToolCall {
         self.authorization
     }
 
-    /// Whether Zed may stop this tool call with `tool_call/cancel`: the agent advertises it
+    /// Whether Recode may stop this tool call with `tool_call/cancel`: the agent advertises it
     /// and the tool call hasn't finished.
     pub fn can_cancel(&self) -> bool {
         self.advertises_cancel
@@ -2050,7 +2050,7 @@ impl From<acp_v1::ToolCallStatus> for ToolCallStatus {
     }
 }
 
-/// Whether Zed can render a form property. Unknown property types and multi-select items
+/// Whether Recode can render a form property. Unknown property types and multi-select items
 /// can't be rendered.
 pub fn is_renderable_elicitation_property(property: &acp_v2::ElicitationPropertySchema) -> bool {
     match property {
@@ -2066,8 +2066,8 @@ pub fn is_renderable_elicitation_property(property: &acp_v2::ElicitationProperty
     }
 }
 
-/// A form Zed can't render is rejected with `-32602` rather than answered with `decline` or
-/// `cancel`, which would report a choice the user never made. Optional properties Zed can't
+/// A form Recode can't render is rejected with `-32602` rather than answered with `decline` or
+/// `cancel`, which would report a choice the user never made. Optional properties Recode can't
 /// render are left out of the form instead.
 fn validate_form_schema(schema: &acp_v2::ElicitationSchema) -> Result<(), acp_v2::Error> {
     let unrenderable = |reason: String| Err(acp_v2::Error::invalid_params().data(reason));
@@ -3669,7 +3669,7 @@ pub const TOKEN_USAGE_WARNING_THRESHOLD: f32 = 0.8;
 impl TokenUsage {
     pub fn ratio(&self) -> TokenUsageRatio {
         #[cfg(debug_assertions)]
-        let warning_threshold: f32 = std::env::var("ZED_THREAD_WARNING_THRESHOLD")
+        let warning_threshold: f32 = std::env::var("RECODE_THREAD_WARNING_THRESHOLD")
             .unwrap_or(TOKEN_USAGE_WARNING_THRESHOLD.to_string())
             .parse()
             .unwrap();
@@ -4154,7 +4154,7 @@ impl AcpThread {
         }
     }
 
-    /// Marks an ACP subagent session, whose work its parent agent owns. Zed cannot
+    /// Marks an ACP subagent session, whose work its parent agent owns. Recode cannot
     /// submit prompts to it, and its foreground state is unconfirmed until the agent
     /// reports one.
     pub fn agent_owned(mut self) -> Self {
@@ -4164,8 +4164,8 @@ impl AcpThread {
         self
     }
 
-    /// Marks a subagent session whose parent runs in Zed, such as a native subagent. Unlike
-    /// `agent_owned`, Zed still submits its prompts.
+    /// Marks a subagent session whose parent runs in Recode, such as a native subagent. Unlike
+    /// `agent_owned`, Recode still submits its prompts.
     pub fn set_subagent_association(&mut self, association: subagents::SubagentAssociation) {
         self.subagent_association = Some(association);
     }
@@ -4432,7 +4432,7 @@ impl AcpThread {
         }
     }
 
-    /// Whether the agent reports this session's foreground state, rather than Zed
+    /// Whether the agent reports this session's foreground state, rather than Recode
     /// deriving it from its own prompt turns.
     pub fn uses_reported_activity(&self) -> bool {
         !matches!(
@@ -4469,7 +4469,7 @@ impl AcpThread {
 
     /// Restores the outcomes a subagent reported before it was saved, each with the entry
     /// count when it was reported, after its entries have been replayed. The last one is
-    /// also its current state, unless entries followed it, as when Zed quit mid-run.
+    /// also its current state, unless entries followed it, as when Recode quit mid-run.
     pub fn restore_subagent_outcomes(
         &mut self,
         outcomes: Vec<(usize, acp_v2::StateUpdate)>,
@@ -4920,8 +4920,8 @@ impl AcpThread {
                     stop_reason: stop_reason.clone(),
                 });
             }
-            // A subagent's work can stop because Zed cancelled an ancestor. Its requests stay
-            // answerable until it reports that, and then go as if Zed had cancelled it.
+            // A subagent's work can stop because Recode cancelled an ancestor. Its requests stay
+            // answerable until it reports that, and then go as if Recode had cancelled it.
             if self.subagent_association.is_some()
                 && matches!(stop_reason, Some(acp_v2::StopReason::Cancelled))
             {
@@ -12253,7 +12253,7 @@ mod tests {
             thread.update_session_state(running(), cx).expect("running");
         });
 
-        // Zed did not cancel this subagent: its work stopped with an ancestor's.
+        // Recode did not cancel this subagent: its work stopped with an ancestor's.
         thread.update(cx, |thread, cx| {
             thread
                 .update_session_state(idle_with(acp_v2::StopReason::Cancelled), cx)
@@ -15589,7 +15589,7 @@ mod tests {
             .unwrap();
 
         thread
-            .update(cx, |thread, cx| thread.send_raw("Hello from Zed!", cx))
+            .update(cx, |thread, cx| thread.send_raw("Hello from Recode!", cx))
             .await
             .unwrap();
 
@@ -15599,7 +15599,7 @@ mod tests {
             indoc! {r#"
             ## User
 
-            Hello from Zed!
+            Hello from Recode!
 
             ## Assistant
 
@@ -15729,12 +15729,12 @@ mod tests {
             .unwrap();
 
         thread
-            .update(cx, |thread, cx| thread.send_raw("Hello from Zed!", cx))
+            .update(cx, |thread, cx| thread.send_raw("Hello from Recode!", cx))
             .await
             .unwrap();
 
         let output = thread.read_with(cx, |thread, cx| thread.to_markdown(cx));
-        assert_eq!(output.matches("Hello from Zed!").count(), 1);
+        assert_eq!(output.matches("Hello from Recode!").count(), 1);
         thread.read_with(cx, |thread, _cx| {
             let Some(AgentThreadEntry::UserMessage(message)) = thread.entries.first() else {
                 panic!("expected optimistic user message");
@@ -16787,15 +16787,15 @@ mod tests {
         let terminal = thread
             .update(cx, |thread, cx| {
                 thread.create_terminal(
-                    r#"[ "$ZED_ACP_PAIR" = 'quote "$literal" héllo' ] &&
-                       [ "${ZED_ACP_EMPTY+x}" = x ] && [ -z "$ZED_ACP_EMPTY" ] &&
+                    r#"[ "$RECODE_ACP_PAIR" = 'quote "$literal" héllo' ] &&
+                       [ "${RECODE_ACP_EMPTY+x}" = x ] && [ -z "$RECODE_ACP_EMPTY" ] &&
                        [ "$PAGER" = caller-pager ] && [ "$GIT_PAGER" = cat ]"#
                         .into(),
                     Vec::new(),
                     vec![
-                        ("ZED_ACP_PAIR".into(), "overridden".into()),
-                        ("ZED_ACP_PAIR".into(), r#"quote "$literal" héllo"#.into()),
-                        ("ZED_ACP_EMPTY".into(), String::new()),
+                        ("RECODE_ACP_PAIR".into(), "overridden".into()),
+                        ("RECODE_ACP_PAIR".into(), r#"quote "$literal" héllo"#.into()),
+                        ("RECODE_ACP_EMPTY".into(), String::new()),
                         ("PAGER".into(), "caller-pager".into()),
                     ],
                     None,
@@ -23125,7 +23125,7 @@ mod tests {
     /// the outer task observes `rx.await` returning `Err(Cancelled)` and
     /// must still clear `running_turn` so the panel transitions out of
     /// `Generating`. Without this, the agent thread is wedged in the
-    /// loading state until Zed restarts.
+    /// loading state until Recode restarts.
     #[gpui::test]
     async fn test_running_turn_cleared_when_send_task_dropped(cx: &mut TestAppContext) {
         init_test(cx);

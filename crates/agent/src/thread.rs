@@ -46,7 +46,7 @@ use language_model::{
     LanguageModelToolChoice, LanguageModelToolResult, LanguageModelToolResultContent,
     LanguageModelToolUse, LanguageModelToolUseId, MessageContent, PromptCompactionStrategy,
     ProviderErrorCategory, Role, SelectedModel, Speed, StopReason, TokenUsage,
-    ZED_CLOUD_PROVIDER_ID,
+    RECODE_CLOUD_PROVIDER_ID,
 };
 use project::{Project, trusted_worktrees::TrustedWorktrees};
 use prompt_store::ProjectContext;
@@ -848,7 +848,7 @@ pub struct SiblingThreadRequest {
     pub title: SharedString,
     /// The initial prompt to send to the new thread.
     pub prompt: String,
-    /// Optional agent ID to use. Defaults to the native Zed agent.
+    /// Optional agent ID to use. Defaults to the native Recode agent.
     pub agent_id: Option<String>,
     /// Optional model override, as `provider/model-id`.
     /// Defaults to the user's configured default model for the agent.
@@ -892,7 +892,7 @@ pub struct AvailableAgent {
     pub id: String,
     /// Human-readable name shown in the UI.
     pub name: SharedString,
-    /// Whether this is Zed's built-in native agent.
+    /// Whether this is Recode's built-in native agent.
     pub is_native: bool,
     /// Models available for this agent. May be empty if models are not
     /// enumerated up front (e.g., external agents that choose their own).
@@ -902,7 +902,7 @@ pub struct AvailableAgent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AvailableModel {
     /// Identifier to pass as the `model` field when creating a thread.
-    /// For `spawn_agent`, use a model from the native Zed agent entry.
+    /// For `spawn_agent`, use a model from the native Recode agent entry.
     pub id: String,
     /// Human-readable name.
     pub name: SharedString,
@@ -1574,7 +1574,7 @@ impl Thread {
         }
 
         let temp_dir = tempfile::Builder::new()
-            .prefix("zed-agent-terminal-")
+            .prefix("recode-agent-terminal-")
             .tempdir()
             .context("failed to create sandboxed terminal temp directory")?;
         let temp_dir = temp_dir.keep();
@@ -3627,7 +3627,7 @@ impl Thread {
             return Err(anyhow!(error));
         };
 
-        let auto_retry = if model.provider_id() == ZED_CLOUD_PROVIDER_ID {
+        let auto_retry = if model.provider_id() == RECODE_CLOUD_PROVIDER_ID {
             plan.is_some()
         } else {
             true
@@ -9919,7 +9919,7 @@ mod tests {
     #[test]
     fn test_retry_strategy_does_not_retry_status_less_provider_rejection() {
         // A rejection like OpenAI's `cyber_policy` content-policy error has
-        // no HTTP status of its own (it arrives as a Zed cloud upstream
+        // no HTTP status of its own (it arrives as a Recode cloud upstream
         // error code); retrying sends the identical request and gets the
         // identical rejection, so it must not retry.
         let error = LanguageModelCompletionError::from_provider_response(

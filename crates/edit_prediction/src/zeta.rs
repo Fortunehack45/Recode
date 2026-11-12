@@ -2,7 +2,7 @@ use crate::{
     CloudRequestTimeoutError, CurrentEditPrediction, DebugEvent, EditPredictionFinishedDebugEvent,
     EditPredictionId, EditPredictionInputs, EditPredictionModelInput,
     EditPredictionStartedDebugEvent, EditPredictionStore, PromptHistoryBoundary,
-    ZedUpdateRequiredError, buffer_path_with_id_fallback,
+    RecodeUpdateRequiredError, buffer_path_with_id_fallback,
     cursor_excerpt::{self, compute_cursor_excerpt, compute_syntax_ranges},
     data_collection::CapturedPredictionContext,
     prediction::EditPredictionResult,
@@ -652,7 +652,7 @@ fn handle_api_response<T>(
                     .ok();
             }
 
-            if err.is::<ZedUpdateRequiredError>() {
+            if err.is::<RecodeUpdateRequiredError>() {
                 cx.update(|cx| {
                     this.update(cx, |this, _cx| {
                         this.update_required = true;
@@ -677,7 +677,7 @@ fn handle_api_response<T>(
                     }
 
                     show_app_notification(
-                        NotificationId::unique::<ZedUpdateRequiredError>(),
+                        NotificationId::unique::<RecodeUpdateRequiredError>(),
                         cx,
                         move |cx| {
                             cx.new({
@@ -859,7 +859,7 @@ pub(crate) fn edit_prediction_accepted(
         .map(|organization| organization.id.clone());
     let app_version = AppVersion::global(cx);
 
-    // Acceptance telemetry to Zed cloud removed
+    // Acceptance telemetry to Recode cloud removed
     let _ = (request_id, model_version, e2e_latency, client, llm_token, organization_id, app_version);
 }
 

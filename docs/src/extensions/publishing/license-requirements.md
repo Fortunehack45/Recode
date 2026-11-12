@@ -1,6 +1,6 @@
 ---
 title: Extension License Requirements
-description: "Understand the license requirements for publishing a Zed extension."
+description: "Understand the license requirements for publishing a Recode extension."
 ---
 
 # Extension License Requirements {#extension-license-requirements}

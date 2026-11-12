@@ -15,7 +15,7 @@ test("ChatStore saves, lists, loads, and deletes chat sessions", () => {
       title: "First user conversation",
       createdAt: new Date(Date.now() - 10000).toISOString(),
       updatedAt: new Date(Date.now() - 5000).toISOString(),
-      model: "opencode-zen",
+      model: "opencode-recode",
       mode: "build",
       messages: [
         { role: "user", content: "Hello agent" },
@@ -52,7 +52,7 @@ test("ChatStore saves, lists, loads, and deletes chat sessions", () => {
     assert.ok(loaded);
     assert.equal(loaded?.title, "First user conversation");
     assert.equal(loaded?.messages.length, 2);
-    assert.equal(loaded?.model, "opencode-zen");
+    assert.equal(loaded?.model, "opencode-recode");
 
     // Delete
     const deleted = ChatStore.deleteChat("session_test_1");

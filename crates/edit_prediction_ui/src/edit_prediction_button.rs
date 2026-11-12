@@ -1,5 +1,5 @@
 use anyhow::Result;
-use client::{Client, UserStore, zed_urls};
+use client::{Client, UserStore, recode_urls};
 use cloud_llm_client::UsageLimit;
 use copilot::Status;
 use edit_prediction::EditPredictionStore;
@@ -37,7 +37,7 @@ use workspace::{
     HideStatusItem, StatusItemView, Toast, Workspace, create_and_open_local_file, item::ItemHandle,
     notifications::NotificationId,
 };
-use zed_actions::{OpenBrowser, OpenSettingsAt};
+use recode_actions::{OpenBrowser, OpenSettingsAt};
 
 use crate::{RatePredictions, rate_prediction_modal::PredictEditsRatePredictionsFeatureFlag};
 
@@ -345,8 +345,8 @@ impl Render for EditPredictionButton {
                         .with_handle(self.popover_menu_handle.clone()),
                 )
             }
-            provider @ (EditPredictionProvider::Zed | EditPredictionProvider::Mercury) => {
-                if edit_prediction::zed_edit_predictions_off_for_plan(self.user_store.read(cx), cx)
+            provider @ (EditPredictionProvider::Recode | EditPredictionProvider::Mercury) => {
+                if edit_prediction::recode_edit_predictions_off_for_plan(self.user_store.read(cx), cx)
                 {
                     return div().hidden();
                 }
@@ -356,7 +356,7 @@ impl Render for EditPredictionButton {
                 let language = self.language.clone();
                 let project = self.project.clone();
                 let provider_name: &'static str = match provider {
-                    EditPredictionProvider::Zed => "zed",
+                    EditPredictionProvider::Recode => "recode",
                     _ => "unknown",
                 };
                 let icons = self
@@ -364,7 +364,7 @@ impl Render for EditPredictionButton {
                     .as_ref()
                     .map(|p| p.icons(cx))
                     .unwrap_or_else(|| {
-                        edit_prediction_types::EditPredictionIconSet::new(IconName::ZedPredict)
+                        edit_prediction_types::EditPredictionIconSet::new(IconName::RecodePredict)
                     });
 
                 let ep_icon;
@@ -402,7 +402,7 @@ impl Render for EditPredictionButton {
                     };
 
                     return div().child(
-                        IconButton::new("zed-predict-pending-button", ep_icon)
+                        IconButton::new("recode-predict-pending-button", ep_icon)
                             .shape(IconButtonShape::Square)
                             .tab_index(0isize)
                             .aria_label("Edit Predictions")
@@ -417,7 +417,7 @@ impl Render for EditPredictionButton {
                                     source = "Edit Prediction Status Button"
                                 );
                                 window.dispatch_action(
-                                    zed_actions::OpenZedPredictOnboarding.boxed_clone(),
+                                    recode_actions::OpenRecodePredictOnboarding.boxed_clone(),
                                     cx,
                                 );
                             })),
@@ -436,13 +436,13 @@ impl Render for EditPredictionButton {
 
                 let show_editor_predictions = self.editor_show_predictions;
                 let user = self.user_store.read(cx).current_user();
-                let zed_cloud_has_no_active_subscription =
-                    matches!(provider, EditPredictionProvider::Zed)
+                let recode_cloud_has_no_active_subscription =
+                    matches!(provider, EditPredictionProvider::Recode)
                         && self
                             .user_store
                             .read(cx)
                             .current_organization_has_no_active_subscription();
-                let excluded_from_plan = edit_prediction::zed_edit_predictions_excluded_from_plan(
+                let excluded_from_plan = edit_prediction::recode_edit_predictions_excluded_from_plan(
                     self.user_store.read(cx),
                     cx,
                 );
@@ -453,7 +453,7 @@ impl Render for EditPredictionButton {
                     );
 
                 let indicator_color =
-                    if missing_token || mercury_has_error || zed_cloud_has_no_active_subscription {
+                    if missing_token || mercury_has_error || recode_cloud_has_no_active_subscription {
                         Some(Color::Error)
                     } else if excluded_from_plan {
                         Some(Color::Muted)
@@ -467,14 +467,14 @@ impl Render for EditPredictionButton {
                         None
                     };
 
-                let zed_cloud_needs_sign_in =
-                    matches!(provider, EditPredictionProvider::Zed) && user.is_none();
+                let recode_cloud_needs_sign_in =
+                    matches!(provider, EditPredictionProvider::Recode) && user.is_none();
                 let provider_unavailable = missing_token
                     || mercury_has_error
-                    || zed_cloud_needs_sign_in
-                    || zed_cloud_has_no_active_subscription;
+                    || recode_cloud_needs_sign_in
+                    || recode_cloud_has_no_active_subscription;
 
-                let icon_button = IconButton::new("zed-predict-pending-button", ep_icon)
+                let icon_button = IconButton::new("recode-predict-pending-button", ep_icon)
                     .shape(IconButtonShape::Square)
                     .tab_index(0isize)
                     .aria_label("Edit Prediction")
@@ -486,9 +486,9 @@ impl Render for EditPredictionButton {
                         element.tooltip(move |_window, cx| {
                             let description = if !enabled {
                                 "Disabled For This File"
-                            } else if zed_cloud_needs_sign_in {
+                            } else if recode_cloud_needs_sign_in {
                                 "Sign In Or Configure a Provider"
-                            } else if zed_cloud_has_no_active_subscription {
+                            } else if recode_cloud_has_no_active_subscription {
                                 "This organization has no active subscription"
                             } else if excluded_from_plan {
                                 "Configure a Provider"
@@ -624,11 +624,11 @@ impl EditPredictionButton {
             .read(cx)
             .current_organization_configuration();
 
-        let is_zed_provider_disabled = organization_configuration
+        let is_recode_provider_disabled = organization_configuration
             .is_some_and(|configuration| !configuration.edit_prediction.is_enabled);
         let user_store = self.user_store.read(cx);
-        let is_zed_provider_unavailable = user_store.current_user().is_none()
-            || edit_prediction::zed_edit_predictions_excluded_from_plan(user_store, cx);
+        let is_recode_provider_unavailable = user_store.current_user().is_none()
+            || edit_prediction::recode_edit_predictions_excluded_from_plan(user_store, cx);
 
         let available_providers = get_available_providers(cx);
 
@@ -645,22 +645,22 @@ impl EditPredictionButton {
                     continue;
                 };
                 let is_current = provider == current_provider;
-                let is_disabled_zed_provider =
-                    provider == EditPredictionProvider::Zed && is_zed_provider_disabled;
-                // Zed stays selected in settings, but checking it would imply predictions are
+                let is_disabled_recode_provider =
+                    provider == EditPredictionProvider::Recode && is_recode_provider_disabled;
+                // Recode stays selected in settings, but checking it would imply predictions are
                 // working when the user still needs to sign in or upgrade.
-                let is_unavailable_zed_provider =
-                    provider == EditPredictionProvider::Zed && is_zed_provider_unavailable;
+                let is_unavailable_recode_provider =
+                    provider == EditPredictionProvider::Recode && is_recode_provider_unavailable;
                 let fs = self.fs.clone();
 
                 menu = menu.item(
                     ContextMenuEntry::new(name)
                         .toggleable(
                             IconPosition::Start,
-                            is_current && !is_disabled_zed_provider && !is_unavailable_zed_provider,
+                            is_current && !is_disabled_recode_provider && !is_unavailable_recode_provider,
                         )
-                        .disabled(is_disabled_zed_provider)
-                        .when(is_disabled_zed_provider, |item| {
+                        .disabled(is_disabled_recode_provider)
+                        .when(is_disabled_recode_provider, |item| {
                             item.documentation_aside(DocumentationSide::Left, move |_cx| {
                                 Label::new("Edit predictions are disabled for this organization.")
                                     .into_any_element()
@@ -878,7 +878,7 @@ impl EditPredictionButton {
 
         menu = menu.separator().header("Privacy");
 
-        if matches!(provider, EditPredictionProvider::Zed) {
+        if matches!(provider, EditPredictionProvider::Recode) {
             if let Some(provider) = &self.edit_prediction_provider {
                 let data_collection = provider.data_collection_state(cx);
 
@@ -931,7 +931,7 @@ impl EditPredictionButton {
                                     .child(
                                         Label::new(indoc!{
                                             "Help us improve our open dataset model by sharing data from open source repositories. \
-                                            Zed must detect a license file in your repo for this setting to take effect. \
+                                            Recode must detect a license file in your repo for this setting to take effect. \
                                             Files with sensitive data and secrets are excluded by default."
                                         })
                                     )
@@ -985,7 +985,7 @@ impl EditPredictionButton {
                 .icon_color(Color::Muted)
                 .documentation_aside(DocumentationSide::Left, |_| {
                     Label::new(indoc!{"
-                        Open your settings to add sensitive paths for which Zed will never predict edits."}).into_any_element()
+                        Open your settings to add sensitive paths for which Recode will never predict edits."}).into_any_element()
                 })
                 .handler(move |window, cx| {
                     telemetry::event!(
@@ -1023,7 +1023,7 @@ impl EditPredictionButton {
                 .as_ref()
                 .map(|p| p.icons(cx))
                 .unwrap_or_else(|| {
-                    edit_prediction_types::EditPredictionIconSet::new(IconName::ZedPredict)
+                    edit_prediction_types::EditPredictionIconSet::new(IconName::RecodePredict)
                 });
             menu = menu.item(
                 ContextMenuEntry::new("This file is excluded.")
@@ -1034,9 +1034,9 @@ impl EditPredictionButton {
         }
 
         if let Some(editor_focus_handle) = self.editor_focus_handle.clone() {
-            let zed_cloud_has_no_active_subscription =
+            let recode_cloud_has_no_active_subscription =
                 all_language_settings(None, cx).edit_predictions.provider
-                    == EditPredictionProvider::Zed
+                    == EditPredictionProvider::Recode
                     && self
                         .user_store
                         .read(cx)
@@ -1047,7 +1047,7 @@ impl EditPredictionButton {
                 .item(
                     ContextMenuEntry::new("Predict Edit at Cursor")
                         .action(Box::new(ShowEditPrediction))
-                        .disabled(zed_cloud_has_no_active_subscription)
+                        .disabled(recode_cloud_has_no_active_subscription)
                         .handler({
                             let editor_focus_handle = editor_focus_handle.clone();
                             move |window, cx| {
@@ -1159,7 +1159,7 @@ impl EditPredictionButton {
             let needs_sign_in = user.is_none()
                 && matches!(
                     provider,
-                    EditPredictionProvider::None | EditPredictionProvider::Zed
+                    EditPredictionProvider::None | EditPredictionProvider::Recode
                 );
 
             if needs_sign_in {
@@ -1187,7 +1187,7 @@ impl EditPredictionButton {
                         telemetry::event!(
                             "Edit Prediction Menu Action",
                             action = "sign_in",
-                            provider = "zed",
+                            provider = "recode",
                         );
                         let client = Client::global(cx);
                         window
@@ -1202,7 +1202,7 @@ impl EditPredictionButton {
                     .link_with_handler(
                         "Learn More",
                         OpenBrowser {
-                            url: zed_urls::edit_prediction_docs(cx).into(),
+                            url: recode_urls::edit_prediction_docs(cx).into(),
                         }
                         .boxed_clone(),
                         |_window, _cx| {
@@ -1233,16 +1233,16 @@ impl EditPredictionButton {
                         .separator();
                 }
 
-                let zed_cloud_has_no_active_subscription =
-                    matches!(provider, EditPredictionProvider::Zed)
+                let recode_cloud_has_no_active_subscription =
+                    matches!(provider, EditPredictionProvider::Recode)
                         && self
                             .user_store
                             .read(cx)
                             .current_organization_has_no_active_subscription();
 
-                if zed_cloud_has_no_active_subscription {
+                if recode_cloud_has_no_active_subscription {
                     menu = menu
-                        .header("Zed AI")
+                        .header("Recode AI")
                         .item(
                             ContextMenuEntry::new(
                                 "This organization has no active subscription",
@@ -1256,19 +1256,19 @@ impl EditPredictionButton {
                             .disabled(true),
                         )
                         .separator();
-                } else if edit_prediction::zed_edit_predictions_excluded_from_plan(
+                } else if edit_prediction::recode_edit_predictions_excluded_from_plan(
                     self.user_store.read(cx),
                     cx,
                 ) {
                     menu = menu
                         .custom_entry(
                             |_window, _cx| {
-                                Label::new("Zed's edit predictions not included in the Free plan.")
+                                Label::new("Recode's edit predictions not included in the Free plan.")
                                     .size(LabelSize::Small)
                                     .color(Color::Muted)
                                     .into_any_element()
                             },
-                            |_window, cx| cx.open_url(&zed_urls::upgrade_to_zed_pro_url(cx)),
+                            |_window, cx| cx.open_url(&recode_urls::upgrade_to_recode_pro_url(cx)),
                         )
                         .entry("Upgrade to Pro", None, |_window, cx| {
                             telemetry::event!(
@@ -1276,7 +1276,7 @@ impl EditPredictionButton {
                                 action = "upsell_clicked",
                                 reason = "excluded_from_plan",
                             );
-                            cx.open_url(&zed_urls::upgrade_to_zed_pro_url(cx))
+                            cx.open_url(&recode_urls::upgrade_to_recode_pro_url(cx))
                         })
                         .separator();
                 } else if let Some(usage) = self
@@ -1315,7 +1315,7 @@ impl EditPredictionButton {
                                     )
                                     .into_any_element()
                             },
-                            move |_, cx| cx.open_url(&zed_urls::account_url(cx)),
+                            move |_, cx| cx.open_url(&recode_urls::account_url(cx)),
                         )
                         .when(usage.over_limit(), |menu| -> ContextMenu {
                             menu.entry("Subscribe to increase your limit", None, |_window, cx| {
@@ -1324,7 +1324,7 @@ impl EditPredictionButton {
                                     action = "upsell_clicked",
                                     reason = "usage_limit",
                                 );
-                                cx.open_url(&zed_urls::account_url(cx))
+                                cx.open_url(&recode_urls::account_url(cx))
                             })
                         })
                         .separator();
@@ -1337,7 +1337,7 @@ impl EditPredictionButton {
                                     .color(Color::Warning)
                                     .into_any_element()
                             },
-                            |_window, cx| cx.open_url(&zed_urls::account_url(cx)),
+                            |_window, cx| cx.open_url(&recode_urls::account_url(cx)),
                         )
                         .entry("Configure providers in Settings.", None, |_window, cx| {
                             telemetry::event!(
@@ -1345,7 +1345,7 @@ impl EditPredictionButton {
                                 action = "upsell_clicked",
                                 reason = "account_age",
                             );
-                            cx.open_url(&zed_urls::account_url(cx))
+                            cx.open_url(&recode_urls::account_url(cx))
                         })
                         .separator();
                 } else if self.user_store.read(cx).has_overdue_invoices() {
@@ -1358,14 +1358,14 @@ impl EditPredictionButton {
                                     .into_any_element()
                             },
                             |_window, cx| {
-                                cx.open_url(&zed_urls::account_url(cx))
+                                cx.open_url(&recode_urls::account_url(cx))
                             },
                         )
                         .entry(
-                            "Check your payment status or contact us at billing-support@zed.dev to continue using this feature.",
+                            "Check your payment status or contact us at billing-support@recode.dev to continue using this feature.",
                             None,
                             |_window, cx| {
-                                cx.open_url(&zed_urls::account_url(cx))
+                                cx.open_url(&recode_urls::account_url(cx))
                             },
                         )
                         .separator();
@@ -1734,7 +1734,7 @@ fn render_zeta_tab_animation(cx: &App) -> impl IntoElement {
             8.,
         ))
         .child(tab_sequence(true))
-        .child(Icon::new(IconName::ZedPredict))
+        .child(Icon::new(IconName::RecodePredict))
         .child(tab_sequence(false))
 }
 
@@ -1793,7 +1793,7 @@ mod tests {
     use language_model::{ApiKeyState, EnvVar};
     use settings::RootUserSettings;
     use workspace::AppState;
-    use zed_credentials_provider::ZedCredentialsProvider;
+    use recode_credentials_provider::RecodeCredentialsProvider;
 
     #[gpui::test]
     async fn test_credentials_survive_button_recreation(cx: &mut TestAppContext) {
@@ -1802,7 +1802,7 @@ mod tests {
         let credentials = Arc::new(FakeCredentialsProvider::default());
 
         cx.update(|cx| {
-            cx.set_global(ZedCredentialsProvider(credentials.clone()));
+            cx.set_global(RecodeCredentialsProvider(credentials.clone()));
             language_model::set_credentials_read_gate::<SettingsStore>(
                 |cx| DisableAiSettings::get_global(cx).disable_ai,
                 cx,

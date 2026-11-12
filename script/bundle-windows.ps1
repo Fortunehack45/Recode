@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 Param(
     [Parameter()][Alias('i')][switch]$Install,
     [Parameter()][Alias('h')][switch]$Help,
@@ -56,10 +56,9 @@ if ($Help) {
     exit 0
 }
 
-Push-Location -Path crates/zed
+Push-Location -Path crates/recode
 $channel = Get-Content "RELEASE_CHANNEL"
-$env:ZED_RELEASE_CHANNEL = $channel
-$env:RELEASE_CHANNEL = $channel
+$env:RECODE_RELEASE_CHANNEL = $channel
 Pop-Location
 
 function CheckEnvironmentVariables {
@@ -67,7 +66,7 @@ function CheckEnvironmentVariables {
         return
     }
 
-    $requiredVars = @('ZED_WORKSPACE', 'RELEASE_VERSION', 'ZED_RELEASE_CHANNEL')
+    $requiredVars = @('RECODE_WORKSPACE', 'RELEASE_VERSION', 'RECODE_RELEASE_CHANNEL')
 
     foreach ($var in $requiredVars) {
         if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($var))) {
@@ -100,7 +99,7 @@ function PrepareForBundle {
         Remove-Item -Path "$innoDir" -Recurse -Force
     }
     New-Item -Path "$innoDir" -ItemType Directory -Force
-    Copy-Item -Path "$env:ZED_WORKSPACE\crates\zed\resources\windows\*" -Destination "$innoDir" -Recurse -Force
+    Copy-Item -Path "$env:RECODE_WORKSPACE\crates\recode\resources\windows\*" -Destination "$innoDir" -Recurse -Force
     New-Item -Path "$innoDir\make_appx" -ItemType Directory -Force
     New-Item -Path "$innoDir\appx" -ItemType Directory -Force
     New-Item -Path "$innoDir\bin" -ItemType Directory -Force
@@ -113,11 +112,11 @@ function GenerateLicenses {
     . $PSScriptRoot/generate-licenses.ps1
 }
 
-function BuildZedAndItsFriends {
-    Write-Output "Building Zed and its friends, for channel: $channel"
-    # Build zed.exe, cli.exe and auto-update-helper.exe
-    cargo --config .cargo/bundle-config.toml build --release --package zed --package cli --package auto_update_helper --target $target
-    Copy-Item -Path ".\$CargoOutDir\zed.exe" -Destination "$innoDir\Zed.exe" -Force
+function BuildRecodeAndItsFriends {
+    Write-Output "Building Recode and its friends, for channel: $channel"
+    # Build recode.exe, cli.exe and auto-update-helper.exe
+    cargo --config .cargo/bundle-config.toml build --release --package recode --package cli --package auto_update_helper --target $target
+    Copy-Item -Path ".\$CargoOutDir\recode.exe" -Destination "$innoDir\Recode.exe" -Force
     Copy-Item -Path ".\$CargoOutDir\cli.exe" -Destination "$innoDir\cli.exe" -Force
     Copy-Item -Path ".\$CargoOutDir\auto-update-helper.exe" -Destination "$innoDir\auto_update_helper.exe" -Force
     # Build explorer_command_injector.dll
@@ -132,7 +131,7 @@ function BuildZedAndItsFriends {
             cargo --config .cargo/bundle-config.toml build --release --package explorer_command_injector --target $target
         }
     }
-    Copy-Item -Path ".\$CargoOutDir\explorer_command_injector.dll" -Destination "$innoDir\zed_explorer_command_injector.dll" -Force
+    Copy-Item -Path ".\$CargoOutDir\explorer_command_injector.dll" -Destination "$innoDir\recode_explorer_command_injector.dll" -Force
 }
 
 function BuildRemoteServer {
@@ -148,7 +147,7 @@ function BuildRemoteServer {
         & "$innoDir\sign.ps1" $remoteServerSrc
     }
 
-    $remoteServerDst = "$env:ZED_WORKSPACE\target\zed-remote-server-windows-$Architecture.zip"
+    $remoteServerDst = "$env:RECODE_WORKSPACE\target\recode-remote-server-windows-$Architecture.zip"
     Write-Output "Compressing remote_server to $remoteServerDst"
     Compress-Archive -Path $remoteServerSrc -DestinationPath $remoteServerDst -Force
     Remove-Item -Path $remoteServerSrc -Force
@@ -156,16 +155,16 @@ function BuildRemoteServer {
     Write-Output "Remote server compressed successfully"
 }
 
-function ZipZedAndItsFriendsDebug {
+function ZipRecodeAndItsFriendsDebug {
     $items = @(
-        ".\$CargoOutDir\zed.pdb",
+        ".\$CargoOutDir\recode.pdb",
         ".\$CargoOutDir\cli.pdb",
         ".\$CargoOutDir\auto_update_helper.pdb",
         ".\$CargoOutDir\explorer_command_injector.pdb",
         ".\$CargoOutDir\remote_server.pdb"
     )
 
-    Compress-Archive -Path $items -DestinationPath ".\$CargoOutDir\zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip" -Force
+    Compress-Archive -Path $items -DestinationPath ".\$CargoOutDir\recode-$env:RELEASE_VERSION-$env:RECODE_RELEASE_CHANNEL.dbg.zip" -Force
 }
 
 
@@ -179,10 +178,10 @@ function UploadToSentry {
         Write-Output "missing SENTRY_AUTH_TOKEN. skipping sentry upload."
         return
     }
-    Write-Output "Uploading zed debug symbols to sentry..."
+    Write-Output "Uploading recode debug symbols to sentry..."
     for ($i = 1; $i -le 3; $i++) {
         try {
-            sentry-cli debug-files upload --include-sources --wait -p zed -o zed-dev $CargoOutDir
+            sentry-cli debug-files upload --include-sources --wait -p recode -o recode-dev $CargoOutDir
             break
         }
         catch {
@@ -199,28 +198,28 @@ function UploadToSentry {
 function MakeAppx {
     switch ($channel) {
         "stable" {
-            $manifestFile = "$env:ZED_WORKSPACE\crates\explorer_command_injector\AppxManifest.xml"
+            $manifestFile = "$env:RECODE_WORKSPACE\crates\explorer_command_injector\AppxManifest.xml"
         }
         "preview" {
-            $manifestFile = "$env:ZED_WORKSPACE\crates\explorer_command_injector\AppxManifest-Preview.xml"
+            $manifestFile = "$env:RECODE_WORKSPACE\crates\explorer_command_injector\AppxManifest-Preview.xml"
         }
         default {
-            $manifestFile = "$env:ZED_WORKSPACE\crates\explorer_command_injector\AppxManifest-Nightly.xml"
+            $manifestFile = "$env:RECODE_WORKSPACE\crates\explorer_command_injector\AppxManifest-Nightly.xml"
         }
     }
     Copy-Item -Path "$manifestFile" -Destination "$innoDir\make_appx\AppxManifest.xml"
     # Add makeAppx.exe to Path
     $sdk = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64"
     $env:Path += ';' + $sdk
-    makeAppx.exe pack /d "$innoDir\make_appx" /p "$innoDir\zed_explorer_command_injector.appx" /nv
+    makeAppx.exe pack /d "$innoDir\make_appx" /p "$innoDir\recode_explorer_command_injector.appx" /nv
 }
 
-function SignZedAndItsFriends {
+function SignRecodeAndItsFriends {
     if (-not $canCodeSign) {
         return
     }
 
-    $files = "$innoDir\Zed.exe,$innoDir\cli.exe,$innoDir\auto_update_helper.exe,$innoDir\zed_explorer_command_injector.dll,$innoDir\zed_explorer_command_injector.appx"
+    $files = "$innoDir\Recode.exe,$innoDir\cli.exe,$innoDir\auto_update_helper.exe,$innoDir\recode_explorer_command_injector.dll,$innoDir\recode_explorer_command_injector.appx"
     & "$innoDir\sign.ps1" $files
 }
 
@@ -243,8 +242,8 @@ function DownloadConpty {
 }
 
 function CollectFiles {
-    Move-Item -Path "$innoDir\zed_explorer_command_injector.appx" -Destination "$innoDir\appx\zed_explorer_command_injector.appx" -Force
-    Move-Item -Path "$innoDir\zed_explorer_command_injector.dll" -Destination "$innoDir\appx\zed_explorer_command_injector.dll" -Force
+    Move-Item -Path "$innoDir\recode_explorer_command_injector.appx" -Destination "$innoDir\appx\recode_explorer_command_injector.appx" -Force
+    Move-Item -Path "$innoDir\recode_explorer_command_injector.dll" -Destination "$innoDir\appx\recode_explorer_command_injector.dll" -Force
     Move-Item -Path "$innoDir\cli.exe" -Destination "$innoDir\bin\recode.exe" -Force
     Move-Item -Path "$innoDir\recode.sh" -Destination "$innoDir\bin\recode" -Force
     Move-Item -Path "$innoDir\auto_update_helper.exe" -Destination "$innoDir\tools\auto_update_helper.exe" -Force
@@ -272,13 +271,13 @@ function BuildInstaller {
             $appName = "Recode"
             $appDisplayName = "Recode"
             $appSetupName = "RecodeSetup-x64"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
+            # The mutex name here should match the mutex name in crates\recode\src\recode\windows_only_instance.rs
             $appMutex = "Recode-Instance-Mutex"
             $appExeName = "Recode"
             $regValueName = "Recode"
             $appUserId = "Recode.Editor"
             $appShellNameShort = "R&ecode"
-            $appAppxFullName = "ZedIndustries.Zed_1.0.0.0_neutral__japxn1gcva8rg"
+            $appAppxFullName = "Recode.Editor_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "preview" {
             $appId = "{{F70E4811-D0E2-4D88-AC99-D63752799F95}"
@@ -286,13 +285,13 @@ function BuildInstaller {
             $appName = "Recode Preview"
             $appDisplayName = "Recode Preview"
             $appSetupName = "RecodeSetup-x64"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Preview-Instance-Mutex"
+            # The mutex name here should match the mutex name in crates\recode\src\recode\windows_only_instance.rs
+            $appMutex = "Recode-Preview-Instance-Mutex"
             $appExeName = "Recode"
-            $regValueName = "ZedPreview"
-            $appUserId = "ZedIndustries.Zed.Preview"
-            $appShellNameShort = "Z&ed Preview"
-            $appAppxFullName = "ZedIndustries.Zed.Preview_1.0.0.0_neutral__japxn1gcva8rg"
+            $regValueName = "RecodePreview"
+            $appUserId = "Recode.Editor.Preview"
+            $appShellNameShort = "R&ecode Preview"
+            $appAppxFullName = "Recode.Editor.Preview_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "nightly" {
             $appId = "{{1BDB21D3-14E7-433C-843C-9C97382B2FE0}"
@@ -300,13 +299,13 @@ function BuildInstaller {
             $appName = "Recode Nightly"
             $appDisplayName = "Recode Nightly"
             $appSetupName = "RecodeSetup-x64"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Nightly-Instance-Mutex"
+            # The mutex name here should match the mutex name in crates\recode\src\recode\windows_only_instance.rs
+            $appMutex = "Recode-Nightly-Instance-Mutex"
             $appExeName = "Recode"
-            $regValueName = "ZedNightly"
-            $appUserId = "ZedIndustries.Zed.Nightly"
-            $appShellNameShort = "Z&ed Editor Nightly"
-            $appAppxFullName = "ZedIndustries.Zed.Nightly_1.0.0.0_neutral__japxn1gcva8rg"
+            $regValueName = "RecodeNightly"
+            $appUserId = "Recode.Editor.Nightly"
+            $appShellNameShort = "R&ecode Editor Nightly"
+            $appAppxFullName = "Recode.Editor.Nightly_1.0.0.0_neutral__japxn1gcva8rg"
         }
         "dev" {
             $appId = "{{8357632E-24A4-4F32-BA97-E575B4D1FE5D}"
@@ -314,13 +313,13 @@ function BuildInstaller {
             $appName = "Recode Dev"
             $appDisplayName = "Recode Dev"
             $appSetupName = "RecodeSetup-x64"
-            # The mutex name here should match the mutex name in crates\zed\src\zed\windows_only_instance.rs
-            $appMutex = "Zed-Dev-Instance-Mutex"
+            # The mutex name here should match the mutex name in crates\recode\src\recode\windows_only_instance.rs
+            $appMutex = "Recode-Dev-Instance-Mutex"
             $appExeName = "Recode"
-            $regValueName = "ZedDev"
-            $appUserId = "ZedIndustries.Zed.Dev"
-            $appShellNameShort = "Z&ed Dev"
-            $appAppxFullName = "ZedIndustries.Zed.Dev_1.0.0.0_neutral__japxn1gcva8rg"
+            $regValueName = "RecodeDev"
+            $appUserId = "Recode.Editor.Dev"
+            $appShellNameShort = "R&ecode Dev"
+            $appAppxFullName = "Recode.Editor.Dev_1.0.0.0_neutral__japxn1gcva8rg"
         }
         default {
             Write-Error "can't bundle installer for $channel."
@@ -336,7 +335,7 @@ function BuildInstaller {
     $definitions = @{
         "AppId"          = $appId
         "AppIconName"    = $appIconName
-        "OutputDir"      = "$env:ZED_WORKSPACE\target"
+        "OutputDir"      = "$env:RECODE_WORKSPACE\target"
         "AppSetupName"   = $appSetupName
         "AppName"        = $appName
         "AppDisplayName" = $appDisplayName
@@ -347,7 +346,7 @@ function BuildInstaller {
         "ShellNameShort" = $appShellNameShort
         "AppUserId"      = $appUserId
         "Version"        = "$env:RELEASE_VERSION"
-        "SourceDir"      = "$env:ZED_WORKSPACE"
+        "SourceDir"      = "$env:RECODE_WORKSPACE"
         "AppxFullName"   = $appAppxFullName
     }
 
@@ -358,8 +357,8 @@ function BuildInstaller {
 
     $innoArgs = @($issFilePath) + $defs
     if($canCodeSign) {
-        # Checked by zed.iss to decide whether to sign the installer.
-        $env:ZED_SIGN_BUNDLE = "1"
+        # Checked by recode.iss to decide whether to sign the installer.
+        $env:RECODE_SIGN_BUNDLE = "1"
         $signTool = "powershell.exe -ExecutionPolicy Bypass -File $innoDir\sign.ps1 `$f"
         $innoArgs += "/sDefaultsign=`"$signTool`""
     }
@@ -379,19 +378,19 @@ function BuildInstaller {
     }
 }
 
-ParseZedWorkspace
-$innoDir = "$env:ZED_WORKSPACE\inno\$Architecture"
-$debugArchive = "$CargoOutDir\zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip"
-$debugStoreKey = "$env:ZED_RELEASE_CHANNEL/zed-$env:RELEASE_VERSION-$env:ZED_RELEASE_CHANNEL.dbg.zip"
+ParseRecodeWorkspace
+$innoDir = "$env:RECODE_WORKSPACE\inno\$Architecture"
+$debugArchive = "$CargoOutDir\recode-$env:RELEASE_VERSION-$env:RECODE_RELEASE_CHANNEL.dbg.zip"
+$debugStoreKey = "$env:RECODE_RELEASE_CHANNEL/recode-$env:RELEASE_VERSION-$env:RECODE_RELEASE_CHANNEL.dbg.zip"
 
 CheckEnvironmentVariables
 PrepareForBundle
 GenerateLicenses
-BuildZedAndItsFriends
+BuildRecodeAndItsFriends
 BuildRemoteServer
 MakeAppx
-SignZedAndItsFriends
-ZipZedAndItsFriendsDebug
+SignRecodeAndItsFriends
+ZipRecodeAndItsFriendsDebug
 DownloadAMDGpuServices
 DownloadConpty
 CollectFiles
@@ -404,8 +403,8 @@ if($env:CI) {
 if ($buildSuccess) {
     Write-Output "Build successful"
     if ($Install) {
-        Write-Output "Installing Zed..."
-        Start-Process -FilePath "$env:ZED_WORKSPACE/target/ZedEditorUserSetup-x64-$env:RELEASE_VERSION.exe"
+        Write-Output "Installing Recode..."
+        Start-Process -FilePath "$env:RECODE_WORKSPACE/target/RecodeSetup-x64-$env:RELEASE_VERSION.exe"
     }
     exit 0
 }

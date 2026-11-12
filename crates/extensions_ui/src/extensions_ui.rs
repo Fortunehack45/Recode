@@ -40,7 +40,7 @@ use workspace::{
     item::{Item, ItemEvent},
     workspace_error::{ErrorAction, ErrorSeverity, WorkspaceError},
 };
-use zed_actions::ExtensionCategoryFilter;
+use recode_actions::ExtensionCategoryFilter;
 
 use crate::components::{ExtensionCard, extension_provides_label};
 use crate::extension_version_selector::{
@@ -48,7 +48,7 @@ use crate::extension_version_selector::{
 };
 
 actions!(
-    zed,
+    recode,
     [
         /// Installs an extension from a local directory for development.
         InstallDevExtension,
@@ -57,7 +57,7 @@ actions!(
 
 /// Rebuilds an installed dev extension.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, JsonSchema, gpui::Action)]
-#[action(namespace = zed)]
+#[action(namespace = recode)]
 #[serde(deny_unknown_fields)]
 pub struct RebuildDevExtension {
     /// The ID of the dev extension to rebuild.
@@ -117,7 +117,7 @@ pub fn init(cx: &mut App) {
         }
         workspace
             .register_action(
-                move |workspace, action: &zed_actions::Extensions, window, cx| {
+                move |workspace, action: &recode_actions::Extensions, window, cx| {
                     let provides_filter = action.category_filter.map(|category| match category {
                         ExtensionCategoryFilter::Themes => ExtensionProvides::Themes,
                         ExtensionCategoryFilter::IconThemes => ExtensionProvides::IconThemes,
@@ -500,7 +500,7 @@ impl ExtensionsPage {
             workspace
                 .update(cx, |_workspace, cx| {
                     window.dispatch_action(
-                        zed_actions::theme_selector::Toggle {
+                        recode_actions::theme_selector::Toggle {
                             themes_filter: Some(themes),
                         }
                         .boxed_clone(),
@@ -519,7 +519,7 @@ impl ExtensionsPage {
             workspace
                 .update(cx, |_workspace, cx| {
                     window.dispatch_action(
-                        zed_actions::icon_theme_selector::Toggle {
+                        recode_actions::icon_theme_selector::Toggle {
                             themes_filter: Some(icon_themes),
                         }
                         .boxed_clone(),

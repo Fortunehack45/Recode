@@ -1,5 +1,5 @@
 ---
-title: Agent Profiles - Zed
+title: Agent Profiles - Recode
 description: Configure Recode Agent profiles for model selection, built-in tool availability, and MCP tool availability.
 ---
 
@@ -11,7 +11,7 @@ Profiles do not decide whether a tool call is allowed automatically. Use [Tool P
 
 ## Built-in Profiles {#built-in-profiles}
 
-Zed includes three built-in profiles:
+Recode includes three built-in profiles:
 
 - `Write`: enables tools for reading, editing, and running commands.
 - `Ask`: focuses on read-only codebase questions.
@@ -51,7 +51,7 @@ Profiles are stored under `agent.profiles` in your settings.
         "enable_all_context_servers": false,
         "context_servers": {},
         "default_model": {
-          "provider": "zed.dev",
+          "provider": "recode.dev",
           "model": "claude-sonnet-4-5"
         }
       }

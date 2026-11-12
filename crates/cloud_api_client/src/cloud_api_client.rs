@@ -119,7 +119,7 @@ impl CloudApiClient {
                     .as_ref(),
             )
             .when_some(system_id, |builder, system_id| {
-                builder.header(ZED_SYSTEM_ID_HEADER_NAME, system_id)
+                builder.header(RECODE_SYSTEM_ID_HEADER_NAME, system_id)
             });
 
         self.send_authenticated_json_request(request_builder, AsyncBody::default())
@@ -139,7 +139,7 @@ impl CloudApiClient {
                     .as_ref(),
             )
             .when_some(system_id, |builder, system_id| {
-                builder.header(ZED_SYSTEM_ID_HEADER_NAME, system_id)
+                builder.header(RECODE_SYSTEM_ID_HEADER_NAME, system_id)
             });
 
         self.send_authenticated_json_request(
@@ -161,7 +161,7 @@ impl CloudApiClient {
                     .map_err(ClientApiError::RequestBuildFailed)?
                     .as_ref(),
             )
-            .header(ZED_SYSTEM_ID_HEADER_NAME, system_id);
+            .header(RECODE_SYSTEM_ID_HEADER_NAME, system_id);
 
         self.send_authenticated_json_request(request_builder, Json(body))
             .await

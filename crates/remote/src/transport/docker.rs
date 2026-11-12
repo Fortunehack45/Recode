@@ -134,7 +134,7 @@ impl DockerExecConnection {
     /// using unique delimiters, so that shell initialization noise (e.g. from
     /// BASH_ENV or .bashrc) does not corrupt the result.
     async fn run_docker_exec_delimited(&self, script: &str) -> Result<String> {
-        const MARKER: &str = "=====ZED_DELIM_7f3a9c=====";
+        const MARKER: &str = "=====RECODE_DELIM_7f3a9c=====";
         let wrapped =
             format!("printf '{MARKER}'; {script}; __exit=$?; printf '{MARKER}'; exit $__exit");
         let output = self
@@ -225,7 +225,7 @@ impl DockerExecConnection {
             _ => version.to_string(),
         };
         let binary_name = format!(
-            "zed-remote-server-{}-{}",
+            "recode-remote-server-{}-{}",
             release_channel.dev_name(),
             version_str
         );
@@ -279,7 +279,7 @@ impl DockerExecConnection {
             ReleaseChannel::Nightly => Ok(None),
             ReleaseChannel::Dev => {
                 anyhow::bail!(
-                    "ZED_BUILD_REMOTE_SERVER is not set and no remote server exists at ({:?})",
+                    "RECODE_BUILD_REMOTE_SERVER is not set and no remote server exists at ({:?})",
                     dst_path
                 )
             }
@@ -478,7 +478,7 @@ impl DockerExecConnection {
         let stderr = String::from_utf8_lossy(&output.stderr);
         log::debug!("failed to change ownership for via chown: {stderr}",);
         anyhow::bail!(
-            "failed to change ownership for zed_remote_server via chown: {}",
+            "failed to change ownership for recode_remote_server via chown: {}",
             stderr,
         );
     }
@@ -689,7 +689,7 @@ impl RemoteConnection for DockerExecConnection {
         let mut docker_args = vec!["exec".to_string()];
 
         push_environment(&mut docker_args, &self.connection_options.remote_env);
-        for env_var in ["RUST_LOG", "RUST_BACKTRACE", "ZED_GENERATE_MINIDUMPS"] {
+        for env_var in ["RUST_LOG", "RUST_BACKTRACE", "RECODE_GENERATE_MINIDUMPS"] {
             if let Some(value) = std::env::var(env_var).ok() {
                 docker_args.push("-e".to_string());
                 docker_args.push(format!("{env_var}={value}"));
@@ -1060,13 +1060,13 @@ mod tests {
                 connection.docker_cli(),
                 "exec",
                 &args,
-                "sh: 1: /usr/local/cargo/bin/zed-remote-server: not found\nGH_TOKEN=ghp_supersecret run",
+                "sh: 1: /usr/local/cargo/bin/recode-remote-server: not found\nGH_TOKEN=ghp_supersecret run",
             ),
             concat!(
                 "failed to run command \"docker\" \"exec\" \"-u\" \"user\"",
                 " \"-e\" \"API_KEY=<redacted>\" \"-e\" \"COMMAND_SECRET=<redacted>\"",
                 " \"container_id\" \"sh\" \"-c\" \"echo hi\"",
-                ": sh: 1: /usr/local/cargo/bin/zed-remote-server: not found\nGH_TOKEN=\"[REDACTED]\" run"
+                ": sh: 1: /usr/local/cargo/bin/recode-remote-server: not found\nGH_TOKEN=\"[REDACTED]\" run"
             )
         );
     }
@@ -1129,14 +1129,14 @@ mod tests {
         );
 
         connection.remote_binary_relpath = Some(Arc::from(RelPath::from_unix_str(
-            ".local/share/zed/remote server",
+            ".local/share/recode/remote server",
         )?));
         for (env_override, working_dir, expected_working_dir, use_podman, expected_program) in [
             (None, None, None, false, "docker"),
             (
                 Some("agent-secret"),
                 Some("~/project"),
-                Some("/tmp/zed/project"),
+                Some("/tmp/recode/project"),
                 true,
                 "podman",
             ),
@@ -1168,7 +1168,7 @@ mod tests {
             expected_args.extend([
                 "-i",
                 "container_id",
-                "/tmp/zed/.local/share/zed/remote server",
+                "/tmp/recode/.local/share/recode/remote server",
                 "exec",
             ]);
             assert_eq!(template.args, expected_args);
@@ -1181,7 +1181,7 @@ mod tests {
     fn connection(remote_env: &[(&str, &str)]) -> DockerExecConnection {
         DockerExecConnection {
             proxy_process: Mutex::new(None),
-            remote_dir_for_server: "/tmp/zed".to_string(),
+            remote_dir_for_server: "/tmp/recode".to_string(),
             remote_binary_relpath: None,
             connection_options: DockerConnectionOptions {
                 name: "container".to_string(),

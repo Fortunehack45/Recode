@@ -31,7 +31,7 @@ pub(crate) fn render_edit_prediction_setup_page(
 ) -> AnyElement {
     let providers = [
         Some(render_provider_dropdown(window, cx)),
-        Some(render_zed_provider(settings_window, window, cx).into_any_element()),
+        Some(render_recode_provider(settings_window, window, cx).into_any_element()),
         render_github_copilot_provider(settings_window, window, cx)
             .map(IntoElement::into_any_element),
         Some(
@@ -200,7 +200,7 @@ fn render_api_key_provider(
     cx: &mut Context<SettingsWindow>,
 ) -> impl IntoElement {
     let weak_page = cx.weak_entity();
-    let credentials_provider = zed_credentials_provider::global(cx);
+    let credentials_provider = recode_credentials_provider::global(cx);
     _ = window.use_keyed_state(current_url(cx), cx, |_, cx| {
         let task = api_key_state.update(cx, |key_state, cx| {
             key_state.load_if_needed(
@@ -229,7 +229,7 @@ fn render_api_key_provider(
     });
 
     let write_key = move |api_key: Option<String>, cx: &mut App| {
-        let credentials_provider = zed_credentials_provider::global(cx);
+        let credentials_provider = recode_credentials_provider::global(cx);
         api_key_state
             .update(cx, |key_state, cx| {
                 let url = current_url(cx);
@@ -876,7 +876,7 @@ fn mercury_settings() -> Box<[SettingsPageItem]> {
     })])
 }
 
-fn zed_settings() -> Box<[SettingsPageItem]> {
+fn recode_settings() -> Box<[SettingsPageItem]> {
     Box::new([SettingsPageItem::SettingItem(SettingItem {
         title: "Prediction Debounce",
         description: "Delay in milliseconds before automatically requesting a prediction after typing stops. Set to 0 to request predictions immediately.",
@@ -888,7 +888,7 @@ fn zed_settings() -> Box<[SettingsPageItem]> {
                     .all_languages
                     .edit_predictions
                     .as_ref()?
-                    .zed
+                    .recode
                     .as_ref()?
                     .prediction_debounce
                     .as_ref()
@@ -899,35 +899,35 @@ fn zed_settings() -> Box<[SettingsPageItem]> {
                     .all_languages
                     .edit_predictions
                     .get_or_insert_default()
-                    .zed
+                    .recode
                     .get_or_insert_default()
                     .prediction_debounce = value;
             },
-            json_path: Some("edit_predictions.zed.prediction_debounce"),
+            json_path: Some("edit_predictions.recode.prediction_debounce"),
         }),
         metadata: None,
         files: USER,
     })])
 }
 
-fn render_zed_provider(
+fn render_recode_provider(
     settings_window: &SettingsWindow,
     window: &mut Window,
     cx: &mut Context<SettingsWindow>,
 ) -> impl IntoElement {
-    let zed_settings = zed_settings();
+    let recode_settings = recode_settings();
     let additional_fields = settings_window
-        .render_sub_page_items_section(zed_settings.iter().enumerate(), true, window, cx)
+        .render_sub_page_items_section(recode_settings.iter().enumerate(), true, window, cx)
         .into_any_element();
 
     v_flex()
-        .id("zed")
+        .id("recode")
         .min_w_0()
         .pt_8()
         .gap_1p5()
         .child(
             SettingsSectionHeader::new("Recode Predictions")
-                .icon(IconName::ZedPredict)
+                .icon(IconName::RecodePredict)
                 .no_padding(true),
         )
         .child(div().px_neg_8().child(additional_fields))

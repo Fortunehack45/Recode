@@ -515,11 +515,11 @@ fn test_remote_command_launcher_expands_home_in_shell() -> Result<()> {
         };
         let exec = format!(
             "cd && {}",
-            home_stdio_launcher_command(ShellKind::Posix, None, ".local/share/zed/remote server")?
+            home_stdio_launcher_command(ShellKind::Posix, None, ".local/share/recode/remote server")?
         );
         assert_eq!(
             exec,
-            "cd && exec \"$HOME\"/'.local/share/zed/remote server' exec"
+            "cd && exec \"$HOME\"/'.local/share/recode/remote server' exec"
         );
         let mut child = shell_launcher(home.path(), &exec).spawn()?;
         child
@@ -652,7 +652,7 @@ fn test_remote_command_launcher_expands_home_in_nushell() -> Result<()> {
                 home_stdio_launcher_command(
                     ShellKind::Nushell,
                     home_dir.as_deref(),
-                    ".local/share/zed/remote server"
+                    ".local/share/recode/remote server"
                 )?
             );
             let mut child = Command::new(nu)
@@ -710,7 +710,7 @@ fn test_remote_command_launcher_survives_local_nushell() -> Result<()> {
                 home_stdio_launcher_command(
                     ShellKind::Posix,
                     home_dir.as_deref(),
-                    ".local/share/zed/remote server"
+                    ".local/share/recode/remote server"
                 )?
             );
             let remote_shell = [String::from("-c"), exec.clone()];
@@ -754,7 +754,7 @@ fn launcher() -> Command {
 }
 
 fn install_helper(home: &std::path::Path) -> Result<String> {
-    let helper_directory = home.join(".local/share/zed");
+    let helper_directory = home.join(".local/share/recode");
     std::fs::create_dir_all(&helper_directory)?;
     let helper = helper_directory.join("remote server");
     std::os::unix::fs::symlink(env!("CARGO_BIN_EXE_remote-server"), &helper)?;

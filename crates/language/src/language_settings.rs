@@ -92,7 +92,7 @@ pub struct LanguageSettings {
     pub line_ending: LineEndingSetting,
     /// How to perform a buffer format.
     pub formatter: settings::FormatterList,
-    /// Zed's Prettier integration settings.
+    /// Recode's Prettier integration settings.
     pub prettier: PrettierSettings,
     /// Whether to automatically close JSX tags.
     pub jsx_tag_auto_close: bool,
@@ -258,13 +258,13 @@ pub struct LanguageTaskSettings {
     /// Extra task variables to set for a particular language.
     pub variables: HashMap<String, String>,
     pub enabled: bool,
-    /// Use LSP tasks over Zed language extension ones.
+    /// Use LSP tasks over Recode language extension ones.
     /// If no LSP tasks are returned due to error/timeout or regular execution,
-    /// Zed language extension tasks will be used instead.
+    /// Recode language extension tasks will be used instead.
     ///
-    /// Other Zed tasks will still be shown:
-    /// * Zed task from either of the task config file
-    /// * Zed task from history (e.g. one-off task was spawned before)
+    /// Other Recode tasks will still be shown:
+    /// * Recode task from either of the task config file
+    /// * Recode task from history (e.g. one-off task was spawned before)
     pub prefer_lsp: bool,
 }
 
@@ -503,7 +503,7 @@ pub struct EditPredictionSettings {
     pub provider: settings::EditPredictionProvider,
     /// Disable edit predictions for files matching these glob patterns.
     ///
-    /// Use `"..."` to add patterns without repeating Zed's defaults. In project
+    /// Use `"..."` to add patterns without repeating Recode's defaults. In project
     /// settings, it extends the user or parent configuration value. Omit
     /// `"..."` to replace the inherited list.
     ///
@@ -534,8 +534,8 @@ pub struct EditPredictionSettings {
     pub ollama: Option<OpenAiCompatibleEditPredictionSettings>,
     /// Settings specific to using custom OpenAI-compatible servers for edit prediction.
     pub open_ai_compatible_api: Option<OpenAiCompatibleEditPredictionSettings>,
-    /// Settings specific to Zed's Edit Predictions provider.
-    pub zed: ZedEditPredictionSettings,
+    /// Settings specific to Recode's Edit Predictions provider.
+    pub recode: RecodeEditPredictionSettings,
     /// Settings specific to the Mercury Edit Predictions provider.
     pub mercury: MercuryEditPredictionSettings,
     /// Controls whether training data collection is enabled.
@@ -571,7 +571,7 @@ impl EditPredictionSettings {
                 .open_ai_compatible_api
                 .as_ref()
                 .map_or_else(DelayMs::default, |settings| settings.prediction_debounce),
-            settings::EditPredictionProvider::Zed => self.zed.prediction_debounce,
+            settings::EditPredictionProvider::Recode => self.recode.prediction_debounce,
             settings::EditPredictionProvider::Mercury => self.mercury.prediction_debounce,
             settings::EditPredictionProvider::None => DelayMs::default(),
         };
@@ -580,14 +580,14 @@ impl EditPredictionSettings {
 
     /// Returns the configured debounce delay for the active prediction delegate.
     ///
-    /// The Zed edit-prediction delegate handles multiple settings providers
-    /// (Zed, Mercury, Ollama, OpenAI-compatible), so it is identified by name
+    /// The Recode edit-prediction delegate handles multiple settings providers
+    /// (Recode, Mercury, Ollama, OpenAI-compatible), so it is identified by name
     /// and then uses the currently configured provider to resolve the delay.
     pub fn debounce_for_delegate(&self, delegate_name: &str) -> Duration {
         match delegate_name {
             "copilot" => Duration::from_millis(self.copilot.prediction_debounce.0),
             "codestral" => Duration::from_millis(self.codestral.prediction_debounce.0),
-            "zed-predict" => self.debounce_for(self.provider),
+            "recode-predict" => self.debounce_for(self.provider),
             _ => Duration::ZERO,
         }
     }
@@ -624,7 +624,7 @@ pub struct CodestralSettings {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct ZedEditPredictionSettings {
+pub struct RecodeEditPredictionSettings {
     /// Automatic prediction debounce delay.
     pub prediction_debounce: DelayMs,
 }
@@ -811,7 +811,7 @@ fn merge_with_editorconfig(settings: &mut LanguageSettings, cfg: &EditorconfigPr
         .merge_from_option(preferred_line_length.as_ref());
     settings.tab_size.merge_from_option(tab_size.as_ref());
     settings.hard_tabs.merge_from_option(hard_tabs.as_ref());
-    // Avoid re-enabling destructive whitespace trimming when Zed settings have
+    // Avoid re-enabling destructive whitespace trimming when Recode settings have
     // disabled it, e.g. for Markdown hard breaks.
     if !matches!(remove_trailing_whitespace_on_save, Some(true))
         || settings.remove_trailing_whitespace_on_save
@@ -997,7 +997,7 @@ impl settings::Settings for AllLanguageSettings {
                 prompt_format: openai_compatible_settings.prompt_format.unwrap().into(),
                 prediction_debounce: openai_compatible_settings.prediction_debounce.unwrap(),
             });
-        let zed_settings = edit_predictions.zed.unwrap();
+        let recode_settings = edit_predictions.recode.unwrap();
         let mercury_settings = edit_predictions.mercury.unwrap();
 
         let mut file_types: FxHashMap<Arc<str>, (GlobSet, Vec<String>)> = FxHashMap::default();
@@ -1053,8 +1053,8 @@ impl settings::Settings for AllLanguageSettings {
                 codestral: codestral_settings,
                 ollama: ollama_settings,
                 open_ai_compatible_api: openai_compatible_settings,
-                zed: ZedEditPredictionSettings {
-                    prediction_debounce: zed_settings.prediction_debounce.unwrap(),
+                recode: RecodeEditPredictionSettings {
+                    prediction_debounce: recode_settings.prediction_debounce.unwrap(),
                 },
                 mercury: MercuryEditPredictionSettings {
                     prediction_debounce: mercury_settings.prediction_debounce.unwrap(),

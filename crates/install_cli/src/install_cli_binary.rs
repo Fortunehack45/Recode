@@ -1,4 +1,4 @@
-use super::register_zed_scheme;
+use super::register_recode_scheme;
 use anyhow::Result;
 use gpui::{AppContext as _, AsyncApp, Context, PromptLevel, Window, actions};
 use release_channel::ReleaseChannel;
@@ -25,7 +25,7 @@ const CANT_INSTALL_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode#can
 /// commonly because the user is not an admin.
 async fn install_script(cx: &AsyncApp) -> Result<Option<PathBuf>> {
     let cli_path = cx.update(|cx| cx.path_for_auxiliary_executable("cli"))?;
-    let link_path = Path::new("/usr/local/bin/zed");
+    let link_path = Path::new("/usr/local/bin/recode");
     let bin_dir_path = link_path.parent().unwrap();
 
     // Don't re-create symlink if it points to the same CLI binary.
@@ -80,7 +80,7 @@ async fn install_script(cx: &AsyncApp) -> Result<Option<PathBuf>> {
 }
 
 pub fn install_cli_binary(window: &mut Window, cx: &mut Context<Workspace>) {
-    const LINUX_PROMPT_DETAIL: &str = "If you installed Zed from our official release add ~/.local/bin to your PATH.\n\nIf you installed Zed from a different source like your package manager, then you may need to create an alias/symlink manually.\n\nDepending on your package manager, the CLI might be named zeditor, zedit, zed-editor or something else.";
+    const LINUX_PROMPT_DETAIL: &str = "If you installed Recode from our official release add ~/.local/bin to your PATH.\n\nIf you installed Recode from a different source like your package manager, then you may need to create an alias/symlink manually.\n\nDepending on your package manager, the CLI might be named recode or recode-editor.";
 
     cx.spawn_in(window, async move |workspace, cx| {
         if cfg!(any(target_os = "linux", target_os = "freebsd")) {
@@ -98,7 +98,7 @@ pub fn install_cli_binary(window: &mut Window, cx: &mut Context<Workspace>) {
             // The user dismissed the administrator prompt; nothing to do.
             Ok(None) => return Ok(()),
             Err(error) => {
-                log::error!("failed to install zed CLI: {error:#}");
+                log::error!("failed to install recode CLI: {error:#}");
                 workspace.update(cx, |workspace, cx| {
                     struct CliInstallFailed;
 
@@ -108,7 +108,7 @@ pub fn install_cli_binary(window: &mut Window, cx: &mut Context<Workspace>) {
                         |cx| {
                             cx.new(|cx| {
                                 MessageNotification::new(
-                                    "You can add `zed` to your PATH manually.",
+                                    "You can add `recode` to your PATH manually.",
                                     cx,
                                 )
                                 .with_title("Couldn't install the Recode CLI")
@@ -123,11 +123,11 @@ pub fn install_cli_binary(window: &mut Window, cx: &mut Context<Workspace>) {
         };
 
         workspace.update_in(cx, |workspace, _, cx| {
-            struct InstalledZedCli;
+            struct InstalledRecodeCli;
 
             workspace.show_toast(
                 Toast::new(
-                    NotificationId::unique::<InstalledZedCli>(),
+                    NotificationId::unique::<InstalledRecodeCli>(),
                     format!(
                         "Installed `recode` to {}. You can launch {} from your terminal.",
                         path.to_string_lossy(),
@@ -137,7 +137,7 @@ pub fn install_cli_binary(window: &mut Window, cx: &mut Context<Workspace>) {
                 cx,
             )
         })?;
-        register_zed_scheme(cx).await.log_err();
+        register_recode_scheme(cx).await.log_err();
         Ok(())
     })
     .detach_and_prompt_err("Cannot install the Recode CLI", window, cx, |_, _, _| None);

@@ -1,28 +1,28 @@
 ---
-title: AI Agents in Zed
+title: AI Agents in Recode
 description: Compare Recode Agent, External Agents, and Terminal Threads.
 ---
 
 # Agents
 
-Zed supports three agent paths. Choose the path based on how you want agentic work to run.
+Recode supports three agent paths. Choose the path based on how you want agentic work to run.
 
 | Agent path                                | Runs in                                             | Uses                                                                                       | Best when                                                                              |
 | ----------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| [Recode Agent](./recode-agent.md)               | [Agent Panel](./agent-panel.md) and Threads Sidebar | Zed-configured LLM providers, native tools, skills, [instructions](./instructions.md), MCP | You want Zed's native agent integration                                                |
+| [Recode Agent](./recode-agent.md)               | [Agent Panel](./agent-panel.md) and Threads Sidebar | Recode-configured LLM providers, native tools, skills, [instructions](./instructions.md), MCP | You want Recode's native agent integration                                                |
 | [External Agents](./external-agents.md)   | Agent Panel and Threads Sidebar                     | ACP agent process and its own auth/config                                                  | You want Claude, Codex, OpenCode, Copilot, Cursor, Pi, or another ACP-integrated agent |
-| [Terminal Threads](./terminal-threads.md) | Threads Sidebar and terminal                        | Native CLI/TUI auth/config                                                                 | You want the tool's command-line experience organized in Zed                           |
+| [Terminal Threads](./terminal-threads.md) | Threads Sidebar and terminal                        | Native CLI/TUI auth/config                                                                 | You want the tool's command-line experience organized in Recode                           |
 
-An agent path is sometimes called a harness. It is the way agentic work is started, displayed, configured, and controlled in Zed.
+An agent path is sometimes called a harness. It is the way agentic work is started, displayed, configured, and controlled in Recode.
 
 ## Agent Path vs. LLM Provider {#agent-path-vs-llm-provider}
 
 | Question                                  | Start here                          |
 | ----------------------------------------- | ----------------------------------- |
 | Which agent or CLI should run the work?   | This page                           |
-| Which model should power Zed AI features? | [LLM Providers](./llm-providers.md) |
+| Which model should power Recode AI features? | [LLM Providers](./llm-providers.md) |
 
-The [Recode Agent](./recode-agent.md) uses models configured in Zed. [External Agents](./external-agents.md) and [Terminal Threads](./terminal-threads.md) may use their own model setup.
+The [Recode Agent](./recode-agent.md) uses models configured in Recode. [External Agents](./external-agents.md) and [Terminal Threads](./terminal-threads.md) may use their own model setup.
 
 ## Thread Types {#thread-types}
 

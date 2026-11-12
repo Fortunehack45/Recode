@@ -4,9 +4,9 @@ import { resolveModel, getBestAvailableModel, DEFAULT_MODELS } from "./models.js
 
 test("OpenCode models and aliases resolve correctly", () => {
   // 1. Exact alias
-  const zen = resolveModel("opencode-zen");
-  assert.strictEqual(zen.provider, "opencode");
-  assert.strictEqual(zen.id, "claude-sonnet-4-5");
+  const recode = resolveModel("opencode-recode");
+  assert.strictEqual(recode.provider, "opencode");
+  assert.strictEqual(recode.id, "claude-sonnet-4-5");
 
   const go = resolveModel("opencode-go");
   assert.strictEqual(go.provider, "opencode");
@@ -14,7 +14,7 @@ test("OpenCode models and aliases resolve correctly", () => {
 
   // 2. Short aliases
   assert.strictEqual(resolveModel("opencode").id, "claude-sonnet-4-5");
-  assert.strictEqual(resolveModel("zen").id, "claude-sonnet-4-5");
+  assert.strictEqual(resolveModel("recode").id, "claude-sonnet-4-5");
   assert.strictEqual(resolveModel("go").id, "deepseek-v4.1-flash");
 
   // 3. Dynamic opencode/ prefix

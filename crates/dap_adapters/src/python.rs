@@ -156,7 +156,7 @@ impl PythonDebugAdapter {
 
         let mut configuration = task_definition.config.clone();
         if let Some(object) = configuration.as_object_mut() {
-            // Use built-in Zed terminal if user did not explicitly provide a setting for console.
+            // Use built-in Recode terminal if user did not explicitly provide a setting for console.
             let console = object.entry("console").or_insert(Value::Null);
             if console.is_null() {
                 *console = Value::String("integratedTerminal".into());
@@ -336,7 +336,7 @@ impl PythonDebugAdapter {
 
                 let debug_adapter_path = paths::debug_adapters_dir().join(Self::DEBUG_ADAPTER_NAME.as_ref());
                 let output = util::command::new_command(&base_python)
-                    .args(["-m", "venv", "zed_base_venv"])
+                    .args(["-m", "venv", "recode_base_venv"])
                     .current_dir(
                         &debug_adapter_path,
                     )
@@ -361,7 +361,7 @@ impl PythonDebugAdapter {
                 Ok(Arc::from(
                     paths::debug_adapters_dir()
                         .join(Self::DEBUG_ADAPTER_NAME.as_ref())
-                        .join("zed_base_venv")
+                        .join("recode_base_venv")
                         .join(PYTHON_PATH)
                         .as_ref(),
                 ))
@@ -504,9 +504,9 @@ impl DebugAdapter for PythonDebugAdapter {
         Some(SharedString::new_static("Python").into())
     }
 
-    async fn config_from_zed_format(&self, zed_scenario: ZedDebugConfig) -> Result<DebugScenario> {
+    async fn config_from_recode_format(&self, recode_scenario: RecodeDebugConfig) -> Result<DebugScenario> {
         let mut args = json!({
-            "request": match zed_scenario.request {
+            "request": match recode_scenario.request {
                 DebugRequest::Launch(_) => "launch",
                 DebugRequest::Attach(_) => "attach",
             },
@@ -515,7 +515,7 @@ impl DebugAdapter for PythonDebugAdapter {
         });
 
         let map = args.as_object_mut().unwrap();
-        match &zed_scenario.request {
+        match &recode_scenario.request {
             DebugRequest::Attach(attach) => {
                 map.insert("processId".into(), attach.process_id.into());
             }
@@ -526,7 +526,7 @@ impl DebugAdapter for PythonDebugAdapter {
                     map.insert("env".into(), launch.env_json());
                 }
 
-                if let Some(stop_on_entry) = zed_scenario.stop_on_entry {
+                if let Some(stop_on_entry) = recode_scenario.stop_on_entry {
                     map.insert("stopOnEntry".into(), stop_on_entry.into());
                 }
                 if let Some(cwd) = launch.cwd.as_ref() {
@@ -536,8 +536,8 @@ impl DebugAdapter for PythonDebugAdapter {
         }
 
         Ok(DebugScenario {
-            adapter: zed_scenario.adapter,
-            label: zed_scenario.label,
+            adapter: recode_scenario.adapter,
+            label: recode_scenario.label,
             config: args,
             build: None,
             tcp_connection: None,
@@ -623,7 +623,7 @@ impl DebugAdapter for PythonDebugAdapter {
                         "label": "Path mapping",
                         "properties": {
                             "localRoot": {
-                                "default": "${ZED_WORKTREE_ROOT}",
+                                "default": "${RECODE_WORKTREE_ROOT}",
                                 "label": "Local source root.",
                                 "type": "string"
                             },
@@ -785,7 +785,7 @@ impl DebugAdapter for PythonDebugAdapter {
                                 ]
                             },
                             "cwd": {
-                                "default": "${ZED_WORKTREE_ROOT}",
+                                "default": "${RECODE_WORKTREE_ROOT}",
                                 "description": "Absolute path to the working directory of the program being debugged. Default is the root directory of the file (leave empty).",
                                 "type": "string"
                             },
@@ -803,7 +803,7 @@ impl DebugAdapter for PythonDebugAdapter {
                                 "type": "object"
                             },
                             "envFile": {
-                                "default": "${ZED_WORKTREE_ROOT}/.env",
+                                "default": "${RECODE_WORKTREE_ROOT}/.env",
                                 "description": "Absolute path to a file containing environment variable definitions.",
                                 "type": "string"
                             },
@@ -818,7 +818,7 @@ impl DebugAdapter for PythonDebugAdapter {
                                 "type": "string"
                             },
                             "program": {
-                                "default": "${ZED_FILE}",
+                                "default": "${RECODE_FILE}",
                                 "description": "Absolute path to the program.",
                                 "type": "string"
                             },
@@ -919,7 +919,7 @@ impl DebugAdapter for PythonDebugAdapter {
             })
             .chain(
                 // While Debugpy's wiki saids absolute paths are required, but it actually supports relative paths when cwd is passed in.
-                // (Which should always be the case because Zed defaults to the cwd worktree root)
+                // (Which should always be the case because Recode defaults to the cwd worktree root)
                 // So we want to check that these relative paths find toolchains as well. Otherwise, they won't be checked
                 // because the strip prefix in the iteration above will return an error
                 config
@@ -1205,7 +1205,7 @@ mod tests {
         fs.insert_tree(
             "/project",
             serde_json::json!({
-                ".env": "IDE=zed\nLLM=claude\n"
+                ".env": "IDE=recode\nLLM=claude\n"
             }),
         )
         .await;
@@ -1223,7 +1223,7 @@ mod tests {
             .get("env")
             .and_then(|v| v.as_object())
             .expect("env should be set");
-        assert_eq!(env.get("IDE").and_then(|v| v.as_str()), Some("zed"));
+        assert_eq!(env.get("IDE").and_then(|v| v.as_str()), Some("recode"));
         assert_eq!(env.get("LLM").and_then(|v| v.as_str()), Some("claude"));
     }
 
@@ -1233,7 +1233,7 @@ mod tests {
         fs.insert_tree(
             "/project",
             serde_json::json!({
-                // .env file suggests VS Code, but the explicit config overrides it with Zed
+                // .env file suggests VS Code, but the explicit config overrides it with Recode
                 ".env": "IDE=vscode\nLLM=openai\n"
             }),
         )
@@ -1243,7 +1243,7 @@ mod tests {
         config.insert("envFile".to_string(), Value::String(".env".to_string()));
         config.insert(
             "env".to_string(),
-            serde_json::json!({ "IDE": "zed", "LLM": "claude" }),
+            serde_json::json!({ "IDE": "recode", "LLM": "claude" }),
         );
 
         handle_envs(&mut config, Some(Path::new("/project")), fs).await;
@@ -1254,7 +1254,7 @@ mod tests {
             .expect("env should be set");
         assert_eq!(
             env.get("IDE").and_then(|v| v.as_str()),
-            Some("zed"),
+            Some("recode"),
             "explicit env should take precedence over envFile"
         );
         assert_eq!(

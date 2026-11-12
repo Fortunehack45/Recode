@@ -5819,7 +5819,7 @@ async fn test_anchor_comparison_tracks_resolution(
 /// occupant's, the end otherwise. When resolution instead ignored that
 /// order (it always chose the end), sorted-input consumers feeding
 /// comparison-sorted anchors to forward-only cursors walked backward in
-/// offset space — the "cannot seek backward" crash family (e.g. ZED-95K).
+/// offset space — the "cannot seek backward" crash family (e.g. RECODE-95K).
 #[gpui::test]
 async fn test_stale_path_anchor_comparison_tracks_resolution(cx: &mut TestAppContext) {
     let old_buffer = cx.new(|cx| Buffer::local("bbb\nccc\nddd\n", cx));

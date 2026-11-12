@@ -464,8 +464,8 @@ impl Component for ExtensionCard {
                     name: name.to_owned(),
                     version: version.into(),
                     description: Some(description.to_owned()),
-                    authors: vec!["Zed Industries".to_owned()],
-                    repository: "https://github.com/zed-industries/zed".to_owned(),
+                    authors: vec!["Recode Industries".to_owned()],
+                    repository: "https://github.com/Fortunehack45/Recode".to_owned(),
                     schema_version: Some(1),
                     wasm_api_version: None,
                     provides: BTreeSet::from_iter(provides),
@@ -478,12 +478,12 @@ impl Component for ExtensionCard {
         fn dev_extension() -> Arc<ExtensionManifest> {
             Arc::new(ExtensionManifest {
                 // Fake ID which will never be accepted during publishing
-                id: "zed-demo-theme".into(),
+                id: "recode-demo-theme".into(),
                 name: "Local Theme".to_owned(),
                 version: "0.1.0".into(),
                 schema_version: SchemaVersion::ZERO,
                 description: Some("A locally installed extension under development.".to_owned()),
-                repository: Some("https://github.com/zed-industries/zed".to_owned()),
+                repository: Some("https://github.com/Fortunehack45/Recode".to_owned()),
                 authors: vec!["Extension Developer".to_owned()],
                 lib: Default::default(),
                 themes: Vec::new(),

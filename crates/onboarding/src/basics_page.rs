@@ -329,7 +329,7 @@ fn render_telemetry_section(tab_index: &mut isize, cx: &App) -> impl IntoElement
 
 fn render_base_keymap_section(tab_index: &mut isize, cx: &mut App) -> impl IntoElement {
     let base_keymap = match BaseKeymap::get_global(cx) {
-        BaseKeymap::Zed => Some(0),
+        BaseKeymap::Recode => Some(0),
         BaseKeymap::VSCode => Some(1),
         BaseKeymap::JetBrains => Some(2),
         BaseKeymap::SublimeText => Some(3),
@@ -344,8 +344,8 @@ fn render_base_keymap_section(tab_index: &mut isize, cx: &mut App) -> impl IntoE
         ToggleButtonGroup::two_rows(
             "base_keymap_selection",
             [
-                ToggleButtonWithIcon::new("Recode", IconName::AiZed, |_, _, cx| {
-                    write_keymap_base(BaseKeymap::Zed, cx);
+                ToggleButtonWithIcon::new("Recode", IconName::AiRecode, |_, _, cx| {
+                    write_keymap_base(BaseKeymap::Recode, cx);
                 }),
                 ToggleButtonWithIcon::new("VS Code", IconName::EditorVsCode, |_, _, cx| {
                     write_keymap_base(BaseKeymap::VSCode, cx);
@@ -588,7 +588,7 @@ fn render_registry_agent_button(
                 }
             });
             window.dispatch_action(
-                Box::new(zed_actions::agent::SelectAgent {
+                Box::new(recode_actions::agent::SelectAgent {
                     agent: agent_id.clone(),
                 }),
                 cx,
@@ -596,7 +596,7 @@ fn render_registry_agent_button(
         })
 }
 
-fn render_zed_agent_button(_user_store: &Entity<UserStore>, _cx: &mut App) -> impl IntoElement {
+fn render_recode_agent_button(_user_store: &Entity<UserStore>, _cx: &mut App) -> impl IntoElement {
     let state_element = Icon::new(IconName::Check)
         .size(IconSize::Small)
         .color(Color::Success)
@@ -604,7 +604,7 @@ fn render_zed_agent_button(_user_store: &Entity<UserStore>, _cx: &mut App) -> im
 
     AgentSetupButton::new("recode-agent-onboarding")
         .icon(
-            Icon::new(IconName::ZedAgent)
+            Icon::new(IconName::RecodeAgent)
                 .size(IconSize::XSmall)
                 .color(Color::Muted),
         )
@@ -632,7 +632,7 @@ fn render_ai_section(user_store: &Entity<UserStore>, cx: &mut App) -> impl IntoE
             .grid()
             .grid_cols(column_count)
             .gap_2()
-            .child(render_zed_agent_button(user_store, cx)),
+            .child(render_recode_agent_button(user_store, cx)),
         |grid, agent_id| {
             let Some(agent) = registry_agents
                 .iter()

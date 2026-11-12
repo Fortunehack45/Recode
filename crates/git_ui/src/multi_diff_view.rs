@@ -228,7 +228,7 @@ impl MultiDiffView {
         });
 
         // The buffers' languages may load after the diff was built, e.g. when
-        // opening the view on startup via `zed --diff`. Propagate them from rhs
+        // opening the view on startup via `recode --diff`. Propagate them from rhs
         // to the corresponding lhs buffers when they change.
         let buffer_language_subscription =
             cx.subscribe(&multibuffer, |_, multibuffer, event, cx| {
@@ -471,7 +471,7 @@ mod tests {
         let diff_view = test_init(cx, DiffViewStyle::Unified).await;
 
         // Language detection completes only after the diff view was created,
-        // as happens on startup with `zed -n --diff old new`.
+        // as happens on startup with `recode -n --diff old new`.
         let language = Arc::new(Language::new(
             LanguageConfig {
                 name: "Rust".into(),
@@ -522,7 +522,7 @@ mod tests {
         let diff_view = test_init(cx, DiffViewStyle::Split).await;
 
         // Language detection completes only after the diff view was created,
-        // as happens on startup with `zed -n --diff old new`.
+        // as happens on startup with `recode -n --diff old new`.
         let language = Arc::new(Language::new(
             LanguageConfig {
                 name: "Rust".into(),

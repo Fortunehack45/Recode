@@ -1,17 +1,17 @@
 ---
-title: Terminal Threads - Zed
-description: Run agent CLIs and TUIs directly in terminal-backed threads in Zed.
+title: Terminal Threads - Recode
+description: Run agent CLIs and TUIs directly in terminal-backed threads in Recode.
 ---
 
 # Terminal Threads
 
-Terminal Threads are terminal-backed threads in the [Threads Sidebar](./parallel-agents.md#threads-sidebar). Use them when you want to run an agent CLI or TUI directly in Zed.
+Terminal Threads are terminal-backed threads in the [Threads Sidebar](./parallel-agents.md#threads-sidebar). Use them when you want to run an agent CLI or TUI directly in Recode.
 
-Terminal Threads are different from [External Agents](./external-agents.md). External Agents integrate with Zed through ACP and render as agent threads. Terminal Threads run the native command-line tool in a terminal that Zed organizes as a thread.
+Terminal Threads are different from [External Agents](./external-agents.md). External Agents integrate with Recode through ACP and render as agent threads. Terminal Threads run the native command-line tool in a terminal that Recode organizes as a thread.
 
-## What Zed Owns {#what-zed-owns}
+## What Recode Owns {#what-recode-owns}
 
-Zed owns the thread surface:
+Recode owns the thread surface:
 
 - the terminal-backed thread in the Threads Sidebar
 - thread grouping by project
@@ -28,7 +28,7 @@ The CLI or TUI running inside the terminal owns its own:
 - skills and instruction files
 - MCP configuration
 
-[Recode Agent profiles](./agent-profiles.md), Recode Agent tool permissions, Zed Skills, and Recode Agent MCP settings do not automatically apply to Terminal Threads.
+[Recode Agent profiles](./agent-profiles.md), Recode Agent tool permissions, Recode Skills, and Recode Agent MCP settings do not automatically apply to Terminal Threads.
 
 ## Opening a Terminal Thread {#opening-a-terminal-thread}
 
@@ -38,7 +38,7 @@ You can open as many Terminal Threads as you like. Each gets its own entry in th
 
 ## Running a Command Automatically {#terminal-thread-init-command}
 
-If you always run the same CLI in Terminal Threads, set the `agent.terminal_init_command` setting to have Zed run a command automatically whenever Zed creates a Terminal Thread shell:
+If you always run the same CLI in Terminal Threads, set the `agent.terminal_init_command` setting to have Recode run a command automatically whenever Recode creates a Terminal Thread shell:
 
 ```json [settings]
 {
@@ -60,7 +60,7 @@ To edit the title of the active Terminal Thread from the Agent Panel, custom-map
 
 ## Notifications {#terminal-thread-notifications}
 
-When a terminal produces a bell character while not in focus, Zed notifies you the same way it does when an agent finishes: with a visual pop-up and an optional sound. Clicking the notification brings the terminal into focus and clears the indicator.
+When a terminal produces a bell character while not in focus, Recode notifies you the same way it does when an agent finishes: with a visual pop-up and an optional sound. Clicking the notification brings the terminal into focus and clears the indicator.
 
 The same `agent.notify_when_agent_waiting` and `agent.play_sound_when_agent_done` settings apply.
 
@@ -70,7 +70,7 @@ Unlike agent threads, Terminal Threads are closed rather than archived. They do 
 
 ## CLI/TUI Setup Notes {#cli-setup}
 
-Some agent CLIs and TUIs can send terminal signals, such as bell notifications or title updates, that Zed uses to show useful context in the sidebar.
+Some agent CLIs and TUIs can send terminal signals, such as bell notifications or title updates, that Recode uses to show useful context in the sidebar.
 
 ### Claude Code Notifications {#claude-code-notifications}
 
@@ -94,7 +94,7 @@ For more, see the [Claude Code documentation](https://code.claude.com/docs/en/te
 
 ### Amp Notifications {#amp-notifications}
 
-Amp updates terminal titles automatically and can also notify you when it needs your attention. To enable notifications in Zed Terminal Threads, add `AMP_FORCE_BEL=1` to your terminal environment settings:
+Amp updates terminal titles automatically and can also notify you when it needs your attention. To enable notifications in Recode Terminal Threads, add `AMP_FORCE_BEL=1` to your terminal environment settings:
 
 ```json [settings]
 {
@@ -110,12 +110,12 @@ Restart Amp after adding the environment variable.
 
 ### OpenCode Notifications {#opencode-notifications}
 
-OpenCode can update terminal titles automatically. For Zed notifications, add an OpenCode plugin that emits a terminal bell when OpenCode needs your attention.
+OpenCode can update terminal titles automatically. For Recode notifications, add an OpenCode plugin that emits a terminal bell when OpenCode needs your attention.
 
-Create `.opencode/plugins/zed-bell.js` in your project, or `~/.config/opencode/plugins/zed-bell.js` to use it globally:
+Create `.opencode/plugins/recode-bell.js` in your project, or `~/.config/opencode/plugins/recode-bell.js` to use it globally:
 
 ```js
-export const ZedBell = async () => {
+export const RecodeBell = async () => {
   return {
     event: async ({ event }) => {
       if (process.env.OPENCODE_CLIENT === "acp") return;
@@ -132,7 +132,7 @@ Restart OpenCode after adding the plugin.
 
 ### Pi Notifications {#pi-notifications}
 
-Pi can use an extension to emit a notification when it finishes a turn. Create `.pi/extensions/zed-bell.ts` in your project, or `~/.pi/agent/extensions/zed-bell.ts` to use it globally:
+Pi can use an extension to emit a notification when it finishes a turn. Create `.pi/extensions/recode-bell.ts` in your project, or `~/.pi/agent/extensions/recode-bell.ts` to use it globally:
 
 ```ts
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -148,7 +148,7 @@ Restart Pi after adding the extension, or run `/reload` if the extension is in o
 
 ### Codex Terminal Titles {#codex-terminal-titles}
 
-Codex can update the terminal title as it works, which Zed uses to show useful context for Codex Terminal Threads in the sidebar, such as the project, current status, branch, model, or task progress.
+Codex can update the terminal title as it works, which Recode uses to show useful context for Codex Terminal Threads in the sidebar, such as the project, current status, branch, model, or task progress.
 
 To configure this from within Codex, run `/title` and use the picker to choose which fields appear and in what order. Codex saves the selection to `tui.terminal_title` in `~/.codex/config.toml`. You can also edit it directly:
 
@@ -161,7 +161,7 @@ terminal_title = ["spinner", "project-name", "run-state", "thread-title"]
 
 Credentials come from the terminal session and the CLI/TUI running inside it.
 
-In remote projects, the CLI may read the remote shell environment and remote config files. In local Terminal Threads, it reads the local shell environment and local config files. Zed does not copy [API keys from LLM provider settings](./use-api-access.md) into Terminal Threads.
+In remote projects, the CLI may read the remote shell environment and remote config files. In local Terminal Threads, it reads the local shell environment and local config files. Recode does not copy [API keys from LLM provider settings](./use-api-access.md) into Terminal Threads.
 
 ## When to Use Terminal Threads {#when-to-use-terminal-threads}
 

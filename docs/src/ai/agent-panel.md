@@ -1,12 +1,12 @@
 ---
 title: AI Coding Agent - Recode Agent Panel
-description: Use Zed's AI coding agent to generate, refactor, and debug code with tool calling and multi-model support.
+description: Use Recode's AI coding agent to generate, refactor, and debug code with tool calling and multi-model support.
 ---
 
 # Agent Panel
 
 The Agent Panel is where you interact with AI agents that can read, write, and run code in your project.
-It's the core of Zed's AI code editing experience — use it for code generation, refactoring, debugging, documentation, and general questions.
+It's the core of Recode's AI code editing experience — use it for code generation, refactoring, debugging, documentation, and general questions.
 
 Open it with {#action agent::NewThread} from [the Command Palette](../command-palette.md) or click the ✨ icon in the status bar.
 
@@ -31,7 +31,7 @@ The sections below cover what you can do from here.
 
 ### Creating New Threads {#new-thread}
 
-By default, the Agent Panel uses Zed's first-party agent.
+By default, the Agent Panel uses Recode's first-party agent.
 
 Start a new thread with {#kb agent::NewThread}, or open the "New Thread…" menu using the agent selector button on the left (in the empty state) or the `+` icon in the top-right of the panel toolbar. You can also open that menu with {#kb agent::ToggleNewThreadMenu}.
 
@@ -64,7 +64,7 @@ You can click on the card that contains your message and re-submit it with an ad
 
 Messages sent while the agent is in the generating state get, by default, queued.
 
-By default, queued messages get sent once the agent finishes generating. If you want a queued message to reach the Recode Agent sooner—interrupting it at its next step (usually between a tool call and a response) rather than waiting for it to finish—toggle "Steer" on that message. Steering is only available for the Recode Agent, since Zed can't detect turn boundaries for external agents.
+By default, queued messages get sent once the agent finishes generating. If you want a queued message to reach the Recode Agent sooner—interrupting it at its next step (usually between a tool call and a response) rather than waiting for it to finish—toggle "Steer" on that message. Steering is only available for the Recode Agent, since Recode can't detect turn boundaries for external agents.
 
 You can edit or remove (an individual or all) queued messages.
 You can also still interrupt the agent immediately if you want by either clicking on the stop button or by clicking the "Send Now" (double-enter) on a queued message.
@@ -100,15 +100,15 @@ You can also hold `cmd`/`ctrl` when submitting a message to automatically follow
 
 ### Keeping the System Awake {#prevent-idle-sleep}
 
-While an agent thread is running, Zed asks the operating system not to idle-sleep, so long-running turns are not interrupted when you step away.
+While an agent thread is running, Recode asks the operating system not to idle-sleep, so long-running turns are not interrupted when you step away.
 The display can still turn off and the screen can still lock; only system sleep is held back, and only while a thread is generating, not while it waits for your confirmation.
 
 Turn this off with the `agent.prevent_idle_sleep` setting.
-If the operating system rejects the request, Zed logs the reason and continues without it.
+If the operating system rejects the request, Recode logs the reason and continues without it.
 
 ### Get Notified {#get-notified}
 
-If you send a prompt to the Agent and then put Zed in the background, you can choose to be notified when its generation wraps up via:
+If you send a prompt to the Agent and then put Recode in the background, you can choose to be notified when its generation wraps up via:
 
 - a visual desktop notification from your operating system
 - a sound notification
@@ -137,7 +137,7 @@ The agent can search your codebase to find relevant context, but providing it ex
 Add context by typing `@` in the message editor.
 You can mention files, directories, symbols, previous threads, [skills](./skills.md), diagnostics, branch diffs, and URLs to fetch.
 
-When you paste multi-line code selections copied from a buffer, Zed automatically formats them as @-mentions with the file context.
+When you paste multi-line code selections copied from a buffer, Recode automatically formats them as @-mentions with the file context.
 To paste content without this automatic formatting, use {#kb agent::PasteRaw} to paste raw text directly.
 
 ### Selection as Context
@@ -154,9 +154,9 @@ Copying an image and pasting it is also supported.
 
 ## Token Usage and Compaction {#token-usage}
 
-Zed surfaces how many tokens you are consuming for your currently active thread near the profile selector in the panel's message editor.
+Recode surfaces how many tokens you are consuming for your currently active thread near the profile selector in the panel's message editor.
 
-Zed automatically compacts long Recode Agent threads as they approach the configured token threshold. Compaction summarizes earlier messages and replaces them in the model context with that summary, leaving more room for the next turn. The thread shows a **Context Compacted** entry that you can expand to inspect the summary. You can compact manually by typing `/compact` in the message editor.
+Recode automatically compacts long Recode Agent threads as they approach the configured token threshold. Compaction summarizes earlier messages and replaces them in the model context with that summary, leaving more room for the next turn. The thread shows a **Context Compacted** entry that you can expand to inspect the summary. You can compact manually by typing `/compact` in the message editor.
 
 If the selected model's context window is too small for automatic compaction (less than 80000 tokens), a banner appears above the message editor as you approach the token limit. Use **Start New Thread** from that banner, or choose **New From Summary** from the New Thread menu (the `+` button on the top right), to continue in a new thread seeded with a summary. You can also @-mention a past thread in a new one.
 
@@ -166,7 +166,7 @@ Configure automatic compaction with `agent.auto_compact`. See [Agent Settings](.
 
 After you've configured your LLM providers—either via [API access](./use-api-access.md) or through [Recode-hosted models](../account/recode-hosted-models.md)—you can switch between their models by clicking on the model selector on the message editor or by using the {#kb agent::ToggleModelSelector} keybinding.
 
-> The same model can be offered via multiple providers - for example, Claude Sonnet 4.5 is available via Zed Pro, OpenRouter, Anthropic directly, and more.
+> The same model can be offered via multiple providers - for example, Claude Sonnet 4.5 is available via Recode Pro, OpenRouter, Anthropic directly, and more.
 > Make sure you've selected the correct model **_provider_** for the model you'd like to use, delineated by the logo to the left of the model in the model selector.
 
 ### Favoriting Models
@@ -177,7 +177,7 @@ Cycle through your favorites with {#kb agent::CycleFavoriteModels} without openi
 
 ## Using Tools and Profiles {#using-tools}
 
-The Agent Panel supports tool calling, which enables agentic editing. Zed includes [built-in tools](./tools.md) for searching your codebase, editing files, running terminal commands, and more.
+The Agent Panel supports tool calling, which enables agentic editing. Recode includes [built-in tools](./tools.md) for searching your codebase, editing files, running terminal commands, and more.
 
 Use [Agent Profiles](./agent-profiles.md) to choose which built-in tools and MCP tools are available in a Recode Agent thread. Use [Tool Permissions](./tool-permissions.md) to control whether permission-gated tool calls are allowed, denied, or confirmed.
 
@@ -194,7 +194,7 @@ All [Recode-hosted models](../account/recode-hosted-models.md) support tool call
 ### MCP Servers {#mcp-servers}
 
 Similarly to the built-in tools, some models may not support all tools included in a given MCP Server.
-Zed's UI will inform you about this via a warning icon that appears close to the model selector.
+Recode's UI will inform you about this via a warning icon that appears close to the model selector.
 
 ## Errors and Debugging {#errors-and-debugging}
 
@@ -204,17 +204,17 @@ You can also open threads as Markdown by clicking on the file icon button, to th
 
 ## Feedback {#feedback}
 
-You can rate agent responses to help improve Zed's system prompt and tools.
+You can rate agent responses to help improve Recode's system prompt and tools.
 
-> **Warning:** Rating an AI response sends the conversation thread to Zed. The
+> **Warning:** Rating an AI response sends the conversation thread to Recode. The
 > conversation thread includes your messages, AI responses, and thread metadata.
 > See [Feedback and Training Data](./ai-improvement.md) and
 > [AI Privacy](./privacy-and-security.md) for more information.
-> **_If you don't want data persisted on Zed's servers, don't rate_**.
-> We will not collect data for improving Zed's agent experience without you
+> **_If you don't want data persisted on Recode's servers, don't rate_**.
+> We will not collect data for improving Recode's agent experience without you
 > explicitly rating responses.
 
-To help improve Zed's system prompt and tools, rate responses with the thumbs up/down controls at the end of each response.
+To help improve Recode's system prompt and tools, rate responses with the thumbs up/down controls at the end of each response.
 In case of a thumbs down, a new text area will show up where you can add more specifics about what happened.
 
 You can provide feedback on the thread at any point after the agent responds, and multiple times within the same thread.

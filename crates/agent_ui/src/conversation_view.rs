@@ -17,7 +17,7 @@ use anyhow::{Context as _, Result, anyhow};
 #[cfg(feature = "audio")]
 use audio::{Audio, Sound};
 use buffer_diff::BufferDiff;
-use client::zed_urls;
+use client::recode_urls;
 use collections::{HashMap, HashSet, IndexMap};
 use editor::scroll::Autoscroll;
 use editor::{
@@ -35,7 +35,7 @@ use gpui::{
 };
 use language::{Buffer, Language};
 use language_model::{
-    LanguageModelCompletionError, ProviderErrorCategory, ZED_CLOUD_PROVIDER_NAME,
+    LanguageModelCompletionError, ProviderErrorCategory, RECODE_CLOUD_PROVIDER_NAME,
 };
 use markdown::{
     CodeBlockRenderer, CopyButtonVisibility, Markdown, MarkdownElement, MarkdownFont, MarkdownStyle,
@@ -75,7 +75,7 @@ use util::{
 use workspace::{
     CollaboratorId, MultiWorkspace, NewTerminal, PathList, Workspace, path_link::sanitize_path_text,
 };
-use zed_actions::agent::{Chat, ToggleModelSelector};
+use recode_actions::agent::{Chat, ToggleModelSelector};
 
 use super::config_options::ConfigOptionsView;
 use super::entry_view_state::EntryViewState;
@@ -125,7 +125,7 @@ enum ThreadFeedback {
 
 #[derive(Debug)]
 pub(crate) enum ThreadError {
-    ZedPaymentRequired,
+    RecodePaymentRequired,
     DataRetentionConsentRequired,
     Refusal,
     AuthenticationRequired(SharedString),
@@ -201,9 +201,9 @@ impl From<&anyhow::Error> for ThreadError {
                     },
                     ProviderErrorCategory::PromptTooLarge { .. } => Self::PromptTooLarge,
                     ProviderErrorCategory::PaymentRequired
-                        if provider == &ZED_CLOUD_PROVIDER_NAME =>
+                        if provider == &RECODE_CLOUD_PROVIDER_NAME =>
                     {
-                        Self::ZedPaymentRequired
+                        Self::RecodePaymentRequired
                     }
                     ProviderErrorCategory::Authentication => Self::AuthenticationFailed {
                         provider: provider.to_string().into(),
@@ -2191,7 +2191,7 @@ impl ConversationView {
                         } else {
                             "New message"
                         },
-                        IconName::ZedAssistant,
+                        IconName::RecodeAssistant,
                         window,
                         cx,
                     );
@@ -2666,7 +2666,7 @@ impl ConversationView {
         window.spawn(cx, async move |cx| {
             let mut task = login.clone();
             if let Some(cmd) = &task.command {
-                // Have "node" command use Zed's managed Node runtime by default
+                // Have "node" command use Recode's managed Node runtime by default
                 if cmd == "node" {
                     let resolved_node_runtime = project.update(cx, |project, cx| {
                         let agent_server_store = project.agent_server_store().clone();
@@ -3787,7 +3787,7 @@ impl ConversationView {
     }
 
     fn current_model_name(&self, cx: &App) -> SharedString {
-        // For native agent (Zed Agent), use the specific model name (e.g., "Claude 3.5 Sonnet")
+        // For native agent (Recode Agent), use the specific model name (e.g., "Claude 3.5 Sonnet")
         // For ACP agents, use the agent name (e.g., "Claude Agent", "Gemini CLI")
         // This provides better clarity about what refused the request
         if self.as_native_connection(cx).is_some() {
@@ -3901,10 +3901,10 @@ fn native_available_skills(
 }
 
 fn placeholder_text(agent_name: &str, has_commands: bool) -> String {
-    if agent_name == agent::ZED_AGENT_ID.as_ref() || agent_name == "Zed Agent" || agent_name == "Recode Agent" {
+    if agent_name == agent::RECODE_AGENT_ID.as_ref() || agent_name == "Recode Agent" {
         format!(
             "Message the {}, @ to include context, / for commands",
-            agent::ZED_AGENT_ID.as_ref()
+            agent::RECODE_AGENT_ID.as_ref()
         )
     } else if has_commands {
         format!(
@@ -4488,7 +4488,7 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn test_payment_required_preserves_non_zed_provider_message() {
+    fn test_payment_required_preserves_non_recode_provider_message() {
         for provider in [
             language_model::LanguageModelProviderName::new("OpenRouter"),
             language_model::OPEN_AI_PROVIDER_NAME,
@@ -4519,9 +4519,9 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn test_payment_required_from_zed_uses_upgrade_prompt() {
+    fn test_payment_required_from_recode_uses_upgrade_prompt() {
         let provider_error = LanguageModelCompletionError::from_provider_response(
-            ZED_CLOUD_PROVIDER_NAME,
+            RECODE_CLOUD_PROVIDER_NAME,
             Some(http_client::StatusCode::PAYMENT_REQUIRED),
             None,
             "Payment required".to_string(),
@@ -4532,8 +4532,8 @@ pub(crate) mod tests {
         let error = ThreadError::from(anyhow!(provider_error));
 
         assert!(
-            matches!(error, ThreadError::ZedPaymentRequired),
-            "expected Zed upgrade prompt, got: {error:?}"
+            matches!(error, ThreadError::RecodePaymentRequired),
+            "expected Recode upgrade prompt, got: {error:?}"
         );
     }
 
@@ -6299,7 +6299,7 @@ pub(crate) mod tests {
             thread
                 .report_local_execution_error(
                     Arc::new(anyhow!(LanguageModelCompletionError::NoApiKey {
-                        provider: ZED_CLOUD_PROVIDER_NAME,
+                        provider: RECODE_CLOUD_PROVIDER_NAME,
                     })),
                     cx,
                 )
@@ -6310,7 +6310,7 @@ pub(crate) mod tests {
             let Some(ThreadError::NoCredentials { provider }) = &view.thread_error else {
                 panic!("local provider error classification should be retained");
             };
-            assert_eq!(provider.to_string(), ZED_CLOUD_PROVIDER_NAME.to_string());
+            assert_eq!(provider.to_string(), RECODE_CLOUD_PROVIDER_NAME.to_string());
             assert_eq!(view.message_queue.len(), 1);
             assert!(view.message_queue.auto_send_candidate(false).is_none());
         });
@@ -10001,7 +10001,7 @@ pub(crate) mod tests {
         C: 'static + AgentConnection + Send + Clone,
     {
         fn logo(&self) -> ui::IconName {
-            ui::IconName::ZedAgent
+            ui::IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -10077,7 +10077,7 @@ pub(crate) mod tests {
 
     impl AgentServer for FlakyAgentServer {
         fn logo(&self) -> ui::IconName {
-            ui::IconName::ZedAgent
+            ui::IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -10224,7 +10224,7 @@ pub(crate) mod tests {
 
     impl AgentServer for SessionCreationRequestElicitationServer {
         fn logo(&self) -> ui::IconName {
-            ui::IconName::ZedAgent
+            ui::IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -10356,7 +10356,7 @@ pub(crate) mod tests {
 
     impl AgentServer for ReleaseRequestElicitationServer {
         fn logo(&self) -> ui::IconName {
-            ui::IconName::ZedAgent
+            ui::IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -20063,7 +20063,7 @@ pub(crate) mod tests {
         cx.focus(&editor);
 
         editor.update_in(cx, |_editor, window, cx| {
-            window.dispatch_action(Box::new(zed_actions::editor::MoveUp), cx);
+            window.dispatch_action(Box::new(recode_actions::editor::MoveUp), cx);
         });
         cx.run_until_parked();
 
@@ -20081,7 +20081,7 @@ pub(crate) mod tests {
 
         // With a non-empty editor, another MoveUp must not consume the queue.
         editor.update_in(cx, |_editor, window, cx| {
-            window.dispatch_action(Box::new(zed_actions::editor::MoveUp), cx);
+            window.dispatch_action(Box::new(recode_actions::editor::MoveUp), cx);
         });
         cx.run_until_parked();
 

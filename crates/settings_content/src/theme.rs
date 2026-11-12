@@ -217,7 +217,7 @@ pub struct ThemeSettingsContent {
     /// The name of a font to use for rendering Mermaid diagrams in the agent
     /// panel and markdown preview. Falls back to the UI font if unset.
     pub mermaid_font_family: Option<FontFamilyName>,
-    /// The name of the Zed theme to use.
+    /// The name of the Recode theme to use.
     pub theme: Option<ThemeSelection>,
     /// The name of the icon theme to use.
     pub icon_theme: Option<IconThemeSelection>,
@@ -471,8 +471,8 @@ impl<'de> Deserialize<'de> for FontFamilyName {
     {
         let s = String::deserialize(deserializer)?;
         let normalized = match s.as_str() {
-            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => ".RecodeMono",
-            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => ".RecodeSans",
+            ".RecodeMono" | "RecodeMono" => ".RecodeMono",
+            ".RecodeSans" | "RecodeSans" => ".RecodeSans",
             _ => s.as_str(),
         };
         Ok(FontFamilyName(Arc::from(normalized)))
@@ -488,8 +488,8 @@ impl AsRef<str> for FontFamilyName {
 impl From<String> for FontFamilyName {
     fn from(value: String) -> Self {
         let normalized = match value.as_str() {
-            ".ZedMono" | "ZedMono" | "Zed Plex Mono" => ".RecodeMono",
-            ".ZedSans" | "ZedSans" | "Zed Plex Sans" => ".RecodeSans",
+            ".RecodeMono" | "RecodeMono" => ".RecodeMono",
+            ".RecodeSans" | "RecodeSans" => ".RecodeSans",
             _ => value.as_str(),
         };
         Self(Arc::from(normalized))

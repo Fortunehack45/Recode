@@ -152,7 +152,7 @@ mod tests {
             remote_env: BTreeMap::from([("FOO".to_string(), "BAR".to_string())]),
         });
         let right = RemoteConnectionOptions::Docker(DockerConnectionOptions {
-            name: "zed-dev".to_string(),
+            name: "recode-dev".to_string(),
             container_id: "container-123".to_string(),
             remote_user: "anth".to_string(),
             upload_binary_over_docker_exec: false,

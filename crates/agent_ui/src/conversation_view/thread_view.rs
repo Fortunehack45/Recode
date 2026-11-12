@@ -566,7 +566,7 @@ mod numbered_code_block_tests {
     #[test]
     fn parses_cat_numbered_markdown_code_block() {
         let parsed = parse_cat_numbered_markdown_code_block(
-            "```rs zed/crates/example.rs\n     2\tfn main() {\n     3\t    println!(\"hi\");\n     4\t}\n```\n",
+            "```rs recode/crates/example.rs\n     2\tfn main() {\n     3\t    println!(\"hi\");\n     4\t}\n```\n",
         )
         .expect("cat-numbered block should parse");
 
@@ -2602,7 +2602,7 @@ impl ThreadView {
     fn emit_thread_error_telemetry(&self, error: &ThreadError, cx: &mut Context<Self>) {
         let (error_kind, acp_error_code, message): (&str, Option<SharedString>, SharedString) =
             match error {
-                ThreadError::ZedPaymentRequired => (
+                ThreadError::RecodePaymentRequired => (
                     "payment_required",
                     None,
                     "You reached your free usage limit. Upgrade to Recode Pro for more prompts."
@@ -3237,7 +3237,7 @@ impl ThreadView {
 
     fn handle_message_editor_move_up(
         &mut self,
-        _: &zed_actions::editor::MoveUp,
+        _: &recode_actions::editor::MoveUp,
         window: &mut Window,
         cx: &mut Context<Self>,
     ) {
@@ -6252,8 +6252,8 @@ impl ThreadView {
                         }))
                         .on_click(|_, window, cx| {
                             window.dispatch_action(
-                                Box::new(zed_actions::OpenSettingsAt {
-                                    path: zed_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
+                                Box::new(recode_actions::OpenSettingsAt {
+                                    path: recode_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
                                     target: None,
                                 }),
                                 cx,
@@ -6930,7 +6930,7 @@ impl ThreadView {
                         .handler({
                             move |window, cx| {
                                 window.dispatch_action(
-                                    zed_actions::agent::AddSelectionToThread.boxed_clone(),
+                                    recode_actions::agent::AddSelectionToThread.boxed_clone(),
                                     cx,
                                 );
                             }
@@ -6976,13 +6976,13 @@ impl ThreadView {
         let following = self.is_following(cx);
 
         let tooltip_label = if following {
-            if self.agent_id.as_ref() == agent::ZED_AGENT_ID.as_ref() {
+            if self.agent_id.as_ref() == agent::RECODE_AGENT_ID.as_ref() {
                 format!("Stop Following the {}", self.agent_id)
             } else {
                 format!("Stop Following {}", self.agent_id)
             }
         } else {
-            if self.agent_id.as_ref() == agent::ZED_AGENT_ID.as_ref() {
+            if self.agent_id.as_ref() == agent::RECODE_AGENT_ID.as_ref() {
                 format!("Follow the {}", self.agent_id)
             } else {
                 format!("Follow {}", self.agent_id)
@@ -9599,7 +9599,7 @@ impl ThreadView {
         TerminalSandboxWarning {
             title,
             detail,
-            docs_url: zed_urls::sandboxing_docs(docs_section, cx).into(),
+            docs_url: recode_urls::sandboxing_docs(docs_section, cx).into(),
         }
     }
 
@@ -10271,7 +10271,7 @@ impl ThreadView {
         section: Option<&str>,
         cx: &Context<Self>,
     ) -> AnyElement {
-        let url = zed_urls::sandboxing_docs(section, cx);
+        let url = recode_urls::sandboxing_docs(section, cx);
 
         Button::new(id, "View Sandboxing Docs")
             .label_size(LabelSize::Small)
@@ -10704,8 +10704,8 @@ impl ThreadView {
                             .tooltip(Tooltip::text("Configure unicode confusables warning"))
                             .on_click(|_, window, cx| {
                                 window.dispatch_action(
-                                    Box::new(zed_actions::OpenSettingsAt {
-                                        path: zed_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
+                                    Box::new(recode_actions::OpenSettingsAt {
+                                        path: recode_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
                                         target: None,
                                     }),
                                     cx,
@@ -10804,8 +10804,8 @@ impl ThreadView {
                             .tooltip(Tooltip::text("Configure Windows-drive warning"))
                             .on_click(|_, window, cx| {
                                 window.dispatch_action(
-                                    Box::new(zed_actions::OpenSettingsAt {
-                                        path: zed_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
+                                    Box::new(recode_actions::OpenSettingsAt {
+                                        path: recode_actions::AGENT_SANDBOX_SETTINGS_PATH.to_string(),
                                         target: None,
                                     }),
                                     cx,
@@ -12753,7 +12753,7 @@ impl ThreadView {
             ThreadError::AuthenticationRequired(error) => {
                 self.render_authentication_required_error(error.clone(), cx)
             }
-            ThreadError::ZedPaymentRequired => self.render_zed_payment_required_error(cx),
+            ThreadError::RecodePaymentRequired => self.render_recode_payment_required_error(cx),
             ThreadError::RateLimitExceeded { provider } => self.render_error_callout(
                 "Rate Limit Reached",
                 format!(
@@ -12886,7 +12886,7 @@ impl ThreadView {
             .dismiss_action(self.dismiss_error_button(cx))
     }
 
-    fn render_zed_payment_required_error(&self, cx: &mut Context<Self>) -> Callout {
+    fn render_recode_payment_required_error(&self, cx: &mut Context<Self>) -> Callout {
         const ERROR_MESSAGE: &str =
             "You reached your free usage limit. Upgrade to Recode Pro for more prompts.";
 
@@ -13008,7 +13008,7 @@ impl ThreadView {
             .on_click(cx.listener(|this, _, window, cx| {
                 this.clear_thread_error(cx);
                 window.dispatch_action(
-                    Box::new(zed_actions::OpenSettingsAt {
+                    Box::new(recode_actions::OpenSettingsAt {
                         path: "llm_providers".to_string(),
                         target: None,
                     }),
@@ -13072,7 +13072,7 @@ impl ThreadView {
             .on_click(cx.listener({
                 move |this, _, _, cx| {
                     this.clear_thread_error(cx);
-                    cx.open_url(&zed_urls::upgrade_to_zed_pro_url(cx));
+                    cx.open_url(&recode_urls::upgrade_to_recode_pro_url(cx));
                 }
             }))
     }
@@ -13141,7 +13141,7 @@ impl ThreadView {
     }
 
     fn current_model_name(&self, cx: &App) -> SharedString {
-        // For native agent (Zed Agent), use the specific model name (e.g., "Claude 3.5 Sonnet")
+        // For native agent (Recode Agent), use the specific model name (e.g., "Claude 3.5 Sonnet")
         // For ACP agents, use the agent name (e.g., "Claude Agent", "Gemini CLI")
         // This provides better clarity about what refused the request
         if self.as_native_connection(cx).is_some() {
@@ -13265,7 +13265,7 @@ impl ThreadView {
                     move |_, _, _window, cx| {
                         #[cfg(windows)]
                         _window.dispatch_action(
-                            zed_actions::wsl_actions::OpenWsl::default().boxed_clone(),
+                            recode_actions::wsl_actions::OpenWsl::default().boxed_clone(),
                             cx,
                         );
                         cx.notify();

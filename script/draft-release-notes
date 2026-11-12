@@ -63,7 +63,7 @@ function main() {
     execFileSync("rm", ["-rf", "target/shallow_clone"]);
     execFileSync("git", [
       "clone",
-      "https://github.com/zed-industries/zed",
+      "https://github.com/Fortunehack45/Recode",
       "target/shallow_clone",
       "--filter=tree:0",
       "--no-checkout",
@@ -91,12 +91,12 @@ function main() {
   let skipped = [];
 
   for (const commit of newCommits) {
-    let link = "https://github.com/zed-industries/zed/pull/" + commit.pr;
+    let link = "https://github.com/Fortunehack45/Recode/pull/" + commit.pr;
     let filteredNotes = filterReleaseNotes(commit.releaseNotes, gpui);
     let notes = filteredNotes;
     if (commit.pr == "") {
-      link = "https://github.com/zed-industries/zed/commits/" + commit.hash;
-    } else if (!notes.includes("zed-industries/zed/issues")) {
+      link = "https://github.com/Fortunehack45/Recode/commits/" + commit.hash;
+    } else if (!notes.includes("Fortunehack45/Recode/issues")) {
       notes = notes + " ([#" + commit.pr + "](" + link + "))";
     }
 
@@ -110,7 +110,7 @@ function main() {
   }
 
   if (releaseNotes.length === 0) {
-    const compareUrl = `https://github.com/zed-industries/zed/compare/${priorTag}...${tag}#commits_bucket`;
+    const compareUrl = `https://github.com/Fortunehack45/Recode/compare/${priorTag}...${tag}#commits_bucket`;
     console.log(`No public-facing changes in this release. [View the commits](${compareUrl}).\n`);
   } else {
     console.log(releaseNotes.join("\n") + "\n");

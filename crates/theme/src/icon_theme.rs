@@ -425,7 +425,7 @@ pub const DEFAULT_ICON_THEME_NAME: &str = "Recode (Default)";
 
 static DEFAULT_ICON_THEME: LazyLock<Arc<IconTheme>> = LazyLock::new(|| {
     Arc::new(IconTheme {
-        id: "zed".into(),
+        id: "recode".into(),
         name: DEFAULT_ICON_THEME_NAME.into(),
         appearance: Appearance::Dark,
         directory_icons: DirectoryIcons {

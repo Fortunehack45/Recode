@@ -16,7 +16,7 @@ use settings::{
 };
 use theme::ActiveTheme as _;
 use util::{RandomCharIter, paths::PathStyle, rel_path::RelPath};
-use zed_actions::editor::{MoveDown, MoveUp};
+use recode_actions::editor::{MoveDown, MoveUp};
 
 struct BenchFile {
     path: Arc<RelPath>,
@@ -443,7 +443,7 @@ fn init_context(cx: &mut BenchAppContext) {
 
 fn multi_cursor_line_counts() -> Vec<usize> {
     let mut line_counts = vec![1000, 10000];
-    if std::env::var("ZED_BENCH_HUGE").is_ok() {
+    if std::env::var("RECODE_BENCH_HUGE").is_ok() {
         line_counts.push(100000);
     }
     line_counts

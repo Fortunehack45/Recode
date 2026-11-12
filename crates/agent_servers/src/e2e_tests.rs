@@ -30,7 +30,7 @@ where
     let project = Project::test(fs.clone(), [], cx).await;
     let thread = new_test_thread(server(&fs, cx).await, project.clone(), "/private/tmp", cx).await;
 
-    send_and_wait_for_turn(&thread, vec!["Hello from Zed!".into()], cx)
+    send_and_wait_for_turn(&thread, vec!["Hello from Recode!".into()], cx)
         .await
         .unwrap();
 
@@ -509,25 +509,25 @@ pub async fn run_until_first_tool_call(
     }
 }
 
-pub fn get_zed_path() -> PathBuf {
-    let mut zed_path = std::env::current_exe().unwrap();
+pub fn get_recode_path() -> PathBuf {
+    let mut recode_path = std::env::current_exe().unwrap();
 
-    while zed_path
+    while recode_path
         .file_name()
         .is_none_or(|name| name.to_string_lossy() != "debug")
     {
-        if !zed_path.pop() {
+        if !recode_path.pop() {
             panic!("Could not find target directory");
         }
     }
 
-    zed_path.push("zed");
+    recode_path.push("recode");
 
-    if !zed_path.exists() {
+    if !recode_path.exists() {
         panic!("\n🚨 Run `cargo build` at least once before running e2e tests\n\n");
     }
 
-    zed_path
+    recode_path
 }
 
 #[cfg(test)]

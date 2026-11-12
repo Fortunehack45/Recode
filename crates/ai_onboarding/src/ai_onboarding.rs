@@ -15,7 +15,7 @@ pub use young_account_banner::YoungAccountBanner;
 
 use std::sync::Arc;
 
-use client::{Client, UserStore, zed_urls};
+use client::{Client, UserStore, recode_urls};
 use gpui::{AnyElement, Entity, IntoElement, ParentElement, TaskExt};
 use ui::{Divider, RegisterComponent, Tooltip, Vector, VectorName, prelude::*};
 
@@ -39,20 +39,20 @@ impl From<client::Status> for SignInStatus {
 }
 
 #[derive(RegisterComponent, IntoElement)]
-pub struct ZedAiOnboarding {
+pub struct RecodeAiOnboarding {
     pub sign_in_status: SignInStatus,
     pub plan: Option<Plan>,
     pub account_too_young: bool,
-    pub continue_with_zed_ai: Arc<dyn Fn(&mut Window, &mut App)>,
+    pub continue_with_recode_ai: Arc<dyn Fn(&mut Window, &mut App)>,
     pub sign_in: Arc<dyn Fn(&mut Window, &mut App)>,
     pub dismiss_onboarding: Option<Arc<dyn Fn(&mut Window, &mut App)>>,
 }
 
-impl ZedAiOnboarding {
+impl RecodeAiOnboarding {
     pub fn new(
         client: Arc<Client>,
         user_store: &Entity<UserStore>,
-        continue_with_zed_ai: Arc<dyn Fn(&mut Window, &mut App)>,
+        continue_with_recode_ai: Arc<dyn Fn(&mut Window, &mut App)>,
         cx: &mut App,
     ) -> Self {
         let store = user_store.read(cx);
@@ -62,7 +62,7 @@ impl ZedAiOnboarding {
             sign_in_status: status.into(),
             plan: store.plan(),
             account_too_young: store.account_too_young(),
-            continue_with_zed_ai,
+            continue_with_recode_ai,
             sign_in: Arc::new(move |_window, cx| {
                 cx.spawn({
                     let client = client.clone();
@@ -222,7 +222,7 @@ impl ZedAiOnboarding {
                                         "Upgrade To Pro Clicked",
                                         state = "young-account"
                                     );
-                                    cx.open_url(&zed_urls::upgrade_to_zed_pro_url(cx))
+                                    cx.open_url(&recode_urls::upgrade_to_recode_pro_url(cx))
                                 }),
                         ),
                 )
@@ -284,7 +284,7 @@ impl ZedAiOnboarding {
                                         "Start Trial Clicked",
                                         state = "post-sign-in"
                                     );
-                                    cx.open_url(&zed_urls::start_trial_url(cx))
+                                    cx.open_url(&recode_urls::start_trial_url(cx))
                                 }),
                         ),
                 )
@@ -378,13 +378,13 @@ impl ZedAiOnboarding {
     }
 }
 
-impl RenderOnce for ZedAiOnboarding {
+impl RenderOnce for RecodeAiOnboarding {
     fn render(self, _window: &mut ui::Window, _cx: &mut App) -> impl IntoElement {
         ApiKeysWithoutProviders::new()
     }
 }
 
-impl Component for ZedAiOnboarding {
+impl Component for RecodeAiOnboarding {
     fn scope() -> ComponentScope {
         ComponentScope::Onboarding
     }
@@ -395,7 +395,7 @@ impl Component for ZedAiOnboarding {
 
     fn description() -> &'static str {
         "The onboarding surface shown to new agent panel users, \
-        guiding them through signing in to Zed and selecting a plan \
+        guiding them through signing in to Recode and selecting a plan \
         before they can start using the agent."
     }
 
@@ -411,11 +411,11 @@ impl Component for ZedAiOnboarding {
                 .max_w(px(1100.))
                 .child(
                     AgentPanelOnboardingCard::new().child(
-                        ZedAiOnboarding {
+                        RecodeAiOnboarding {
                             sign_in_status,
                             plan,
                             account_too_young,
-                            continue_with_zed_ai: Arc::new(|_, _| {}),
+                            continue_with_recode_ai: Arc::new(|_, _| {}),
                             sign_in: Arc::new(|_, _| {}),
                             dismiss_onboarding: None,
                         }
@@ -439,27 +439,27 @@ impl Component for ZedAiOnboarding {
                 ),
                 single_example(
                     "Free Plan",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedFree), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodeFree), false),
                 ),
                 single_example(
                     "Pro Trial",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedProTrial), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodeProTrial), false),
                 ),
                 single_example(
                     "Pro Plan",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedPro), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodePro), false),
                 ),
                 single_example(
                     "Business Plan",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedBusiness), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodeBusiness), false),
                 ),
                 single_example(
                     "VIP Plan",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedVip), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodeVip), false),
                 ),
                 single_example(
                     "Student Plan",
-                    onboarding(SignInStatus::SignedIn, Some(Plan::ZedStudent), false),
+                    onboarding(SignInStatus::SignedIn, Some(Plan::RecodeStudent), false),
                 ),
             ])
             .into_any_element()

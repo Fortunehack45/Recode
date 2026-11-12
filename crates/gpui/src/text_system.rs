@@ -260,8 +260,8 @@ impl TextSystem {
             wrapper_pool: Mutex::default(),
             fallback_font_stack: smallvec![
                 // TODO: Remove this when Linux have implemented setting fallbacks.
-                font(".ZedMono"),
-                font(".ZedSans"),
+                font(".RecodeMono"),
+                font(".RecodeSans"),
                 font("Helvetica"),
                 font("Segoe UI"),     // Windows
                 font("Ubuntu"),       // Gnome (Ubuntu)
@@ -1260,13 +1260,13 @@ impl FontMetrics {
 /// Maps well-known virtual font names to their concrete equivalents.
 #[allow(unused)]
 pub fn font_name_with_fallbacks<'a>(name: &'a str, system: &'a str) -> &'a str {
-    // Note: the "Zed Plex" fonts were deprecated as we are not allowed to use "Plex"
+    // Note: the "Recode Plex" fonts were deprecated as we are not allowed to use "Plex"
     // in a derived font name. They are essentially indistinguishable from IBM Plex/Lilex,
     // and so retained here for backward compatibility.
     match name {
         ".SystemUIFont" => system,
-        ".RecodeSans" | "Recode Sans" | "RecodeSans" | ".ZedSans" | "Zed Plex Sans" => "IBM Plex Sans",
-        ".RecodeMono" | "Recode Mono" | "RecodeMono" | ".ZedMono" | "Zed Plex Mono" => "Lilex",
+        ".RecodeSans" | "Recode Sans" | "RecodeSans" => "IBM Plex Sans",
+        ".RecodeMono" | "Recode Mono" | "RecodeMono" => "Lilex",
         _ => name,
     }
 }
@@ -1277,13 +1277,13 @@ pub fn font_name_with_fallbacks_shared<'a>(
     name: &'a SharedString,
     system: &'a SharedString,
 ) -> &'a SharedString {
-    // Note: the "Zed Plex" fonts were deprecated as we are not allowed to use "Plex"
+    // Note: the "Recode Plex" fonts were deprecated as we are not allowed to use "Plex"
     // in a derived font name. They are essentially indistinguishable from IBM Plex/Lilex,
     // and so retained here for backward compatibility.
     match name.as_str() {
         ".SystemUIFont" => system,
-        ".RecodeSans" | "Recode Sans" | "RecodeSans" | ".ZedSans" | "Zed Plex Sans" => const { &SharedString::new_static("IBM Plex Sans") },
-        ".RecodeMono" | "Recode Mono" | "RecodeMono" | ".ZedMono" | "Zed Plex Mono" => const { &SharedString::new_static("Lilex") },
+        ".RecodeSans" | "Recode Sans" | "RecodeSans" => const { &SharedString::new_static("IBM Plex Sans") },
+        ".RecodeMono" | "Recode Mono" | "RecodeMono" => const { &SharedString::new_static("Lilex") },
         _ => name,
     }
 }
@@ -1325,7 +1325,7 @@ mod line_wrapper_pool_tests {
         let text_system = Arc::new(TextSystem::new(Arc::new(NoopTextSystem::new())));
         let weak_text_system = Arc::downgrade(&text_system);
 
-        let mut wrapper = text_system.line_wrapper(font(".ZedMono"), px(16.));
+        let mut wrapper = text_system.line_wrapper(font(".RecodeMono"), px(16.));
         let fragments = [LineFragment::text("hello world")];
         wrapper
             .wrap_line(&fragments, px(40.), IndentAdjustment::default())

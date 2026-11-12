@@ -15,7 +15,7 @@ use ordered_float::OrderedFloat;
 use picker::{Picker, PickerDelegate};
 use settings::Settings;
 use ui::prelude::*;
-use zed_actions::agent::OpenSettings;
+use recode_actions::agent::OpenSettings;
 
 use crate::ui::{ModelSelectorFooter, ModelSelectorHeader, ModelSelectorListItem};
 
@@ -598,7 +598,7 @@ mod tests {
                     .any(|(fav_provider, fav_name)| *fav_provider == provider && *fav_name == name);
                 ModelInfo {
                     model: test_language_model(name, provider),
-                    icon: IconOrSvg::Icon(IconName::ZedAgent),
+                    icon: IconOrSvg::Icon(IconName::RecodeAgent),
                     is_favorite,
                 }
             })

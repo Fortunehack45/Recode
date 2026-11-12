@@ -1251,7 +1251,7 @@ mod git_worktrees {
 
         // Valid: subdirectory
         assert!(
-            worktrees_directory_for_repo(work_dir, ".git/zed-worktrees", PathStyle::Unix).is_ok()
+            worktrees_directory_for_repo(work_dir, ".git/recode-worktrees", PathStyle::Unix).is_ok()
         );
         assert!(worktrees_directory_for_repo(work_dir, "my-worktrees", PathStyle::Unix).is_ok());
 
@@ -1318,7 +1318,7 @@ mod git_worktrees {
         init_test(cx);
         let fs = FakeFs::new(cx.background_executor.clone());
         fs.insert_tree(
-            path!("/zed"),
+            path!("/recode"),
             json!({
                 ".bare": {
                     "worktrees": {
@@ -1328,14 +1328,14 @@ mod git_worktrees {
                     },
                 },
                 "main": {
-                    ".git": "gitdir: /zed/.bare/worktrees/main",
+                    ".git": "gitdir: /recode/.bare/worktrees/main",
                     "file.txt": "content",
                 },
             }),
         )
         .await;
 
-        let project = Project::test(fs, [path!("/zed/main").as_ref()], cx).await;
+        let project = Project::test(fs, [path!("/recode/main").as_ref()], cx).await;
         cx.executor().run_until_parked();
 
         let repository = project.read_with(cx, |project, cx| {
@@ -1354,11 +1354,11 @@ mod git_worktrees {
 
         assert_eq!(
             default_path,
-            PathBuf::from(path!("/worktrees/zed/plum-warbler/zed"))
+            PathBuf::from(path!("/worktrees/recode/plum-warbler/recode"))
         );
         assert_eq!(
             repository_relative_path,
-            PathBuf::from(path!("/zed/worktrees/plum-warbler/zed"))
+            PathBuf::from(path!("/recode/worktrees/plum-warbler/recode"))
         );
     }
 
@@ -1532,7 +1532,7 @@ mod git_worktrees {
         init_test(cx);
         let fs = FakeFs::new(cx.background_executor.clone());
         fs.insert_tree(
-            path!("/zed"),
+            path!("/recode"),
             json!({
                 ".bare": {
                     "worktrees": {
@@ -1542,14 +1542,14 @@ mod git_worktrees {
                     },
                 },
                 "main": {
-                    ".git": "gitdir: /zed/.bare/worktrees/main",
+                    ".git": "gitdir: /recode/.bare/worktrees/main",
                     "file.txt": "content",
                 },
             }),
         )
         .await;
 
-        let project = Project::test(fs.clone(), [path!("/zed/main").as_ref()], cx).await;
+        let project = Project::test(fs.clone(), [path!("/recode/main").as_ref()], cx).await;
         cx.executor().run_until_parked();
 
         let repository = project.read_with(cx, |project, cx| {
@@ -1560,13 +1560,13 @@ mod git_worktrees {
                 .path_for_new_linked_worktree("feature/nested", "../worktrees")
                 .unwrap()
         });
-        let worktree_parent = PathBuf::from(path!("/worktrees/zed/feature/nested"));
-        let worktree_intermediate_parent = PathBuf::from(path!("/worktrees/zed/feature"));
-        let worktree_base = PathBuf::from(path!("/worktrees/zed"));
+        let worktree_parent = PathBuf::from(path!("/worktrees/recode/feature/nested"));
+        let worktree_intermediate_parent = PathBuf::from(path!("/worktrees/recode/feature"));
+        let worktree_base = PathBuf::from(path!("/worktrees/recode"));
 
         assert_eq!(
             worktree_path,
-            PathBuf::from(path!("/worktrees/zed/feature/nested/zed"))
+            PathBuf::from(path!("/worktrees/recode/feature/nested/recode"))
         );
 
         cx.update(|cx| {
@@ -1932,11 +1932,11 @@ mod resolve_worktree_tests {
     fn test_repo_identity_path() {
         let examples = [
             // Normal checkout: `.git` starts with `.`, so parent is the worktree
-            ("/home/bob/zed/.git", "/home/bob/zed"),
+            ("/home/bob/recode/.git", "/home/bob/recode"),
             // Bare clone named `.bare`: starts with `.`, so parent is the project dir
             ("/repos/project/.bare", "/repos/project"),
             // Bare clone with `.git` extension: does not start with `.`, kept as-is
-            ("/repos/zed.git", "/repos/zed.git"),
+            ("/repos/recode.git", "/repos/recode.git"),
             // Bare clone with arbitrary plain name: kept as-is
             ("/repos/project", "/repos/project"),
         ];
@@ -1970,24 +1970,24 @@ mod resolve_worktree_tests {
     fn test_linked_worktree_short_name() {
         let examples = [
             (
-                "/home/bob/zed",
-                "/home/bob/worktrees/olivetti/zed",
+                "/home/bob/recode",
+                "/home/bob/worktrees/olivetti/recode",
                 PathStyle::Unix,
                 Some("olivetti".into()),
             ),
             (
-                "/home/bob/zed",
-                "/home/bob/zed2",
+                "/home/bob/recode",
+                "/home/bob/recode2",
                 PathStyle::Unix,
-                Some("zed2".into()),
+                Some("recode2".into()),
             ),
             (
-                "/home/bob/zed",
-                "/home/bob/worktrees/zed/selectric",
+                "/home/bob/recode",
+                "/home/bob/worktrees/recode/selectric",
                 PathStyle::Unix,
                 Some("selectric".into()),
             ),
-            ("/home/bob/zed", "/home/bob/zed", PathStyle::Unix, None),
+            ("/home/bob/recode", "/home/bob/recode", PathStyle::Unix, None),
             (
                 r"C:\Users\bob\dev\zed",
                 r"C:\Users\bob\dev\worktrees\zed\olivetti\zed",
@@ -1998,7 +1998,7 @@ mod resolve_worktree_tests {
                 r"C:\Users\bob\dev\zed",
                 r"C:\Users\bob\dev\zed2",
                 PathStyle::Windows,
-                Some("zed2".into()),
+                Some("recode2".into()),
             ),
         ];
         for (main_worktree_path, linked_worktree_path, path_style, expected) in examples {

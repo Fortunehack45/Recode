@@ -1,4 +1,4 @@
-//! Provides constructs for the Zed app version and release channel.
+//! Provides constructs for the Recode app version and release channel.
 
 #![deny(missing_docs)]
 
@@ -13,26 +13,25 @@ const RECODE_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode";
 pub static RELEASE_CHANNEL_NAME: LazyLock<String> = LazyLock::new(|| {
     if cfg!(debug_assertions) {
         env::var("RECODE_RELEASE_CHANNEL")
-            .or_else(|_| env::var("ZED_RELEASE_CHANNEL"))
             .unwrap_or_else(|_| compile_time_release_channel_name())
     } else {
         compile_time_release_channel_name()
     }
 });
 
-/// When a crate in zed is used as a dependency that uses the `crane` nix
+/// When a crate in recode is used as a dependency that uses the `crane` nix
 /// library, it vendors each crate separately and builds it in isolation, which
 /// makes the `include_str!` fail.
 ///
-/// The build script checks for `$ZED_RELEASE_CHANNEL` and emits the `cfg`
-#[cfg(__do_not_set_zed_release_channel)]
+/// The build script checks for `$RECODE_RELEASE_CHANNEL` and emits the `cfg`
+#[cfg(__do_not_set_recode_release_channel)]
 fn compile_time_release_channel_name() -> String {
-    env!("ZED_RELEASE_CHANNEL").trim().to_string()
+    env!("RECODE_RELEASE_CHANNEL").trim().to_string()
 }
 
-#[cfg(not(__do_not_set_zed_release_channel))]
+#[cfg(not(__do_not_set_recode_release_channel))]
 fn compile_time_release_channel_name() -> String {
-    include_str!("../../zed/RELEASE_CHANNEL").trim().to_string()
+    include_str!("../../recode/RELEASE_CHANNEL").trim().to_string()
 }
 
 #[doc(hidden)]
@@ -53,7 +52,7 @@ pub fn app_identifier() -> &'static str {
     }
 }
 
-/// The Git commit SHA that Zed was built at.
+/// The Git commit SHA that Recode was built at.
 #[derive(Clone, Eq, Debug, PartialEq)]
 pub struct AppCommitSha(String);
 
@@ -93,7 +92,7 @@ struct GlobalAppVersion(Version);
 
 impl Global for GlobalAppVersion {}
 
-/// The version of Zed.
+/// The version of Recode.
 pub struct AppVersion;
 
 impl AppVersion {
@@ -103,7 +102,7 @@ impl AppVersion {
         build_id: Option<&str>,
         commit_sha: Option<AppCommitSha>,
     ) -> Version {
-        let mut version: Version = if let Ok(from_env) = env::var("RECODE_APP_VERSION").or_else(|_| env::var("ZED_APP_VERSION")) {
+        let mut version: Version = if let Ok(from_env) = env::var("RECODE_APP_VERSION") {
             from_env.parse().expect("invalid APP_VERSION")
         } else {
             pkg_version.parse().expect("invalid version in Cargo.toml")
@@ -136,12 +135,12 @@ impl AppVersion {
     }
 }
 
-/// A Zed release channel.
+/// A Recode release channel.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub enum ReleaseChannel {
     /// The development release channel.
     ///
-    /// Used for local debug builds of Zed.
+    /// Used for local debug builds of Recode.
     #[default]
     Dev,
 
@@ -171,7 +170,7 @@ pub fn init_test(app_version: Version, release_channel: ReleaseChannel, cx: &mut
     cx.set_global(GlobalReleaseChannel(release_channel))
 }
 
-/// Returns the Zed docs URL for the current release channel for the given
+/// Returns the Recode docs URL for the current release channel for the given
 /// `slug`.
 pub fn docs_url(slug: &str, cx: &App) -> String {
     ReleaseChannel::try_global(cx)
@@ -226,7 +225,7 @@ impl ReleaseChannel {
 
     /// Returns the application ID that's used by Wayland as application ID
     /// and WM_CLASS on X11.
-    /// This also has to match the bundle identifier for Zed on macOS.
+    /// This also has to match the bundle identifier for Recode on macOS.
     pub fn app_id(&self) -> &'static str {
         match self {
             ReleaseChannel::Dev => "dev.recode.editor.dev",
@@ -246,7 +245,7 @@ impl ReleaseChannel {
         }
     }
 
-    /// Returns the Zed docs URL for this [`ReleaseChannel`] for the given
+    /// Returns the Recode docs URL for this [`ReleaseChannel`] for the given
     /// `slug`.
     pub fn docs_url(&self, slug: &str) -> String {
         let channel_path_segment = match self {

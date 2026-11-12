@@ -1,9 +1,9 @@
 ---
 title: Rough quick CPU profiling (Flamechart)
-description: "Performance profiling and optimization for Zed development."
+description: "Performance profiling and optimization for Recode development."
 ---
 
-How to use our internal tools to profile and keep Zed fast.
+How to use our internal tools to profile and keep Recode fast.
 
 # Rough quick CPU profiling (Flamechart)
 
@@ -33,7 +33,7 @@ fn should_appear_in_profile(kitty: Cat) {
 }
 ```
 
-Then either compile Zed with `ZTRACING=1 cargo r --features tracy --release`. The release build is optional but highly recommended as like every program Zed's performance characteristics change dramatically with optimizations. You do not want to chase slowdowns that do not exist in release.
+Then either compile Recode with `ZTRACING=1 cargo r --features tracy --release`. The release build is optional but highly recommended as like every program Recode's performance characteristics change dramatically with optimizations. You do not want to chase slowdowns that do not exist in release.
 
 ## One time Setup/Building the profiler:
 
@@ -51,7 +51,7 @@ Download the profiler:
 
 ## Usage
 
-Open the profiler (tracy-profiler), you should see zed in the list of `Discovered clients` click it.
+Open the profiler (tracy-profiler), you should see recode in the list of `Discovered clients` click it.
 
 <img width="392" height="auto" alt="image" src="https://github.com/user-attachments/assets/b6f06fc3-6b25-41c7-ade9-558cc93d6033" style="display: block; margin: 0 auto;"/>
 
@@ -96,7 +96,7 @@ let _enter = span.enter(); // span guard, when this is dropped the span ends (an
 
 # Task/Async profiling
 
-Get a profile of the zed foreground executor and background executors. Check if
+Get a profile of the recode foreground executor and background executors. Check if
 anything is blocking the foreground too long or taking too much (clock) time in
 the background.
 

@@ -499,7 +499,7 @@ impl LanguageModelProvider for OpenCodeLanguageModelProvider {
     }
 
     fn icon(&self) -> IconOrSvg {
-        IconOrSvg::Icon(IconName::AiZed)
+        IconOrSvg::Icon(IconName::AiRecode)
     }
 
     fn default_model(&self, _cx: &App) -> Option<LanguageModel> {

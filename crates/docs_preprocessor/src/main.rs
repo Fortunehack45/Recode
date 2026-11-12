@@ -67,7 +67,7 @@ impl KeymapOverlay {
     }
 }
 
-const FRONT_MATTER_COMMENT: &str = "<!-- ZED_META {} -->";
+const FRONT_MATTER_COMMENT: &str = "<!-- RECODE_META {} -->";
 
 fn main() -> Result<()> {
     zlog::init();
@@ -689,8 +689,8 @@ fn handle_postprocessing() -> Result<()> {
         .expect("has output")
         .as_table_mut()
         .expect("output is table");
-    let zed_html = output.remove("zed-html").expect("zed-html output defined");
-    let redirects = zed_html
+    let recode_html = output.remove("recode-html").expect("recode-html output defined");
+    let redirects = recode_html
         .get("redirect")
         .and_then(|redirects| redirects.as_table())
         .map(|redirects| {
@@ -703,13 +703,13 @@ fn handle_postprocessing() -> Result<()> {
                 })
                 .collect::<Vec<_>>()
         });
-    let default_description = zed_html
+    let default_description = recode_html
         .get("default-description")
         .expect("Default description not found")
         .as_str()
         .expect("Default description not a string")
         .to_string();
-    let default_title = zed_html
+    let default_title = recode_html
         .get("default-title")
         .expect("Default title not found")
         .as_str()
@@ -735,7 +735,7 @@ fn handle_postprocessing() -> Result<()> {
         ""
     };
 
-    output.insert("html".to_string(), zed_html);
+    output.insert("html".to_string(), recode_html);
     mdbook::Renderer::render(&mdbook::renderer::HtmlHandlebars::new(), &ctx)?;
     let ignore_list = ["toc.html"];
 
@@ -836,7 +836,7 @@ fn handle_postprocessing() -> Result<()> {
 
         title_tag_contents
             .trim()
-            .strip_suffix("- Zed")
+            .strip_suffix("- Recode")
             .unwrap_or(title_tag_contents)
             .trim()
             .to_string()

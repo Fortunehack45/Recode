@@ -787,7 +787,7 @@ async fn test_stdio_server_restarts_when_project_root_becomes_available(cx: &mut
 
     // Adding a directory worktree makes the project root resolvable. Since the
     // server was started with working directory `None`, it must be restarted so
-    // it picks up the new root — otherwise it keeps running under Zed's own cwd.
+    // it picks up the new root — otherwise it keeps running under Recode's own cwd.
     {
         let _server_events = assert_server_events(
             &store,
@@ -1614,7 +1614,7 @@ async fn test_multi_worktree_context_server_settings(cx: &mut TestAppContext) {
     fs.insert_tree(
         path!("/project_a"),
         json!({
-            ".zed": {
+            ".recode": {
                 "settings.json": serde_json::to_string(&json!({
                     "context_servers": {
                         "server-from-project-a": {
@@ -1631,7 +1631,7 @@ async fn test_multi_worktree_context_server_settings(cx: &mut TestAppContext) {
     fs.insert_tree(
         path!("/project_b"),
         json!({
-            ".zed": {
+            ".recode": {
                 "settings.json": serde_json::to_string(&json!({
                     "context_servers": {
                         "server-from-project-b": {
@@ -1712,7 +1712,7 @@ async fn test_multi_worktree_duplicate_server_first_wins(cx: &mut TestAppContext
     fs.insert_tree(
         path!("/project_a"),
         json!({
-            ".zed": {
+            ".recode": {
                 "settings.json": serde_json::to_string(&json!({
                     "context_servers": {
                         "shared-server": {
@@ -1729,7 +1729,7 @@ async fn test_multi_worktree_duplicate_server_first_wins(cx: &mut TestAppContext
     fs.insert_tree(
         path!("/project_b"),
         json!({
-            ".zed": {
+            ".recode": {
                 "settings.json": serde_json::to_string(&json!({
                     "context_servers": {
                         "shared-server": {

@@ -84,7 +84,7 @@ test("LiveActionIndicator tracks real-time action states", () => {
   indicator.startSimmering();
 
   // Start reading file
-  indicator.startTool("read_file", { path: "crates/zed/src/main.rs" });
+  indicator.startTool("read_file", { path: "crates/recode/src/main.rs" });
 
   // Start editing file
   indicator.startTool("edit_file", { path: "packages/tui/src/repl.ts" });
@@ -125,9 +125,9 @@ test("UI renders welcome splash, dashboard, history, chats, and channel cards cl
   });
   UI.printModelCatalog(
     {
-      "opencode-zen": {
-        id: "zen",
-        name: "OpenCode Zen (Recode)",
+      "opencode-recode": {
+        id: "recode",
+        name: "OpenCode Recode",
         provider: "opencode",
         contextWindow: 200000,
         supportsTools: true,
@@ -135,7 +135,7 @@ test("UI renders welcome splash, dashboard, history, chats, and channel cards cl
         description: "OpenCode flagship reasoning & agentic coding model.",
       },
     },
-    "opencode-zen",
+    "opencode-recode",
     { opencode: { configured: true } }
   );
 });

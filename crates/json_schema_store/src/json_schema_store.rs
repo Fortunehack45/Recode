@@ -182,7 +182,7 @@ fn resolve_static_schema(path: &str) -> Option<String> {
         "snippets" => Some(SNIPPETS_SCHEMA.clone()),
         "jsonc" => Some(JSONC_SCHEMA.clone()),
         "keymap" => Some(KEYMAP_SCHEMA.clone()),
-        "zed_inspector_style" => {
+        "recode_inspector_style" => {
             #[cfg(debug_assertions)]
             {
                 Some(INSPECTOR_STYLE_SCHEMA.clone())
@@ -490,9 +490,9 @@ pub fn all_schema_file_associations(
             .unwrap()
             .push(serde_json::json!({
                 "fileMatch": [
-                    "zed-inspector-style.json"
+                    "recode-inspector-style.json"
                 ],
-                "url": format!("{SCHEMA_URI_PREFIX}zed_inspector_style")
+                "url": format!("{SCHEMA_URI_PREFIX}recode_inspector_style")
             }));
     }
 

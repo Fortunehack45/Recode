@@ -1,7 +1,7 @@
 # Recode
 
 <p align="center">
-  <img src="crates/zed/resources/app-icon@2x.png" width="128" height="128" alt="Recode Logo" />
+  <img src="crates/recode/resources/app-icon@2x.png" width="128" height="128" alt="Recode Logo" />
 </p>
 
 <p align="center">
@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/Fortunehack45/Recode/releases"><img src="https://img.shields.io/github/v/release/Fortunehack45/Recode?style=flat-square&color=blue" alt="Latest Release" /></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-Source--Available%20%7C%20RSAL-blue?style=flat-square" alt="License: Source-Available" /></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later%20%7C%20Apache--2.0-blue?style=flat-square" alt="License: GPL-3.0-or-later | Apache-2.0" /></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square" alt="Platforms" />
   <img src="https://img.shields.io/badge/built%20with-Rust%20%2B%20GPUI-orange?style=flat-square" alt="Rust GPUI" />
   <img src="https://img.shields.io/badge/AI-Claude%20%7C%20GPT--4o%20%7C%20Gemini%20%7C%20DeepSeek%20%7C%20Ollama-purple?style=flat-square" alt="AI Models" />
@@ -20,7 +20,7 @@
 
 ## Overview
 
-**Recode** is a source-available, native, GPU-accelerated code editor engineered in pure Rust. It combines instantaneous cold boot speeds (<50ms) and silky 120 FPS rendering with a deeply integrated autonomous AI coding agent, multi-file diff engine, full Model Context Protocol (MCP) ecosystem, and Bring Your Own Key (BYOK) privacy.
+**Recode** is an open-source, native, GPU-accelerated code editor engineered in pure Rust. It combines instantaneous cold boot speeds (<50ms) and silky 120 FPS rendering with a deeply integrated autonomous AI coding agent, multi-file diff engine, full Model Context Protocol (MCP) ecosystem, and Bring Your Own Key (BYOK) privacy.
 
 <p align="center">
   <img src="assets/images/recode-editor-agent.jpg" alt="Recode Autonomous AI Editor and Workspace" width="100%" />
@@ -238,13 +238,12 @@ cargo build --release --package recode --package cli
 
 ---
 
-## 📄 License & Source-Available Community Model
+## 📄 License & Open Source Community Model
 
-Recode is developed under the **Recode Source-Available & Anti-Forking License (RSAL v1.0)**. The source code is publicly accessible on GitHub for auditing, personal compilation, and upstream contribution.
+Recode is **Open Source Software** licensed under **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)** ([`LICENSE-GPL`](LICENSE-GPL)) for the editor application and **Apache License 2.0 (`Apache-2.0`)** ([`LICENSE-APACHE`](LICENSE-APACHE)) for designated framework and SDK crates, as summarized in [`LICENSE.md`](LICENSE.md).
 
-- **Anti-Forking & Anti-Rebranding Protection:** Downstream cloning, rebranding, white-labeling, or distributing derivative competing editor/IDE products is strictly prohibited under our [Trademark Policy](legal/TRADEMARK_POLICY.md) and [License](LICENSE.md).
-- **Official Commercial EULA:** See [legal/EULA.md](legal/EULA.md) and [EULA.md](EULA.md).
-- **Contributor Agreement (CLA):** See [legal/CONTRIBUTOR_LICENSE_AGREEMENT.md](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md).
-- **Terms of Service:** See [legal/terms.md](legal/terms.md).
-- **Privacy Policy:** See [legal/privacy-policy.md](legal/privacy-policy.md).
+- **Trademarks & Official Brand Protection:** Under GPL-3.0 Section 7(e) and Apache-2.0 Section 6, modified or third-party redistributions must replace Recode names, logos, and icons; see [`legal/TRADEMARK_POLICY.md`](legal/TRADEMARK_POLICY.md).
+- **Contributor Agreement (CLA):** See [`legal/CONTRIBUTOR_LICENSE_AGREEMENT.md`](legal/CONTRIBUTOR_LICENSE_AGREEMENT.md).
+- **Terms of Use:** See [`legal/terms.md`](legal/terms.md).
+- **Privacy Policy:** See [`legal/privacy-policy.md`](legal/privacy-policy.md).
 - **Official Repository & Releases:** [https://github.com/Fortunehack45/Recode](https://github.com/Fortunehack45/Recode) | [legal@recode.dev](mailto:legal@recode.dev)

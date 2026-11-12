@@ -254,7 +254,7 @@ impl TryFrom<acp_v2::UpdateSessionNotification> for InboundSessionNotification {
                     plan,
                     update_meta: update.meta,
                 },
-                // Zed can't render an unknown plan type, but it still replaces the plan with
+                // Recode can't render an unknown plan type, but it still replaces the plan with
                 // that ID.
                 acp_v2::PlanUpdateContent::Other(plan) => InboundSessionUpdate::PlanItems {
                     plan: acp_v2::PlanItems::new(plan.plan_id, Vec::new()),

@@ -62,7 +62,7 @@ impl Repository {
 
     pub fn name(&self) -> String {
         match self {
-            Self::Workspace => "zed-industries/zed".to_owned(),
+            Self::Workspace => "Fortunehack45/Recode".to_owned(),
             Self::Git(repository) => format!(
                 "{owner}/{repo}",
                 owner = repository.owner,
@@ -217,14 +217,14 @@ mod tests {
     fn workspace_repository_uses_the_argument_sha() -> Result<()> {
         let repository = Repository::Workspace;
         let package = repository.publish_info("gpui");
-        assert_eq!(package.repository.name(), "zed-industries/zed");
+        assert_eq!(package.repository.name(), "Fortunehack45/Recode");
         for revision in [REVISION, WORKSPACE_REVISION] {
             let args = GpuiArgs {
                 sha: revision.parse().map_err(anyhow::Error::msg)?,
             };
             assert_eq!(
                 package.repository.display(&args).to_string(),
-                format!("zed-industries/zed@{revision}")
+                format!("Fortunehack45/Recode@{revision}")
             );
         }
         Ok(())

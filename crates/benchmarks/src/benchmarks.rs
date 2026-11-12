@@ -1,4 +1,4 @@
-//! Benchmark targets for Zed crates.
+//! Benchmark targets for Recode crates.
 //!
 //! Benchmarks live in their own crate so benchmark-only dependencies
 //! (Criterion, `gpui_platform`, GPUI's `bench-support` feature, ...) don't

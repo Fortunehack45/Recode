@@ -75,7 +75,7 @@ pub(crate) fn render_sandbox_settings_page(
         )
         .child({
             let docs_url =
-                client::zed_urls::sandboxing_docs(Some("persistent-sandbox-permissions"), cx);
+                client::recode_urls::sandboxing_docs(Some("persistent-sandbox-permissions"), cx);
             let tooltip = format!("Opens {docs_url}");
             // Wrap in a row so the button shrinks to its content width instead
             // of stretching across the settings page.
@@ -409,7 +409,7 @@ fn raw_sandbox_lists(cx: &App) -> (Vec<String>, Vec<PathBuf>) {
         .map(|hosts| hosts.0.clone())
         .unwrap_or_default();
     // Display and match on the requested path of each entry (the literal a
-    // hand-edit types); Zed-written "allow always" grants also carry a resolved
+    // hand-edit types); Recode-written "allow always" grants also carry a resolved
     // canonical, but the settings row still keys off the requested path.
     let write_paths = permissions
         .and_then(|permissions| permissions.write_paths.as_ref())

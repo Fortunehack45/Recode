@@ -9,7 +9,7 @@ use std::{
 };
 
 use anyhow::Context as _;
-use client::parse_zed_link;
+use client::parse_recode_link;
 use command_palette_hooks::{
     CommandInterceptItem, CommandInterceptResult, CommandPaletteFilter,
     GlobalCommandPaletteInterceptor,
@@ -31,7 +31,7 @@ use ui::{
 };
 use util::ResultExt;
 use workspace::{ModalView, Workspace, WorkspaceSettings};
-use zed_actions::{OpenZedUrl, command_palette::Toggle};
+use recode_actions::{OpenRecodeUrl, command_palette::Toggle};
 
 actions!(command_palette, [RemoveSelected]);
 
@@ -595,7 +595,7 @@ impl PickerDelegate for CommandPaletteDelegate {
         let (mut tx, mut rx) = postage::dispatch::channel(1);
 
         let query_str = query.as_str();
-        let is_zed_link = parse_zed_link(query_str, cx).is_some();
+        let is_recode_link = parse_recode_link(query_str, cx).is_some();
 
         let task = cx.background_spawn({
             let mut commands = self.all_commands.clone();
@@ -638,10 +638,10 @@ impl PickerDelegate for CommandPaletteDelegate {
                     }
                 });
 
-                let intercept_result = if is_zed_link {
+                let intercept_result = if is_recode_link {
                     CommandInterceptResult {
                         results: vec![CommandInterceptItem {
-                            action: OpenZedUrl {
+                            action: OpenRecodeUrl {
                                 url: query_for_link.clone().into(),
                             }
                             .boxed_clone(),
@@ -720,7 +720,7 @@ impl PickerDelegate for CommandPaletteDelegate {
                 return;
             };
             let action_name = selected_command.action.name();
-            let open_keymap = Box::new(zed_actions::ChangeKeybinding {
+            let open_keymap = Box::new(recode_actions::ChangeKeybinding {
                 action: action_name.to_string(),
             });
             window.dispatch_action(open_keymap, cx);

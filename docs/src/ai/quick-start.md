@@ -25,38 +25,38 @@ Start in the [Agent Panel](./agent-panel.md) to prompt the agent, add context, r
 | Add always-on personal or project context | [Instructions](./instructions.md)         |
 | Connect external tools and context        | [Model Context Protocol](./mcp.md)        |
 
-## Use Another Coding Agent in Zed {#agent-cli}
+## Use Another Coding Agent in Recode {#agent-cli}
 
 Use this path for Claude, Codex, OpenCode, Copilot, Cursor, Pi Coding Agent, Gemini CLI, or another coding agent.
 
 | If the agent...                 | Use                                       |
 | ------------------------------- | ----------------------------------------- |
-| Integrates with Zed through ACP | [External Agents](./external-agents.md)   |
+| Integrates with Recode through ACP | [External Agents](./external-agents.md)   |
 | Runs as a CLI or TUI            | [Terminal Threads](./terminal-threads.md) |
 
 External Agents and Terminal Threads usually own their own auth, model configuration, subscriptions, tools, instructions, and MCP configuration.
 
 ## Choose Which Models the Recode Agent Uses {#model-access}
 
-The Recode Agent and other model-backed Zed AI features use models configured through [LLM Providers](./llm-providers.md).
+The Recode Agent and other model-backed Recode AI features use models configured through [LLM Providers](./llm-providers.md).
 
 | If you want to...                                                             | Use                                                               |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Use models billed through Zed                                                 | [Recode-Hosted Models](../account/recode-hosted-models.md)              |
+| Use models billed through Recode                                                 | [Recode-Hosted Models](../account/recode-hosted-models.md)              |
 | Bring your own provider API key, credits, top-ups, or usage billing           | [Use API Access](./use-api-access.md)                             |
 | Use a subscription you already pay for                                        | [Use an Existing Subscription](./use-an-existing-subscription.md) |
 | Use OpenRouter, Vercel AI Gateway, Amazon Bedrock, or another gateway         | [Use a Gateway](./use-a-gateway.md)                               |
 | Use Ollama, LM Studio, local OpenAI-compatible servers, or self-hosted models | [Use a Local Model](./use-a-local-model.md)                       |
 
-Provider keys saved through Zed are stored in the system keychain, not in `settings.json`.
+Provider keys saved through Recode are stored in the system keychain, not in `settings.json`.
 
 ## Change AI Settings {#ai-settings}
 
 | If you want to...                                                           | Go to                                                                    |
 | --------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Configure LLM providers, External Agents, or MCP servers                    | [Agent Settings](./agent-settings.md) with {#action agent::OpenSettings} |
-| Disable AI, configure tool permissions, or set up edit prediction providers | Settings Editor with {#action zed::OpenSettings}                         |
-| Edit advanced JSON-only settings                                            | Settings file with {#action zed::OpenSettingsFile}                       |
+| Disable AI, configure tool permissions, or set up edit prediction providers | Settings Editor with {#action recode::OpenSettings}                         |
+| Edit advanced JSON-only settings                                            | Settings file with {#action recode::OpenSettingsFile}                       |
 
 For general settings mechanics, see [Configuring Recode](../configuring-recode.md).
 
@@ -79,7 +79,7 @@ For general settings mechanics, see [Configuring Recode](../configuring-recode.m
 
 ## Turn AI Off {#turn-ai-off}
 
-Open the Settings Editor with {#action zed::OpenSettings}, search for `Disable AI`, and enable it.
+Open the Settings Editor with {#action recode::OpenSettings}, search for `Disable AI`, and enable it.
 
 You can also add this to your settings file:
 

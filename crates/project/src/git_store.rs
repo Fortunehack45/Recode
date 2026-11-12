@@ -1148,7 +1148,7 @@ impl GitStore {
             .values()
             .filter(|repo| {
                 let repo_path = &repo.read(cx).work_directory_abs_path;
-                // The folder opened in Zed isn't necessarily the repo root; it may be
+                // The folder opened in Recode isn't necessarily the repo root; it may be
                 // a subdirectory of it, e.g. opening `~/code/myrepo/backend` when the
                 // repo lives at `~/code/myrepo`. So match any repo whose work directory
                 // contains the folder. Nested repos can produce multiple matches, e.g.
@@ -6200,8 +6200,8 @@ impl RepositorySnapshot {
     /// The main worktree is the original checkout that other worktrees were
     /// created from.
     ///
-    /// For example, if you had both `~/code/zed` and `~/code/worktrees/zed-2`,
-    /// then `~/code/zed` is the main worktree and `~/code/worktrees/zed-2` is a linked worktree.
+    /// For example, if you had both `~/code/recode` and `~/code/worktrees/recode-2`,
+    /// then `~/code/recode` is the main worktree and `~/code/worktrees/recode-2` is a linked worktree.
     ///
     /// Submodules also return `true` here, since they are not linked worktrees.
     pub fn is_main_worktree(&self) -> bool {
@@ -10630,7 +10630,7 @@ impl Repository {
         self.send_job("access", None, move |git_repo, _cx| async move {
             match git_repo {
                 // TODO: Correctly handle remote repositories, where the user
-                // that's running the Zed remote may not own the `.git/`
+                // that's running the Recode remote may not own the `.git/`
                 // directory. For now we just return `GitAccess::Yes` so that
                 // remoting continues working as expected.
                 RepositoryState::Remote(..) => GitAccess::Yes,
@@ -10807,7 +10807,7 @@ async fn remove_empty_managed_worktree_ancestors(fs: &dyn Fs, child_path: &Path,
 ///   normal checkout, or `.bare` for a bare clone), the parent directory is
 ///   returned. Both of these are internal Git directories; the parent is the
 ///   meaningful project root.
-/// - Otherwise (e.g. `zed.git` for a bare clone), `common_dir` itself is
+/// - Otherwise (e.g. `recode.git` for a bare clone), `common_dir` itself is
 ///   returned — it is already a meaningful on-disk path.
 pub fn repo_identity_path(common_dir: &Path, path_style: PathStyle) -> &Path {
     let is_dot_entry = path_style
@@ -11727,7 +11727,7 @@ mod tests {
         fs.set_remote_for_repo(
             Path::new("/project/.git"),
             "origin",
-            "https://github.com/zed-industries/zed.git",
+            "https://github.com/Fortunehack45/Recode.git",
         );
 
         let project = Project::test(fs.clone(), [Path::new("/project")], cx).await;
@@ -11752,7 +11752,7 @@ mod tests {
 
         assert_eq!(
             permalink.as_str(),
-            &format!("https://github.com/zed-industries/zed/blob/{sha}/src/main.rs")
+            &format!("https://github.com/Fortunehack45/Recode/blob/{sha}/src/main.rs")
         );
         assert!(permalink.fragment().is_none());
     }
@@ -12533,13 +12533,13 @@ mod tests {
         let cases = [
             // Normal clone (`.git`): the main worktree's checkout is the anchor.
             (
-                "/worktrees/zed/feature/zed",
-                "/repos/zed/.git/worktrees/feature",
-                "/worktrees/zed/feature/zed/.git",
-                "/repos/zed/.git",
+                "/worktrees/recode/feature/recode",
+                "/repos/recode/.git/worktrees/feature",
+                "/worktrees/recode/feature/recode/.git",
+                "/repos/recode/.git",
                 PathStyle::Unix,
-                Some("/repos/zed"),
-                "/repos/zed",
+                Some("/repos/recode"),
+                "/repos/recode",
             ),
             (
                 r"C:\worktrees\zed\feature\zed",
@@ -12553,13 +12553,13 @@ mod tests {
             // Bare clone stored in `.bare`: there is no main worktree, so the parent
             // of `.bare` is the anchor.
             (
-                "/worktrees/zed/plum-warbler/zed",
-                "/repos/zed/.bare/worktrees/plum-warbler",
-                "/worktrees/zed/plum-warbler/zed/.git",
-                "/repos/zed/.bare",
+                "/worktrees/recode/plum-warbler/recode",
+                "/repos/recode/.bare/worktrees/plum-warbler",
+                "/worktrees/recode/plum-warbler/recode/.git",
+                "/repos/recode/.bare",
                 PathStyle::Unix,
                 None,
-                "/repos/zed",
+                "/repos/recode",
             ),
             (
                 r"C:\worktrees\zed\plum-warbler\zed",
@@ -12573,13 +12573,13 @@ mod tests {
             // Bare clone named `repo.git`: there is no main worktree and no parent to
             // strip, so the common directory itself is the anchor.
             (
-                "/worktrees/zed.git/plum-warbler/zed.git",
-                "/repos/zed.git/worktrees/plum-warbler",
-                "/worktrees/zed.git/plum-warbler/zed.git/.git",
-                "/repos/zed.git",
+                "/worktrees/recode.git/plum-warbler/recode.git",
+                "/repos/recode.git/worktrees/plum-warbler",
+                "/worktrees/recode.git/plum-warbler/recode.git/.git",
+                "/repos/recode.git",
                 PathStyle::Unix,
                 None,
-                "/repos/zed.git",
+                "/repos/recode.git",
             ),
             (
                 r"C:\worktrees\zed.git\plum-warbler\zed.git",

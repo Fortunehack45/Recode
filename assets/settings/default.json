@@ -1988,9 +1988,6 @@
       "**/.recode/settings.json",
       "/**/recode/settings.json",
       "/**/recode/keymap.json",
-      "**/.zed/settings.json",
-      "/**/zed/settings.json",
-      "/**/zed/keymap.json",
     ],
     // When to show edit predictions previews in buffer.
     // This setting takes two possible values:
@@ -2035,9 +2032,6 @@
       "prediction_debounce": 0,
     },
     "recode": {
-      "prediction_debounce": 0,
-    },
-    "zed": {
       "prediction_debounce": 0,
     },
     "mercury": {
@@ -2371,9 +2365,8 @@
   "file_types": {
     "JSONC": [
       "**/.recode/*.json",
-      "**/.zed/*.json",
       "**/.vscode/**/*.json",
-      "**/{recode,Recode,zed,Zed}/{settings,keymap,tasks,debug}.json",
+      "**/{recode,Recode}/{settings,keymap,tasks,debug}.json",
       "tsconfig*.json",
     ],
     "Markdown": [".rules", ".cursorrules", ".windsurfrules", ".clinerules"],

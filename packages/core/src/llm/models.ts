@@ -122,9 +122,9 @@ export const DEFAULT_MODELS: Record<string, ModelInfo> = {
   },
 
   // OpenCode API
-  "opencode-zen": {
+  "opencode-recode": {
     id: "claude-sonnet-4-5",
-    name: "OpenCode Zen (Claude Sonnet 4.5)",
+    name: "OpenCode Recode (Claude Sonnet 4.5)",
     provider: "opencode",
     contextWindow: 1000000,
     supportsTools: true,
@@ -198,7 +198,7 @@ export const DEFAULT_MODELS: Record<string, ModelInfo> = {
 
 export const PROVIDER_DEFAULT_MODELS: Record<string, string> = {
   gemini: "gemini-2.5-flash",
-  opencode: "opencode-zen",
+  opencode: "opencode-recode",
   openai: "gpt-4o",
   anthropic: "claude-3-7-sonnet",
   deepseek: "deepseek-chat",
@@ -214,7 +214,7 @@ export function getBestAvailableModel(providers?: Record<string, string | undefi
   };
 
   if (check("gemini")) return DEFAULT_MODELS["gemini-2.5-flash"];
-  if (check("opencode")) return DEFAULT_MODELS["opencode-zen"];
+  if (check("opencode")) return DEFAULT_MODELS["opencode-recode"];
   if (check("openai")) return DEFAULT_MODELS["gpt-4o"];
   if (check("anthropic")) return DEFAULT_MODELS["claude-3-7-sonnet"];
   if (check("deepseek")) return DEFAULT_MODELS["deepseek-chat"];
@@ -246,14 +246,14 @@ export function resolveModel(
 
   // OpenCode aliases
   const lower = modelAliasOrId.toLowerCase();
-  if (lower === "opencode" || lower === "zen" || lower === "recode") {
-    return DEFAULT_MODELS["opencode-zen"];
+  if (lower === "opencode" || lower === "recode") {
+    return DEFAULT_MODELS["opencode-recode"];
   }
   if (lower === "go" || lower === "opencode-go") {
     return DEFAULT_MODELS["opencode-go"];
   }
 
-  // OpenCode prefix support (e.g. "opencode/zen", "opencode/go", "opencode/glm-5.2", "opencode/claude-sonnet-4-5")
+  // OpenCode prefix support (e.g. "opencode/recode", "opencode/go", "opencode/glm-5.2", "opencode/claude-sonnet-4-5")
   if (lower.startsWith("opencode/")) {
     const rawId = modelAliasOrId.substring("opencode/".length);
     for (const [alias, m] of Object.entries(DEFAULT_MODELS)) {

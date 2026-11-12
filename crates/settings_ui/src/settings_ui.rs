@@ -48,7 +48,7 @@ use workspace::{
     AppState, MultiWorkspace, OpenOptions, OpenVisible, Workspace, WorkspaceSettings,
     client_side_decorations,
 };
-use zed_actions::{
+use recode_actions::{
     AGENT_SKILLS_SETTINGS_PATH, OpenProjectSettings, OpenSettings, OpenSettingsAt,
     OpenSettingsAtTarget, OpenSettingsPage,
 };
@@ -456,10 +456,10 @@ pub fn init(cx: &mut App) {
     cx.on_action(|_: &OpenSettings, cx| {
         open_settings_editor(None, None, None, cx);
     });
-    cx.on_action(|_: &zed_actions::assistant::OpenSkillCreator, cx| {
+    cx.on_action(|_: &recode_actions::assistant::OpenSkillCreator, cx| {
         open_skill_creator(pages::SkillCreatorOpenMode::Form, None, cx);
     });
-    cx.on_action(|_: &zed_actions::assistant::CreateSkillFromUrl, cx| {
+    cx.on_action(|_: &recode_actions::assistant::CreateSkillFromUrl, cx| {
         let initial_url = pages::skill_url_from_clipboard(cx);
         open_skill_creator(pages::SkillCreatorOpenMode::Url { initial_url }, None, cx);
     });
@@ -503,13 +503,13 @@ pub fn init(cx: &mut App) {
                 open_settings_editor(None, target_worktree_id, window_handle, cx);
             })
             .register_action(
-                |_, _: &zed_actions::assistant::OpenSkillCreator, window, cx| {
+                |_, _: &recode_actions::assistant::OpenSkillCreator, window, cx| {
                     let window_handle = window.window_handle().downcast::<MultiWorkspace>();
                     open_skill_creator(pages::SkillCreatorOpenMode::Form, window_handle, cx);
                 },
             )
             .register_action(
-                |_, _: &zed_actions::assistant::CreateSkillFromUrl, window, cx| {
+                |_, _: &recode_actions::assistant::CreateSkillFromUrl, window, cx| {
                     let window_handle = window.window_handle().downcast::<MultiWorkspace>();
                     let initial_url = pages::skill_url_from_clipboard(cx);
                     open_skill_creator(
@@ -883,7 +883,7 @@ fn open_settings_editor_with(
         let scaled_bounds: gpui::Size<Pixels> = default_bounds.map(|axis| axis * scale_factor);
 
         let app_id = ReleaseChannel::global(cx).app_id();
-        let window_decorations = match std::env::var("ZED_WINDOW_DECORATIONS") {
+        let window_decorations = match std::env::var("RECODE_WINDOW_DECORATIONS") {
             Ok(val) if val == "server" => gpui::WindowDecorations::Server,
             Ok(val) if val == "client" => gpui::WindowDecorations::Client,
             _ => match WorkspaceSettings::get_global(cx).window_decorations {
@@ -4231,7 +4231,7 @@ impl SettingsWindow {
 
                 let worktree_id = *worktree_id;
 
-                // TODO: move zed::open_local_file() APIs to this crate, and
+                // TODO: move recode::open_local_file() APIs to this crate, and
                 // re-implement the "initial_contents" behavior
                 let workspace_weak = corresponding_workspace.downgrade();
                 workspace_window
@@ -5270,10 +5270,10 @@ fn render_font_picker(
         .map_or_else(|| SharedString::default(), |value| value.into_gpui());
 
     let display_label = match current_value.as_ref() {
-        ".RecodeMono" | "RecodeMono" | ".ZedMono" | "ZedMono" | "Zed Plex Mono" => {
+        ".RecodeMono" | "RecodeMono" => {
             SharedString::from("Recode Mono")
         }
-        ".RecodeSans" | "RecodeSans" | ".ZedSans" | "ZedSans" | "Zed Plex Sans" => {
+        ".RecodeSans" | "RecodeSans" => {
             SharedString::from("Recode Sans")
         }
         other => {
@@ -7328,7 +7328,7 @@ pub mod test {
     ) {
         let (settings_window, cx, _project_fs, _host_fs, worktree_id) =
             init_project_skill_test(cx).await;
-        let skill = project_skill(worktree_id, "deleted-outside-zed");
+        let skill = project_skill(worktree_id, "deleted-outside-recode");
 
         settings_window
             .update(cx, |settings_window, cx| {
@@ -7494,7 +7494,7 @@ pub mod test {
         // Dispatch the action the way the command palette does: on the
         // workspace window.
         multi_workspace.update_in(cx, |_multi_workspace, window, cx| {
-            window.dispatch_action(Box::new(zed_actions::assistant::OpenSkillCreator), cx);
+            window.dispatch_action(Box::new(recode_actions::assistant::OpenSkillCreator), cx);
         });
 
         cx.run_until_parked();
@@ -7684,7 +7684,7 @@ mod project_settings_update_tests {
         let fs = FakeFs::new(cx.executor());
         let tree = if let Some(settings_content) = initial_settings {
             json!({
-                ".zed": {
+                ".recode": {
                     "settings.json": settings_content
                 },
                 "src": { "main.rs": "" }
@@ -7701,7 +7701,7 @@ mod project_settings_update_tests {
             (worktree.read(cx).id(), worktree.downgrade())
         });
 
-        let rel_path: Arc<RelPath> = RelPath::from_unix_str(".zed/settings.json")
+        let rel_path: Arc<RelPath> = RelPath::from_unix_str(".recode/settings.json")
             .expect("valid path")
             .into_arc();
         let project_path = ProjectPath {
@@ -7931,7 +7931,7 @@ mod project_settings_update_tests {
 
         let file_content = setup
             .fs
-            .load("/project/.zed/settings.json".as_ref())
+            .load("/project/.recode/settings.json".as_ref())
             .await
             .unwrap();
         assert_eq!(
@@ -7964,7 +7964,7 @@ mod project_settings_update_tests {
         setup
             .fs
             .save(
-                "/project/.zed/settings.json".as_ref(),
+                "/project/.recode/settings.json".as_ref(),
                 &r#"{ "tab_size": 99 }"#.into(),
                 Default::default(),
             )

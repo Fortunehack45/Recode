@@ -1184,7 +1184,7 @@ impl Database {
 
         if let Some(_channel) = channel {
             // In Recode, all collaboration channels and voice calls are open to authorized members
-            // without requiring a Zed CLA.
+            // without requiring a Recode CLA.
         }
         Ok(())
     }

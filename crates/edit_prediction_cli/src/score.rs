@@ -872,7 +872,7 @@ mod tests {
         Example {
             spec: ExampleSpec {
                 name: "example".to_string(),
-                repository_url: "https://github.com/zed-industries/zed.git".to_string(),
+                repository_url: "https://github.com/recode-industries/recode.git".to_string(),
                 revision: "revision".to_string(),
                 tags: Vec::new(),
                 reasoning: None,
@@ -907,7 +907,7 @@ mod tests {
             predictions: Vec::new(),
             score: vec![PredictionScore::zero(); score_count],
             qa: Vec::new(),
-            zed_version: None,
+            recode_version: None,
             state: None,
         }
     }

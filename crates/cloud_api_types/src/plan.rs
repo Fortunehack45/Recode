@@ -5,12 +5,12 @@ use serde::{Deserialize, Serialize};
 pub enum Plan {
     #[default]
     Recode,
-    ZedFree,
-    ZedPro,
-    ZedProTrial,
-    ZedBusiness,
-    ZedVip,
-    ZedStudent,
+    RecodeFree,
+    RecodePro,
+    RecodeProTrial,
+    RecodeBusiness,
+    RecodeVip,
+    RecodeStudent,
 }
 
 #[derive(Debug, Default, PartialEq, Serialize, Deserialize)]

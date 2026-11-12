@@ -111,7 +111,7 @@ fn release_job(deps: &[&NamedJob]) -> Job {
 }
 
 fn update_nightly_tag_job(bundle: &ReleaseBundleJobs) -> NamedJob {
-    let (authenticate, token) = steps::authenticate_as_zippy()
+    let (authenticate, token) = steps::authenticate_as_bot()
         .for_repository(RepositoryTarget::current())
         .with_permissions([(TokenPermissions::Contents, Level::Write)])
         .into();

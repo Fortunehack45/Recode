@@ -81,7 +81,7 @@ pub struct AcpConnection {
     auth_methods: Vec<acp_v2::AuthMethod>,
     agent_server_store: WeakEntity<AgentServerStore>,
     agent_capabilities: acp::AgentCapabilities,
-    /// Whether Zed advertised the subagents RFD, so the agent reports subagents with it.
+    /// Whether Recode advertised the subagents RFD, so the agent reports subagents with it.
     accepts_subagent_updates: bool,
     request_elicitations: Entity<ElicitationStore>,
     defaults: AcpConnectionDefaults,
@@ -486,7 +486,7 @@ fn client_builder(
         )
 }
 
-/// `acp_beta` advertises the unstable subagents and plan operations RFDs, which Zed only
+/// `acp_beta` advertises the unstable subagents and plan operations RFDs, which Recode only
 /// offers v1 agents behind the `acp-beta` flag.
 fn client_capabilities_for_agent(agent_id: &AgentId, acp_beta: bool) -> acp::ClientCapabilities {
     let mut meta = acp::Meta::from_iter([
@@ -597,7 +597,7 @@ impl AcpConnection {
 
         let (connection_tx, connection_rx) = futures::channel::oneshot::channel();
         let connection_future = connect_client_future(
-            "zed",
+            "recode",
             transport,
             dispatch_tx.clone(),
             connection_tx,
@@ -640,7 +640,7 @@ impl AcpConnection {
                 acp::InitializeRequest::new(ProtocolVersion::V1)
                     .client_capabilities(client_capabilities)
                     .client_info(
-                        acp::Implementation::new("zed", version)
+                        acp::Implementation::new("recode", version)
                             .title(release_channel.map(ToOwned::to_owned)),
                     ),
             )
@@ -1857,7 +1857,7 @@ pub mod test_support {
 
     impl crate::AgentServer for FakeAcpAgentServer {
         fn logo(&self) -> ui::IconName {
-            ui::IconName::ZedAgent
+            ui::IconName::RecodeAgent
         }
 
         fn agent_id(&self) -> AgentId {
@@ -2249,7 +2249,7 @@ pub mod test_support {
 
         let (connection_tx, connection_rx) = futures::channel::oneshot::channel();
         let client_future = connect_client_future(
-            "zed-test",
+            "recode-test",
             client_transport,
             dispatch_tx.clone(),
             connection_tx,
@@ -5536,7 +5536,7 @@ mod tests {
                         url_elicitation_id.clone(),
                         "https://auth.example.com/device",
                     ),
-                    "Authorize Zed in your browser",
+                    "Authorize Recode in your browser",
                 ),
                 acp::CompleteElicitationNotification::new(url_elicitation_id),
                 cx,
@@ -7283,7 +7283,7 @@ mod tests {
             ),
         });
         // Like claude-agent-acp, this agent reports a subagent while it works on a prompt.
-        // It sends the announcement whatever Zed advertised, so the test also covers Zed
+        // It sends the announcement whatever Recode advertised, so the test also covers Recode
         // ignoring subagent updates it did not ask for.
         let script = format!(
             r#"
@@ -7836,7 +7836,7 @@ exit 7
 
         let (connection_tx, connection_rx) = futures::channel::oneshot::channel();
         let client_future = connect_client_future(
-            "zed-test",
+            "recode-test",
             client_transport,
             dispatch_tx.clone(),
             connection_tx,

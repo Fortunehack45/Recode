@@ -25,7 +25,7 @@ use std::{
     str::FromStr,
     sync::{Arc, OnceLock},
 };
-use task::{SpawnInTerminal, ZedDebugConfig};
+use task::{SpawnInTerminal, RecodeDebugConfig};
 use url::Url;
 use util::{
     archive::extract_zip, fs::make_file_executable, maybe, paths::PathStyle, rel_path::RelPath,
@@ -233,8 +233,8 @@ impl From<AttachRequest> for task::AttachRequest {
     }
 }
 
-impl From<ZedDebugConfig> for DebugConfig {
-    fn from(value: ZedDebugConfig) -> Self {
+impl From<RecodeDebugConfig> for DebugConfig {
+    fn from(value: RecodeDebugConfig) -> Self {
         Self {
             label: value.label.into(),
             adapter: value.adapter.into(),

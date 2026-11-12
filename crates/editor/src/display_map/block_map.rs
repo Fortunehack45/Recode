@@ -4678,7 +4678,7 @@ mod tests {
         }
     }
 
-    /// Deterministic demonstration of the root cause behind ZED-7G6's crash
+    /// Deterministic demonstration of the root cause behind RECODE-7G6's crash
     /// family: multibuffer anchor comparison is not stable across diff base
     /// text changes, which unsorts the fold map's persistent fold tree.
     ///
@@ -4767,7 +4767,7 @@ mod tests {
         fold_map.read(inlay_snapshot, inlay_edits);
     }
 
-    /// Regression fuzz for ZED-7G6 ("buffer snapshot not found for excerpt
+    /// Regression fuzz for RECODE-7G6 ("buffer snapshot not found for excerpt
     /// boundary"): header blocks cache an `ExcerptBoundaryInfo`, so when a
     /// buffer leaves the multibuffer without the block map re-syncing the
     /// header's rows, the stale block panics at render time. Excerpt removal
@@ -5564,7 +5564,7 @@ mod tests {
         );
     }
 
-    // Regression test for ZED-9V4: `BlockMap::sync` walks the (old) transform
+    // Regression test for RECODE-9V4: `BlockMap::sync` walks the (old) transform
     // tree with a `WrapRow` cursor and used to `cursor.item().unwrap()` for
     // every edit, assuming each edit's `old.start` lands strictly inside the
     // tree. The companion (split-diff) branch of `sync` can compose an edit
@@ -5715,7 +5715,7 @@ mod tests {
     /// emitted edits to the previous wrap text must reproduce the new wrap
     /// text exactly. A row that changed without being covered by an edit is
     /// precisely the kind of under-invalidation that leaves the block map
-    /// holding stale header blocks (ZED-7G6), because every layer below the
+    /// holding stale header blocks (RECODE-7G6), because every layer below the
     /// block map propagates its changes only through these edits. Checking at
     /// the wrap boundary catches under-coverage introduced by any layer
     /// beneath it.

@@ -193,7 +193,7 @@ Audit of workspace member crates, external Cargo dependencies, npm dependencies,
 | `proto` | `crates/proto` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `proxy_handshake` | `crates/proxy_handshake` | Apache-2.0 | Permissive (Apache 2.0) |
 | `recent_projects` | `crates/recent_projects` | GPL-3.0-or-later | Copyleft (GPL v3+) |
-| `recode` | `crates/zed` | GPL-3.0-or-later | Copyleft (GPL v3+) |
+| `recode` | `crates/recode` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `refineable` | `crates/refineable` | Apache-2.0 | Permissive (Apache 2.0) |
 | `release_channel` | `crates/release_channel` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `remote` | `crates/remote` | GPL-3.0-or-later | Copyleft (GPL v3+) |
@@ -262,9 +262,9 @@ Audit of workspace member crates, external Cargo dependencies, npm dependencies,
 | `x_ai` | `crates/x_ai` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `x_ai_subscribed` | `crates/x_ai_subscribed` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `xtask` | `tooling/xtask` | GPL-3.0-or-later | Copyleft (GPL v3+) |
-| `zed_actions` | `crates/zed_actions` | GPL-3.0-or-later | Copyleft (GPL v3+) |
-| `zed_credentials_provider` | `crates/zed_credentials_provider` | GPL-3.0-or-later | Copyleft (GPL v3+) |
-| `zed_env_vars` | `crates/zed_env_vars` | GPL-3.0-or-later | Copyleft (GPL v3+) |
+| `recode_actions` | `crates/recode_actions` | GPL-3.0-or-later | Copyleft (GPL v3+) |
+| `recode_credentials_provider` | `crates/recode_credentials_provider` | GPL-3.0-or-later | Copyleft (GPL v3+) |
+| `recode_env_vars` | `crates/recode_env_vars` | GPL-3.0-or-later | Copyleft (GPL v3+) |
 | `zed_extension_api` | `crates/extension_api` | Apache-2.0 | Permissive (Apache 2.0) |
 | `zed_html` | `extensions/html` | Apache-2.0 | Permissive (Apache 2.0) |
 | `zed_proto` | `extensions/proto` | Apache-2.0 | Permissive (Apache 2.0) |
@@ -334,6 +334,6 @@ Audit of workspace member crates, external Cargo dependencies, npm dependencies,
 
 ## 4. Legal Compliance & Action Items
 
-1. **Attribution**: Original Zed copyright notices (`Copyright (c) Zed Industries, Inc.`) must remain in `LICENSE-GPL`, `LICENSE-APACHE`, and legal headers per Part 5.
+1. **Attribution**: Required upstream third-party copyright and permission notices must remain intact in `LICENSE-GPL`, `LICENSE-APACHE`, and source headers per GPL-3.0 Section 4 and Apache-2.0 Section 4(c).
 2. **Workspace Rebranding**: Crates being renamed in Phases 1, 2, and 7 retain their existing license declarations while updating package name and metadata.
 3. **Commercial / BYOK Use**: Since Recode is distributed under GPL-3.0-or-later for the app, and GPUI under Apache-2.0, open-source compliance is fully preserved.

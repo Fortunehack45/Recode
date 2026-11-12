@@ -1,5 +1,5 @@
 -- WARNING: If you are modifying this file you MUST open a PR to the Cloud repository prior to merging any changes.
--- If you are not Zed staff you MUST coordinate with a staff member to apply the schema migrations before this PR is merged.
+-- If you are not Recode staff you MUST coordinate with a staff member to apply the schema migrations before this PR is merged.
 
 CREATE TABLE "users" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -268,7 +268,7 @@ CREATE TABLE "channels" (
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "visibility" VARCHAR NOT NULL,
     "parent_path" TEXT NOT NULL,
-    "requires_zed_cla" BOOLEAN NOT NULL DEFAULT FALSE,
+    "requires_recode_cla" BOOLEAN NOT NULL DEFAULT FALSE,
     "channel_order" INTEGER NOT NULL DEFAULT 1
 );
 

@@ -32,7 +32,7 @@ use project::{
 
 use settings::{SeedQuerySetting, Settings};
 use std::{any::TypeId, sync::Arc};
-use zed_actions::{outline::ToggleOutline, workspace::CopyPath, workspace::CopyRelativePath};
+use recode_actions::{outline::ToggleOutline, workspace::CopyPath, workspace::CopyRelativePath};
 
 use ui::{BASE_REM_SIZE_IN_PX, IconButtonShape, Tooltip, prelude::*, utils::SearchInputWidth};
 use util::{ResultExt, paths::PathMatcher};
@@ -50,7 +50,7 @@ use registrar::{ForDeployed, ForDismissed, SearchActionsRegistrar};
 
 const MAX_BUFFER_SEARCH_HISTORY_SIZE: usize = 50;
 
-pub use zed_actions::buffer_search::{
+pub use recode_actions::buffer_search::{
     Deploy, DeployReplace, Dismiss, FocusEditor, UseSelectionForFind,
 };
 
@@ -4314,7 +4314,7 @@ mod tests {
             assert_eq!(
                 editor.search_background_highlights(cx).len(),
                 1,
-                "only the literal 'z.d' should match, not 'zed'"
+                "only the literal 'z.d' should match, not 'recode'"
             );
         });
     }
@@ -4327,8 +4327,8 @@ mod tests {
         // uppercase version of the same word, so we can confirm whether case
         // sensitivity is affecting `editor: select next` .
         let cx = cx.add_empty_window();
-        let buffer_a = cx.new(|cx| Buffer::local("zed\nZED\n", cx));
-        let buffer_b = cx.new(|cx| Buffer::local("zed\nZED\n", cx));
+        let buffer_a = cx.new(|cx| Buffer::local("recode\nZED\n", cx));
+        let buffer_b = cx.new(|cx| Buffer::local("recode\nZED\n", cx));
         let editor_a = cx
             .new_window_entity(|window, cx| Editor::for_buffer(buffer_a.clone(), None, window, cx));
         let editor_b = cx
@@ -4482,7 +4482,7 @@ mod tests {
         init_globals(cx);
 
         let cx = cx.add_empty_window();
-        let buffer = cx.new(|cx| Buffer::local("zed\nzedfoo\nzed", cx));
+        let buffer = cx.new(|cx| Buffer::local("recode\nzedfoo\nzed", cx));
         let editor =
             cx.new_window_entity(|window, cx| Editor::for_buffer(buffer.clone(), None, window, cx));
 
@@ -4530,7 +4530,7 @@ mod tests {
         cx: &mut TestAppContext,
     ) {
         init_globals(cx);
-        let buffer = cx.new(|cx| Buffer::local("zed\nzed\nzed\n", cx));
+        let buffer = cx.new(|cx| Buffer::local("recode\nzed\nzed\n", cx));
         let mut editor = None;
         let window = cx.add_window(|window, cx| {
             // Load the keymaps in the same order (and with the same sources) as
@@ -4568,7 +4568,7 @@ mod tests {
 
         search_bar
             .update_in(cx, |search_bar, window, cx| {
-                search_bar.search("zed", None, true, window, cx)
+                search_bar.search("recode", None, true, window, cx)
             })
             .await
             .unwrap();

@@ -8,13 +8,13 @@
       ...
     }:
     let
-      mkZed = import ../toolchain.nix { inherit inputs; };
-      zed-editor = mkZed pkgs;
+      mkRecode = import ../toolchain.nix { inherit inputs; };
+      recode-editor = mkRecode pkgs;
     in
     {
       packages = {
-        default = zed-editor;
-        debug = zed-editor.override { profile = "dev"; };
+        default = recode-editor;
+        debug = recode-editor.override { profile = "dev"; };
       };
     }
     // lib.optionalAttrs (lib.hasSuffix "linux" system) {

@@ -46,16 +46,12 @@ use settings_json::{infer_json_indent_size, update_value_in_json_text};
 pub const LSP_SETTINGS_SCHEMA_URL_PREFIX: &str = "recode://schemas/settings/lsp/";
 
 // GPUI resolves these aliases, but they are not part of the platform font inventory.
-const VIRTUAL_FONT_NAMES: [&str; 9] = [
+const VIRTUAL_FONT_NAMES: [&str; 5] = [
     ".RecodeMono",
     ".RecodeSans",
     "Recode Mono",
     "Recode Sans",
     ".SystemUIFont",
-    ".ZedMono",
-    ".ZedSans",
-    "Zed Plex Mono",
-    "Zed Plex Sans",
 ];
 
 pub trait SettingsKey: 'static + Send + Sync {
@@ -806,7 +802,7 @@ impl SettingsStore {
     }
 
     #[inline(always)]
-    fn parse_and_migrate_zed_settings<SettingsContentType: RootUserSettings>(
+    fn parse_and_migrate_recode_settings<SettingsContentType: RootUserSettings>(
         &mut self,
         user_settings_content: &str,
         file: SettingsFile,
@@ -982,7 +978,7 @@ impl SettingsStore {
         }
         self.last_user_settings_content = Some(user_settings_content.to_string());
 
-        let (settings, parse_result) = self.parse_and_migrate_zed_settings::<UserSettingsContent>(
+        let (settings, parse_result) = self.parse_and_migrate_recode_settings::<UserSettingsContent>(
             user_settings_content,
             SettingsFile::User,
         );
@@ -1009,7 +1005,7 @@ impl SettingsStore {
         }
         self.last_global_settings_content = Some(global_settings_content.to_string());
 
-        let (settings, parse_result) = self.parse_and_migrate_zed_settings::<SettingsContent>(
+        let (settings, parse_result) = self.parse_and_migrate_recode_settings::<SettingsContent>(
             global_settings_content,
             SettingsFile::Global,
         );
@@ -1076,7 +1072,7 @@ impl SettingsStore {
         let content = settings_content
             .map(|content| content.trim())
             .filter(|content| !content.is_empty());
-        let mut zed_settings_changed = false;
+        let mut recode_settings_changed = false;
         match (path.clone(), kind, content) {
             (LocalSettingsPath::InWorktree(directory_path), LocalSettingsKind::Tasks, _) => {
                 return Err(InvalidSettingsError::Tasks {
@@ -1098,7 +1094,7 @@ impl SettingsStore {
                 });
             }
             (LocalSettingsPath::InWorktree(directory_path), LocalSettingsKind::Settings, None) => {
-                zed_settings_changed = self
+                recode_settings_changed = self
                     .local_settings
                     .remove(&(root_id, directory_path.clone()))
                     .is_some();
@@ -1111,7 +1107,7 @@ impl SettingsStore {
                 Some(settings_contents),
             ) => {
                 let (new_settings, parse_result) = self
-                    .parse_and_migrate_zed_settings::<ProjectSettingsContent>(
+                    .parse_and_migrate_recode_settings::<ProjectSettingsContent>(
                         settings_contents,
                         SettingsFile::Project((root_id, directory_path.clone())),
                     );
@@ -1132,7 +1128,7 @@ impl SettingsStore {
                                 project: new_settings,
                                 ..Default::default()
                             });
-                            zed_settings_changed = true;
+                            recode_settings_changed = true;
                         }
                         btree_map::Entry::Occupied(mut o) => {
                             if &o.get().project != &new_settings {
@@ -1140,7 +1136,7 @@ impl SettingsStore {
                                     project: new_settings,
                                     ..Default::default()
                                 });
-                                zed_settings_changed = true;
+                                recode_settings_changed = true;
                             }
                         }
                     }
@@ -1161,7 +1157,7 @@ impl SettingsStore {
             }
         }
         if let LocalSettingsPath::InWorktree(directory_path) = &path {
-            if zed_settings_changed {
+            if recode_settings_changed {
                 self.recompute_values(Some((root_id, &directory_path)), cx);
             }
         }
@@ -3281,9 +3277,9 @@ mod tests {
 
         let schema = SettingsStore::json_schema(&SettingsJsonSchemaParams {
             language_names: &["Rust".to_string(), "TypeScript".to_string()],
-            font_names: &["Zed Mono".to_string()],
+            font_names: &["Recode Mono".to_string()],
             theme_names: &["One Dark".into()],
-            icon_theme_names: &["Zed Icons".into()],
+            icon_theme_names: &["Recode Icons".into()],
             lsp_adapter_names: &[
                 "rust-analyzer".to_string(),
                 "typescript-language-server".to_string(),
@@ -3336,9 +3332,9 @@ mod tests {
 
         let schema = SettingsStore::project_json_schema(&SettingsJsonSchemaParams {
             language_names: &["Rust".to_string(), "TypeScript".to_string()],
-            font_names: &["Zed Mono".to_string()],
+            font_names: &["Recode Mono".to_string()],
             theme_names: &["One Dark".into()],
-            icon_theme_names: &["Zed Icons".into()],
+            icon_theme_names: &["Recode Icons".into()],
             lsp_adapter_names: &[
                 "rust-analyzer".to_string(),
                 "typescript-language-server".to_string(),
@@ -3391,9 +3387,9 @@ mod tests {
 
         let schema = SettingsStore::json_schema(&SettingsJsonSchemaParams {
             language_names: &["Rust".to_string(), "TypeScript".to_string()],
-            font_names: &["Zed Mono".to_string()],
+            font_names: &["Recode Mono".to_string()],
             theme_names: &["One Dark".into()],
-            icon_theme_names: &["Zed Icons".into()],
+            icon_theme_names: &["Recode Icons".into()],
             lsp_adapter_names: &[],
             action_names: &[],
             action_documentation: &HashMap::default(),
@@ -3427,9 +3423,9 @@ mod tests {
 
         let params = SettingsJsonSchemaParams {
             language_names: &["Rust".to_string()],
-            font_names: &["Zed Mono".to_string()],
+            font_names: &["Recode Mono".to_string()],
             theme_names: &["One Dark".into()],
-            icon_theme_names: &["Zed Icons".into()],
+            icon_theme_names: &["Recode Icons".into()],
             lsp_adapter_names: &["rust-analyzer".to_string()],
             action_names: &[],
             action_documentation: &HashMap::default(),

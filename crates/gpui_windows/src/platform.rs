@@ -636,13 +636,13 @@ impl Platform for WindowsPlatform {
             return;
         };
         let script = r#"
-            $pidToWaitFor = $env:ZED_RESTART_PID
-            $exePath = $env:ZED_RESTART_EXECUTABLE
-            $argumentList = $env:ZED_RESTART_ARGUMENTS
+            $pidToWaitFor = $env:RECODE_RESTART_PID
+            $exePath = $env:RECODE_RESTART_EXECUTABLE
+            $argumentList = $env:RECODE_RESTART_ARGUMENTS
 
-            [Environment]::SetEnvironmentVariable("ZED_RESTART_PID", $null)
-            [Environment]::SetEnvironmentVariable("ZED_RESTART_EXECUTABLE", $null)
-            [Environment]::SetEnvironmentVariable("ZED_RESTART_ARGUMENTS", $null)
+            [Environment]::SetEnvironmentVariable("RECODE_RESTART_PID", $null)
+            [Environment]::SetEnvironmentVariable("RECODE_RESTART_EXECUTABLE", $null)
+            [Environment]::SetEnvironmentVariable("RECODE_RESTART_ARGUMENTS", $null)
 
             while ($true) {
                 $process = Get-Process -Id $pidToWaitFor -ErrorAction SilentlyContinue
@@ -674,9 +674,9 @@ impl Platform for WindowsPlatform {
                 command
                     .arg("-command")
                     .arg(script)
-                    .env("ZED_RESTART_PID", pid.to_string())
-                    .env("ZED_RESTART_EXECUTABLE", app_path)
-                    .env("ZED_RESTART_ARGUMENTS", arguments);
+                    .env("RECODE_RESTART_PID", pid.to_string())
+                    .env("RECODE_RESTART_EXECUTABLE", app_path)
+                    .env("RECODE_RESTART_ARGUMENTS", arguments);
                 #[allow(
                     clippy::disallowed_methods,
                     reason = "We are restarting ourselves, using std command thus is fine"
@@ -1810,7 +1810,7 @@ fn handle_gpu_device_lost(
     Ok(())
 }
 
-const PLATFORM_WINDOW_CLASS_NAME: PCWSTR = w!("Zed::PlatformWindow");
+const PLATFORM_WINDOW_CLASS_NAME: PCWSTR = w!("Recode::PlatformWindow");
 
 fn register_platform_window_class() {
     let wc = WNDCLASSW {
@@ -1988,9 +1988,9 @@ mod tests {
         assert_eq!(
             encode_restart_arguments(&[
                 OsString::from("--user-data-dir"),
-                OsString::from(r"C:\Zed Data"),
+                OsString::from(r"C:\Recode Data"),
             ]),
-            OsStr::new(r#""--user-data-dir" "C:\Zed Data""#)
+            OsStr::new(r#""--user-data-dir" "C:\Recode Data""#)
         );
         assert_eq!(
             encode_restart_arguments(&[OsString::from(r"C:\")]),

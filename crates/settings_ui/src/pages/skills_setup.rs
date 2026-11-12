@@ -110,7 +110,7 @@ pub(crate) fn trash_skill(
                     let entry_id = project
                         .entry_for_path(&project_path, cx)
                         .map(|entry| entry.id);
-                    // Already deleted outside Zed.
+                    // Already deleted outside Recode.
                     anyhow::Ok(entry_id.and_then(|entry_id| project.trash_entry(entry_id, cx)))
                 });
                 match trash_task {

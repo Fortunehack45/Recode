@@ -24,7 +24,7 @@ use agent_settings::{AgentSettings, UserAgentsMd};
 use anyhow::Context as _;
 use askpass::AskPassDelegate;
 use branch_mode::{BranchBase, ChangesMode};
-use client::zed_urls;
+use client::recode_urls;
 use collections::{BTreeMap, HashMap, HashSet};
 use db::kvp::KeyValueStore;
 use editor::{Editor, EditorElement, EditorMode, MultiBuffer, MultiBufferOffset, SizingBehavior};
@@ -109,7 +109,7 @@ use workspace::{
     dock::{DockPosition, Panel, PanelEvent},
     notifications::{DetachAndPromptErr, NotificationId, NotifyTaskExt},
 };
-use zed_actions::{
+use recode_actions::{
     DecreaseBufferFontSize, IncreaseBufferFontSize, ResetBufferFontSize,
     git_panel::ToggleFocus,
     workspace::{CopyPath, CopyRelativePath},
@@ -394,7 +394,7 @@ fn git_panel_context_menu(
                 )
             })
             .action_disabled_when(!has_stash_items, "Stash Pop", StashPop.boxed_clone())
-            .action("View Stash", zed_actions::git::ViewStash.boxed_clone())
+            .action("View Stash", recode_actions::git::ViewStash.boxed_clone())
             .when(include_copy_paths, |context_menu| {
                 context_menu
                     .separator()
@@ -6698,7 +6698,7 @@ impl GitPanel {
                         // button is pressed.
                         this.action("Create Pull Request", move |window, cx| {
                             window
-                                .dispatch_action(Box::new(zed_actions::git::CreatePullRequest), cx);
+                                .dispatch_action(Box::new(recode_actions::git::CreatePullRequest), cx);
                         })
                     }
                     (Toast, false) => this,
@@ -7462,10 +7462,10 @@ impl GitPanel {
                                         .h_full()
                                         .flex_grow_1()
                                         .cursor_text()
-                                        .on_action(|&zed_actions::editor::MoveUp, _, cx| {
+                                        .on_action(|&recode_actions::editor::MoveUp, _, cx| {
                                             cx.stop_propagation();
                                         })
-                                        .on_action(|&zed_actions::editor::MoveDown, _, cx| {
+                                        .on_action(|&recode_actions::editor::MoveDown, _, cx| {
                                             cx.stop_propagation();
                                         })
                                         .child(EditorElement::new(
@@ -9868,7 +9868,7 @@ impl Render for GenerateCommitMessageConfigurationTooltip {
                                 .label_size(LabelSize::Small)
                                 .on_click(|_, window, cx| {
                                     window.dispatch_action(
-                                        zed_actions::OpenSettingsAt {
+                                        recode_actions::OpenSettingsAt {
                                             path: "llm_providers".to_string(),
                                             target: None,
                                         }
@@ -9887,7 +9887,7 @@ impl Render for GenerateCommitMessageConfigurationTooltip {
                                 )
                                 .label_size(LabelSize::Small)
                                 .on_click(move |_, _, cx| {
-                                    cx.open_url(&zed_urls::llm_provider_docs(cx))
+                                    cx.open_url(&recode_urls::llm_provider_docs(cx))
                                 }),
                         ),
                 )
@@ -10381,7 +10381,7 @@ impl RenderOnce for PanelRepoFooter {
             .label_size(LabelSize::Small)
             .truncate(true)
             .on_click(|_, window, cx| {
-                window.dispatch_action(zed_actions::git::Switch.boxed_clone(), cx);
+                window.dispatch_action(recode_actions::git::Switch.boxed_clone(), cx);
             });
 
         let branch_selector = PopoverMenu::new("popover-button")
@@ -10392,7 +10392,7 @@ impl RenderOnce for PanelRepoFooter {
             })
             .trigger_with_tooltip(
                 branch_selector_button,
-                Tooltip::for_action_title("Switch Branch", &zed_actions::git::Switch),
+                Tooltip::for_action_title("Switch Branch", &recode_actions::git::Switch),
             )
             .anchor(Anchor::BottomLeft)
             .offset(gpui::Point {
@@ -10503,7 +10503,7 @@ impl Component for PanelRepoFooter {
                 is_head: true,
                 ref_name: branch_name.to_string().into(),
                 upstream: upstream.map(|tracking| Upstream {
-                    ref_name: format!("zed/{}", branch_name).into(),
+                    ref_name: format!("recode/{}", branch_name).into(),
                     tracking,
                 }),
                 most_recent_commit: Some(CommitSummary {
@@ -10619,7 +10619,7 @@ impl Component for PanelRepoFooter {
                                 .w(example_width)
                                 .overflow_hidden()
                                 .child(PanelRepoFooter::new_preview(
-                                    SharedString::from("zed"),
+                                    SharedString::from("recode"),
                                     Some(custom("main", behind_upstream)),
                                 ))
                                 .into_any_element(),
@@ -10630,7 +10630,7 @@ impl Component for PanelRepoFooter {
                                 .w(example_width)
                                 .overflow_hidden()
                                 .child(PanelRepoFooter::new_preview(
-                                    SharedString::from("zed"),
+                                    SharedString::from("recode"),
                                     Some(custom(
                                         "redesign-and-update-git-ui-list-entry-style",
                                         behind_upstream,
@@ -10644,7 +10644,7 @@ impl Component for PanelRepoFooter {
                                 .w(example_width)
                                 .overflow_hidden()
                                 .child(PanelRepoFooter::new_preview(
-                                    SharedString::from("zed-industries-community-examples"),
+                                    SharedString::from("recode-community-examples"),
                                     Some(custom("gpui", ahead_of_upstream)),
                                 ))
                                 .into_any_element(),
@@ -10655,7 +10655,7 @@ impl Component for PanelRepoFooter {
                                 .w(example_width)
                                 .overflow_hidden()
                                 .child(PanelRepoFooter::new_preview(
-                                    SharedString::from("zed-industries-community-examples"),
+                                    SharedString::from("recode-community-examples"),
                                     Some(custom(
                                         "redesign-and-update-git-ui-list-entry-style",
                                         behind_upstream,
@@ -10680,7 +10680,7 @@ impl Component for PanelRepoFooter {
                                 .w(example_width)
                                 .overflow_hidden()
                                 .child(PanelRepoFooter::new_preview(
-                                    SharedString::from("zed"),
+                                    SharedString::from("recode"),
                                     Some(custom("update-README", behind_upstream)),
                                 ))
                                 .into_any_element(),

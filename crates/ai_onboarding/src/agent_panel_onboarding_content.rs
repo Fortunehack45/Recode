@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use client::{Client, UserStore};
 use gpui::{Entity, IntoElement, ParentElement};
-use language_model::{LanguageModelRegistry, ZED_CLOUD_PROVIDER_ID};
+use language_model::{LanguageModelRegistry, RECODE_CLOUD_PROVIDER_ID};
 use ui::prelude::*;
 
 use crate::{AgentPanelOnboardingCard, ApiKeysWithoutProviders};
@@ -11,14 +11,14 @@ pub struct AgentPanelOnboarding {
     user_store: Entity<UserStore>,
     client: Arc<Client>,
     has_configured_providers: bool,
-    continue_with_zed_ai: Arc<dyn Fn(&mut Window, &mut App)>,
+    continue_with_recode_ai: Arc<dyn Fn(&mut Window, &mut App)>,
 }
 
 impl AgentPanelOnboarding {
     pub fn new(
         user_store: Entity<UserStore>,
         client: Arc<Client>,
-        continue_with_zed_ai: impl Fn(&mut Window, &mut App) + 'static,
+        continue_with_recode_ai: impl Fn(&mut Window, &mut App) + 'static,
         cx: &mut Context<Self>,
     ) -> Self {
         cx.subscribe(
@@ -39,7 +39,7 @@ impl AgentPanelOnboarding {
             user_store,
             client,
             has_configured_providers: Self::has_configured_providers(cx),
-            continue_with_zed_ai: Arc::new(continue_with_zed_ai),
+            continue_with_recode_ai: Arc::new(continue_with_recode_ai),
         }
     }
 
@@ -48,7 +48,7 @@ impl AgentPanelOnboarding {
             .visible_providers()
             .iter()
             .any(|provider| {
-                if provider.id() == ZED_CLOUD_PROVIDER_ID {
+                if provider.id() == RECODE_CLOUD_PROVIDER_ID {
                     return false;
                 }
                 // For Ollama/LM Studio local providers, check if they actually have provided models discovered

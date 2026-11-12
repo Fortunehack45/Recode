@@ -76,7 +76,7 @@ fn crate_json(name: &str) -> Value {
 }
 
 #[test]
-fn test_requests_identify_zed_and_authenticate_with_api_token() {
+fn test_requests_identify_recode_and_authenticate_with_api_token() {
     let (fake_http_client, requests) = recording_fake_http_client(|_| {
         let site_metadata = json!({
             "deployed_sha": "abc",
@@ -93,7 +93,7 @@ fn test_requests_identify_zed_and_authenticate_with_api_token() {
     let requests = requests.lock();
     assert_eq!(
         requests[0].headers[header::USER_AGENT],
-        "Zed GPUI releases (https://github.com/zed-industries/zed)"
+        "Recode GPUI releases (https://github.com/Fortunehack45/Recode)"
     );
     assert_eq!(requests[0].headers[header::AUTHORIZATION], "secret");
 }

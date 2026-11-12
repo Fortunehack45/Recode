@@ -225,7 +225,7 @@ impl WslRemoteConnection {
         };
 
         let binary_name = format!(
-            "zed-remote-server-{}-{}",
+            "recode-remote-server-{}-{}",
             release_channel.dev_name(),
             version_str
         );
@@ -375,7 +375,7 @@ impl WslRemoteConnection {
         let mut command = wsl_command_impl(
             &self.connection_options,
             "sh",
-            &["-c", "cat > \"$1\"", "zed-upload", dst_posix.as_ref()],
+            &["-c", "cat > \"$1\"", "recode-upload", dst_posix.as_ref()],
             true,
         );
         command.kill_on_drop(true);
@@ -466,7 +466,7 @@ impl RemoteConnection for WslRemoteConnection {
         };
 
         let mut proxy_args = vec![];
-        for env_var in ["RUST_LOG", "RUST_BACKTRACE", "ZED_GENERATE_MINIDUMPS"] {
+        for env_var in ["RUST_LOG", "RUST_BACKTRACE", "RECODE_GENERATE_MINIDUMPS"] {
             if let Some(value) = std::env::var(env_var).ok() {
                 // We don't quote the value here as it seems excessive and may result in invalid envs for the
                 // proxy server. For example, `RUST_LOG='debug'` will result in a warning "invalid logging spec 'debug'', ignoring it"
@@ -862,7 +862,7 @@ mod tests {
         );
 
         connection.remote_binary_path = Some(Arc::from(RelPath::from_unix_str(
-            ".local/share/zed/remote server",
+            ".local/share/recode/remote server",
         )?));
         for (home_dir, user, working_dir, shell, shell_kind, expected_args) in [
             (
@@ -880,7 +880,7 @@ mod tests {
                     "/bin/bash",
                     "-i",
                     "-c",
-                    "exec \"$HOME\"/'.local/share/zed/remote server' exec",
+                    "exec \"$HOME\"/'.local/share/recode/remote server' exec",
                 ],
             ),
             (
@@ -898,7 +898,7 @@ mod tests {
                     "/bin/fish",
                     "-i",
                     "-c",
-                    "exec '/home/user/.local/share/zed/remote server' exec",
+                    "exec '/home/user/.local/share/recode/remote server' exec",
                 ],
             ),
             (
@@ -918,7 +918,7 @@ mod tests {
                     "/usr/bin/nu",
                     "-i",
                     "-c",
-                    "exec '/home/user/.local/share/zed/remote server' exec",
+                    "exec '/home/user/.local/share/recode/remote server' exec",
                 ],
             ),
             (
@@ -936,7 +936,7 @@ mod tests {
                     "/usr/bin/nu",
                     "-i",
                     "-c",
-                    "exec '/home/a^b/.local/share/zed/remote server' exec",
+                    "exec '/home/a^b/.local/share/recode/remote server' exec",
                 ],
             ),
             (
@@ -954,7 +954,7 @@ mod tests {
                     "/usr/bin/nu",
                     "-i",
                     "-c",
-                    "exec ($env.HOME | path join '.local/share/zed/remote server') exec",
+                    "exec ($env.HOME | path join '.local/share/recode/remote server') exec",
                 ],
             ),
             (
@@ -972,7 +972,7 @@ mod tests {
                     "/bin/tcsh",
                     "-i",
                     "-c",
-                    "exec '/home/bang'\\!'user/.local/share/zed/remote server' exec",
+                    "exec '/home/bang'\\!'user/.local/share/recode/remote server' exec",
                 ],
             ),
         ] {

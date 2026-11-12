@@ -109,7 +109,7 @@ impl Github {
         }
 
         // TODO: detecting self hosted instances by checking whether "github" is in the url or not
-        // is not very reliable. See https://github.com/zed-industries/zed/issues/26393 for more
+        // is not very reliable. See https://github.com/Fortunehack45/Recode/issues/26393 for more
         // information.
         if !host.contains("github") {
             bail!("not a GitHub URL");
@@ -177,7 +177,7 @@ impl GitHostingProvider for Github {
 
     fn supports_avatars(&self) -> bool {
         // Avatars are not supported for self-hosted GitHub instances
-        // See tracking issue: https://github.com/zed-industries/zed/issues/11043
+        // See tracking issue: https://github.com/Fortunehack45/Recode/issues/11043
         &self.name == "GitHub"
     }
 
@@ -310,7 +310,7 @@ mod tests {
 
     #[test]
     fn test_remote_url_with_root_slash() {
-        let remote_url = "git@github.com:/zed-industries/zed";
+        let remote_url = "git@github.com:/Fortunehack45/Recode";
         let parsed_remote = Github::public_instance()
             .parse_remote_url(remote_url)
             .unwrap();
@@ -326,14 +326,14 @@ mod tests {
 
     #[test]
     fn test_invalid_self_hosted_remote_url() {
-        let remote_url = "git@github.com:zed-industries/zed.git";
+        let remote_url = "git@github.com:Fortunehack45/Recode.git";
         let github = Github::from_remote_url(remote_url);
         assert!(github.is_err());
     }
 
     #[test]
     fn test_from_remote_url_ssh() {
-        let remote_url = "git@github.my-enterprise.com:zed-industries/zed.git";
+        let remote_url = "git@github.my-enterprise.com:Fortunehack45/Recode.git";
         let github = Github::from_remote_url(remote_url).unwrap();
 
         assert!(!github.supports_avatars());
@@ -346,7 +346,7 @@ mod tests {
 
     #[test]
     fn test_from_remote_url_https() {
-        let remote_url = "https://github.my-enterprise.com/zed-industries/zed.git";
+        let remote_url = "https://github.my-enterprise.com/Fortunehack45/Recode.git";
         let github = Github::from_remote_url(remote_url).unwrap();
 
         assert!(!github.supports_avatars());
@@ -359,7 +359,7 @@ mod tests {
 
     #[test]
     fn test_parse_remote_url_given_self_hosted_ssh_url() {
-        let remote_url = "git@github.my-enterprise.com:zed-industries/zed.git";
+        let remote_url = "git@github.my-enterprise.com:Fortunehack45/Recode.git";
         let parsed_remote = Github::from_remote_url(remote_url)
             .unwrap()
             .parse_remote_url(remote_url)
@@ -376,7 +376,7 @@ mod tests {
 
     #[test]
     fn test_parse_remote_url_given_self_hosted_https_url_with_subgroup() {
-        let remote_url = "https://github.my-enterprise.com/zed-industries/zed.git";
+        let remote_url = "https://github.my-enterprise.com/Fortunehack45/Recode.git";
         let parsed_remote = Github::from_remote_url(remote_url)
             .unwrap()
             .parse_remote_url(remote_url)
@@ -394,7 +394,7 @@ mod tests {
     #[test]
     fn test_parse_remote_url_given_ssh_url() {
         let parsed_remote = Github::public_instance()
-            .parse_remote_url("git@github.com:zed-industries/zed.git")
+            .parse_remote_url("git@github.com:Fortunehack45/Recode.git")
             .unwrap();
 
         assert_eq!(
@@ -409,7 +409,7 @@ mod tests {
     #[test]
     fn test_parse_remote_url_given_https_url() {
         let parsed_remote = Github::public_instance()
-            .parse_remote_url("https://github.com/zed-industries/zed.git")
+            .parse_remote_url("https://github.com/Fortunehack45/Recode.git")
             .unwrap();
 
         assert_eq!(
@@ -451,7 +451,7 @@ mod tests {
             ),
         );
 
-        let expected_url = "https://github.com/zed-industries/zed/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs";
+        let expected_url = "https://github.com/Fortunehack45/Recode/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs";
         assert_eq!(permalink.to_string(), expected_url.to_string())
     }
 
@@ -469,7 +469,7 @@ mod tests {
             ),
         );
 
-        let expected_url = "https://github.com/zed-industries/zed/blob/b2efec9824c45fcc90c9a7eb107a50d1772a60aa/crates/zed/src/main.rs";
+        let expected_url = "https://github.com/Fortunehack45/Recode/blob/b2efec9824c45fcc90c9a7eb107a50d1772a60aa/crates/zed/src/main.rs";
         assert_eq!(permalink.to_string(), expected_url.to_string())
     }
 
@@ -487,7 +487,7 @@ mod tests {
             ),
         );
 
-        let expected_url = "https://github.com/zed-industries/zed/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs#L7";
+        let expected_url = "https://github.com/Fortunehack45/Recode/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs#L7";
         assert_eq!(permalink.to_string(), expected_url.to_string())
     }
 
@@ -505,7 +505,7 @@ mod tests {
             ),
         );
 
-        let expected_url = "https://github.com/zed-industries/zed/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs#L24-L48";
+        let expected_url = "https://github.com/Fortunehack45/Recode/blob/e6ebe7974deb6bb6cc0e2595c8ec31f0c71084b7/crates/editor/src/git/permalink.rs#L24-L48";
         assert_eq!(permalink.to_string(), expected_url.to_string())
     }
 
@@ -524,7 +524,7 @@ mod tests {
 
         assert_eq!(
             url.as_str(),
-            "https://github.com/zed-industries/zed/pull/new/feature%2Fsomething%20cool"
+            "https://github.com/Fortunehack45/Recode/pull/new/feature%2Fsomething%20cool"
         );
     }
 
@@ -557,7 +557,7 @@ mod tests {
                 .unwrap()
                 .url
                 .as_str(),
-            "https://github.com/zed-industries/zed/pull/10687"
+            "https://github.com/Fortunehack45/Recode/pull/10687"
         );
 
         // Pull request number in middle of line, which we want to ignore
@@ -603,10 +603,10 @@ mod tests {
 
         assert_eq!(
             url.as_str(),
-            "https://github.com/zed-industries/zed/pull/new/feature%2Fnew-feature"
+            "https://github.com/Fortunehack45/Recode/pull/new/feature%2Fnew-feature"
         );
 
-        let base_url = Url::parse("https://github.zed.com").unwrap();
+        let base_url = Url::parse("https://github.recode.com").unwrap();
         let github = Github::new("GitHub Self-Hosted", base_url);
         let url = github
             .build_create_pull_request_url(&remote, "feature/new-feature")
@@ -614,7 +614,7 @@ mod tests {
 
         assert_eq!(
             url.as_str(),
-            "https://github.zed.com/zed-industries/zed/pull/new/feature%2Fnew-feature"
+            "https://github.recode.com/Fortunehack45/Recode/pull/new/feature%2Fnew-feature"
         );
     }
 

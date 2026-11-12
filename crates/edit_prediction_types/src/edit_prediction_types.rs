@@ -42,10 +42,10 @@ impl EditPredictionIconSet {
     pub fn new(base: IconName) -> Self {
         Self {
             base,
-            disabled: IconName::ZedPredictDisabled,
-            up: IconName::ZedPredictUp,
-            down: IconName::ZedPredictDown,
-            error: IconName::ZedPredictError,
+            disabled: IconName::RecodePredictDisabled,
+            up: IconName::RecodePredictUp,
+            down: IconName::RecodePredictDown,
+            error: IconName::RecodePredictError,
         }
     }
 

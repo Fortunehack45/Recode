@@ -2260,7 +2260,7 @@ async fn test_zed_cloud_predictions_skip_organizations_without_subscriptions(
     authenticated_user.organizations = vec![organization("unsubscribed"), organization("paid")];
     authenticated_user.plans_by_organization.insert(
         OrganizationId("paid".into()),
-        KnownOrUnknown::Known(Plan::ZedBusiness),
+        KnownOrUnknown::Known(Plan::RecodeBusiness),
     );
     let authenticated_user = serde_json::to_string(&authenticated_user).unwrap();
     let local_completion_requests = Arc::new(Mutex::new(0));
@@ -2336,7 +2336,7 @@ async fn test_zed_cloud_predictions_skip_organizations_without_subscriptions(
     set_provider(settings::EditPredictionProvider::OpenAiCompatibleApi, cx);
     request_prediction(&ep_store, cx).await.unwrap();
     assert_eq!(*local_completion_requests.lock(), 1);
-    set_provider(settings::EditPredictionProvider::Zed, cx);
+    set_provider(settings::EditPredictionProvider::Recode, cx);
 
     let user_store = ep_store.read_with(cx, |ep_store, _cx| ep_store.user_store.clone());
     user_store
@@ -2913,7 +2913,7 @@ fn init_test_with_fake_client_and_legacy_data_collection(
         if let Some(legacy_data_collection_choice) = legacy_data_collection_choice {
             KeyValueStore::global(cx)
                 .write_kvp(
-                    ZED_PREDICT_DATA_COLLECTION_CHOICE.into(),
+                    RECODE_PREDICT_DATA_COLLECTION_CHOICE.into(),
                     legacy_data_collection_choice.to_string(),
                 )
                 .now_or_never()
@@ -3064,7 +3064,7 @@ fn set_test_organization(user_store: &Entity<UserStore>, cx: &mut TestAppContext
                     ui_permissions: Default::default(),
                 }),
                 OrganizationConfiguration {
-                    is_zed_model_provider_enabled: true,
+                    is_recode_model_provider_enabled: true,
                     is_agent_thread_feedback_enabled: true,
                     is_collaboration_enabled: true,
                     edit_prediction: OrganizationEditPredictionConfiguration {
@@ -3079,7 +3079,7 @@ fn set_test_organization(user_store: &Entity<UserStore>, cx: &mut TestAppContext
 }
 
 #[gpui::test]
-async fn test_free_plan_edit_predictions_ended_for_zed_provider(cx: &mut TestAppContext) {
+async fn test_free_plan_edit_predictions_ended_for_recode_provider(cx: &mut TestAppContext) {
     let (ep_store, _requests) = init_test_with_fake_client(cx);
     let user_store = ep_store.read_with(cx, |ep_store, _| ep_store.user_store.clone());
 
@@ -3112,39 +3112,39 @@ async fn test_free_plan_edit_predictions_ended_for_zed_provider(cx: &mut TestApp
         });
     };
     let excluded_from_plan = |cx: &mut TestAppContext| {
-        cx.read(|cx| zed_edit_predictions_excluded_from_plan(user_store.read(cx), cx))
+        cx.read(|cx| recode_edit_predictions_excluded_from_plan(user_store.read(cx), cx))
     };
     let off_for_plan = |cx: &mut TestAppContext| {
-        cx.read(|cx| zed_edit_predictions_off_for_plan(user_store.read(cx), cx))
+        cx.read(|cx| recode_edit_predictions_off_for_plan(user_store.read(cx), cx))
     };
     let notice_shown =
         |cx: &mut TestAppContext| cx.read(|cx| FreePlanEditPredictionsEndedNotice::dismissed(cx));
 
     set_provider(None, cx);
-    set_plan_and_usage(Plan::ZedPro, 250, cx);
+    set_plan_and_usage(Plan::RecodePro, 250, cx);
     assert!(!excluded_from_plan(cx));
     assert!(!off_for_plan(cx));
     assert!(!notice_shown(cx));
 
-    // Local Zeta models don't go through Zed's servers.
+    // Local Zeta models don't go through Recode's servers.
     set_provider(Some(EditPredictionProvider::Ollama), cx);
-    set_plan_and_usage(Plan::ZedFree, 250, cx);
+    set_plan_and_usage(Plan::RecodeFree, 250, cx);
     assert!(!excluded_from_plan(cx));
     assert!(!notice_shown(cx));
 
     // Free users who never accepted a prediction this period don't need to be told.
     set_provider(None, cx);
-    set_plan_and_usage(Plan::ZedFree, 0, cx);
+    set_plan_and_usage(Plan::RecodeFree, 0, cx);
     assert!(excluded_from_plan(cx));
     assert!(off_for_plan(cx));
     assert!(!notice_shown(cx));
 
-    // Explicitly choosing Zed keeps it on, so the status bar can explain why it isn't working.
-    set_provider(Some(EditPredictionProvider::Zed), cx);
+    // Explicitly choosing Recode keeps it on, so the status bar can explain why it isn't working.
+    set_provider(Some(EditPredictionProvider::Recode), cx);
     assert!(excluded_from_plan(cx));
     assert!(!off_for_plan(cx));
 
-    set_plan_and_usage(Plan::ZedFree, 250, cx);
+    set_plan_and_usage(Plan::RecodeFree, 250, cx);
     assert!(notice_shown(cx));
 }
 
@@ -4835,7 +4835,7 @@ async fn test_data_collection_default_uses_cached_legacy_value(cx: &mut TestAppC
     });
 
     cx.update(|cx| KeyValueStore::global(cx))
-        .delete_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into())
+        .delete_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into())
         .await
         .unwrap();
 
@@ -4922,7 +4922,7 @@ async fn test_data_collection_disabled_by_organization_configuration(cx: &mut Te
                     ui_permissions: Default::default(),
                 }),
                 OrganizationConfiguration {
-                    is_zed_model_provider_enabled: true,
+                    is_recode_model_provider_enabled: true,
                     is_agent_thread_feedback_enabled: true,
                     is_collaboration_enabled: true,
                     edit_prediction: OrganizationEditPredictionConfiguration {
@@ -4983,10 +4983,10 @@ async fn test_toggle_data_collection_from_kv_enabled_state(cx: &mut TestAppConte
 async fn test_upsell_shown_by_default(cx: &mut TestAppContext) {
     init_test(cx);
     let kvp = cx.update(|cx| KeyValueStore::global(cx));
-    kvp.delete_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into())
+    kvp.delete_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into())
         .await
         .ok();
-    kvp.delete_kvp(ZedPredictUpsell::KEY.into()).await.ok();
+    kvp.delete_kvp(RecodePredictUpsell::KEY.into()).await.ok();
 
     cx.update(|cx| assert!(should_show_upsell_modal(cx)));
 }
@@ -4999,7 +4999,7 @@ async fn test_upsell_dismissed_when_data_collection_choice_in_kv_store(cx: &mut 
     // shown, regardless of whether data collection was accepted or declined.
     for value in &["true", "false"] {
         cx.update(|cx| KeyValueStore::global(cx))
-            .write_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into(), value.to_string())
+            .write_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into(), value.to_string())
             .await
             .unwrap();
 
@@ -5012,7 +5012,7 @@ async fn test_upsell_dismissed_when_data_collection_choice_in_kv_store(cx: &mut 
     }
 
     cx.update(|cx| KeyValueStore::global(cx))
-        .delete_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into())
+        .delete_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into())
         .await
         .unwrap();
 }
@@ -5021,36 +5021,36 @@ async fn test_upsell_dismissed_when_data_collection_choice_in_kv_store(cx: &mut 
 async fn test_upsell_dismissed_when_dismissed_key_set(cx: &mut TestAppContext) {
     init_test(cx);
     let kvp = cx.update(|cx| KeyValueStore::global(cx));
-    kvp.delete_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into())
+    kvp.delete_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into())
         .await
         .ok();
-    kvp.write_kvp(ZedPredictUpsell::KEY.into(), "1".into())
+    kvp.write_kvp(RecodePredictUpsell::KEY.into(), "1".into())
         .await
         .unwrap();
 
     cx.update(|cx| assert!(!should_show_upsell_modal(cx)));
 
-    kvp.delete_kvp(ZedPredictUpsell::KEY.into()).await.unwrap();
+    kvp.delete_kvp(RecodePredictUpsell::KEY.into()).await.unwrap();
 }
 
 #[gpui::test]
 async fn test_upsell_dismissed_via_dismissable_api(cx: &mut TestAppContext) {
     init_test(cx);
     let kvp = cx.update(|cx| KeyValueStore::global(cx));
-    kvp.delete_kvp(ZED_PREDICT_DATA_COLLECTION_CHOICE.into())
+    kvp.delete_kvp(RECODE_PREDICT_DATA_COLLECTION_CHOICE.into())
         .await
         .ok();
-    kvp.delete_kvp(ZedPredictUpsell::KEY.into()).await.ok();
+    kvp.delete_kvp(RecodePredictUpsell::KEY.into()).await.ok();
 
     cx.update(|cx| {
         assert!(should_show_upsell_modal(cx));
-        ZedPredictUpsell::set_dismissed(true, cx);
+        RecodePredictUpsell::set_dismissed(true, cx);
     });
     cx.run_until_parked();
 
     cx.update(|cx| assert!(!should_show_upsell_modal(cx)));
 
-    kvp.delete_kvp(ZedPredictUpsell::KEY.into()).await.unwrap();
+    kvp.delete_kvp(RecodePredictUpsell::KEY.into()).await.unwrap();
 }
 
 #[ctor::ctor(unsafe)]

@@ -3542,7 +3542,7 @@ fn image_fallback_element(
         .min_w_0()
         .child(Label::new(label).color(Color::Warning).underline())
         .tooltip(Tooltip::text(
-            "Image failed to load. Open `zed: log` for more details.",
+            "Image failed to load. Open `recode: log` for more details.",
         ))
         .when(open_image_url_on_click, |this| {
             this.cursor_pointer()
@@ -6420,11 +6420,11 @@ mod tests {
         for alignment in ["---", ":---", ":---:", "---:"] {
             for (cell, surrounding_words) in [
                 (
-                    "[https://zed.dev/docs/über/条件/🙂/markdown/preview/tables/wrapped-links](https://zed.dev/docs/markdown/unicode)",
+                    "[https://recode.dev/docs/über/条件/🙂/markdown/preview/tables/wrapped-links](https://recode.dev/docs/markdown/unicode)",
                     None,
                 ),
                 (
-                    "before [https://zed.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection](https://zed.dev/docs/markdown/links) after",
+                    "before [https://recode.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection](https://recode.dev/docs/markdown/links) after",
                     Some(["before", "after"]),
                 ),
             ] {
@@ -6818,7 +6818,7 @@ mod tests {
                 TextAlign::Right,
             ),
             (
-                r#"<p style="text-align: center"><a href="https://zed.dev"><img src="icon.png"></a></p>"#,
+                r#"<p style="text-align: center"><a href="https://recode.dev"><img src="icon.png"></a></p>"#,
                 TextAlign::Center,
             ),
         ] {
@@ -8181,7 +8181,7 @@ mod tests {
         cx: &mut TestAppContext,
     ) {
         ensure_theme_initialized(cx);
-        let source = "~~[struck](https://zed.dev) through~~";
+        let source = "~~[struck](https://recode.dev) through~~";
         let highlight_start = source
             .find("struck")
             .expect("highlighted text should be present");
@@ -8252,7 +8252,7 @@ mod tests {
         // Only the link background distinguishes `f` from its neighbors, so the
         // run boundaries around it must survive shaping to keep `f` and `i` from
         // forming a ligature across them
-        let source = "a[f](https://zed.dev)i b";
+        let source = "a[f](https://recode.dev)i b";
         let markdown = cx.new(|cx| Markdown::new(source.into(), None, None, cx));
         let (_, cx) = cx.add_window_view(move |_, _| MarkdownTestView {
             markdown,
@@ -8386,8 +8386,8 @@ mod tests {
     const WRAPPED_LINK_TABLE: &str = indoc::indoc! {r#"
         | # | Link |
         | --- | --- |
-        | 1 | [https://zed.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection](https://zed.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection) |
-        | 2 | [https://zed.dev/docs/editor/appearance/themes/configuring-editor-colors](https://zed.dev/docs/editor/appearance/themes/configuring-editor-colors) |
+        | 1 | [https://recode.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection](https://recode.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection) |
+        | 2 | [https://recode.dev/docs/editor/appearance/themes/configuring-editor-colors](https://recode.dev/docs/editor/appearance/themes/configuring-editor-colors) |
     "#};
 
     fn wrapped_link_table_with_columns(
@@ -8407,11 +8407,11 @@ mod tests {
         for (number, url) in [
             (
                 "1",
-                "https://zed.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection",
+                "https://recode.dev/docs/markdown/preview/tables/wrapped-link-hit-testing-and-selection",
             ),
             (
                 "2",
-                "https://zed.dev/docs/editor/appearance/themes/configuring-editor-colors",
+                "https://recode.dev/docs/editor/appearance/themes/configuring-editor-colors",
             ),
         ] {
             let mut cells = vec![number.to_string(); column_count];

@@ -10,16 +10,16 @@ $ErrorActionPreference = 'Stop'
 # Resolve paths
 $repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
 
-# Automatically extract version from crates/zed/Cargo.toml or git tags if not passed as a valid number
+# Automatically extract version from crates/recode/Cargo.toml or git tags if not passed as a valid number
 if (-not $Version -or $Version -eq "auto" -or $Version -notmatch '^[0-9]+\.[0-9]+') {
-    $tomlPath = Join-Path $repoRoot "crates/zed/Cargo.toml"
+    $tomlPath = Join-Path $repoRoot "crates/recode/Cargo.toml"
     if (Test-Path $tomlPath) {
         $content = Get-Content $tomlPath -Raw
         if ($content -match '(?m)^version\s*=\s*"([^"]+)"') {
             $Version = $matches[1]
         }
     }
-    # crates/zed/Cargo.toml is the single source of truth
+    # crates/recode/Cargo.toml is the single source of truth
 }
 if (-not $Version -or $Version -notmatch '^[0-9]+\.[0-9]+') {
     $Version = "1.29.1"
@@ -53,10 +53,8 @@ New-Item -ItemType Directory -Path $outFullPath -Force | Out-Null
 # Copy main binary
 if (Test-Path "$TargetDir/recode.exe") {
     Copy-Item "$TargetDir/recode.exe" "$staging/Recode.exe" -Force
-} elseif (Test-Path "$TargetDir/zed.exe") {
-    Copy-Item "$TargetDir/zed.exe" "$staging/Recode.exe" -Force
 } else {
-    Write-Error "Could not find recode.exe or zed.exe in $TargetDir"
+    Write-Error "Could not find recode.exe in $TargetDir"
 }
 
 # Copy cli binary
@@ -70,9 +68,9 @@ if (Test-Path "$TargetDir/auto-update-helper.exe") {
 }
 
 # Copy icon and resources
-Copy-Item "$repoRoot/crates/zed/resources/windows/app-icon.ico" "$staging/app-icon.ico" -Force
-if (Test-Path "$repoRoot/crates/zed/resources/windows/messages") {
-    Copy-Item -Recurse "$repoRoot/crates/zed/resources/windows/messages" "$staging/messages" -Force
+Copy-Item "$repoRoot/crates/recode/resources/windows/app-icon.ico" "$staging/app-icon.ico" -Force
+if (Test-Path "$repoRoot/crates/recode/resources/windows/messages") {
+    Copy-Item -Recurse "$repoRoot/crates/recode/resources/windows/messages" "$staging/messages" -Force
 }
 
 # Prepare license file if missing
@@ -89,7 +87,7 @@ if (Test-Path "$TargetDir/conpty.dll") {
 }
 
 # Compile with Inno Setup
-$issFile = Join-Path $repoRoot "crates/zed/resources/windows/recode.iss"
+$issFile = Join-Path $repoRoot "crates/recode/resources/windows/recode.iss"
 $definitions = @(
     "/DAppId={{2DB0DA96-CA55-49BB-AF4F-64AF36A86712}}",
     "/DAppIconName=app-icon",

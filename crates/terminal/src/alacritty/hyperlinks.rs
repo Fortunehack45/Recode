@@ -602,8 +602,8 @@ mod tests {
         let test_cases = vec![
             ("https://example.com.", "https://example.com"),
             (
-                "https://github.com/zed-industries/zed.",
-                "https://github.com/zed-industries/zed",
+                "https://github.com/Fortunehack45/Recode.",
+                "https://github.com/Fortunehack45/Recode",
             ),
             (
                 "https://example.com/path/file.html.",
@@ -966,7 +966,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/12338>
+            // <https://github.com/Fortunehack45/Recode/issues/12338>
             fn issue_12338_regex() {
                 // Issue #12338
                 test_path!(".rw-r--r--     0     staff 05-27 14:03 ‹«'test file 👉1.txt'»›");
@@ -974,7 +974,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/12338>
+            // <https://github.com/Fortunehack45/Recode/issues/12338>
             fn issue_12338() {
                 // Issue #12338
                 test_path!(".rw-r--r--     0     staff 05-27 14:03 ‹«test👉、2.txt»›");
@@ -1008,7 +1008,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/40202>
+            // <https://github.com/Fortunehack45/Recode/issues/40202>
             fn issue_40202() {
                 // Elixir
                 test_path!("[‹«lib/blitz_apex_👉server/stats/aggregate_rank_stats.ex»:«35»›: BlitzApexServer.Stats.AggregateRankStats.update/2]
@@ -1016,7 +1016,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/28194>
+            // <https://github.com/Fortunehack45/Recode/issues/28194>
             fn issue_28194() {
                 test_path!(
                     "‹«test/c👉ontrollers/template_items_controller_test.rb»:«20»›:in 'block (2 levels) in <class:TemplateItemsControllerTest>'"
@@ -1024,7 +1024,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/50531>
+            // <https://github.com/Fortunehack45/Recode/issues/50531>
             fn issue_50531() {
                 // Paths preceded by "N:" prefix (e.g. grep output line numbers)
                 // should still be clickable
@@ -1036,7 +1036,7 @@ mod tests {
             }
 
             #[test]
-            // <https://github.com/zed-industries/zed/issues/46795>
+            // <https://github.com/Fortunehack45/Recode/issues/46795>
             fn issue_46795() {
                 // Box drawing characters are commonly used as UI elements and
                 // should not interfere with path detection; they appear rarely
@@ -1253,7 +1253,7 @@ mod tests {
             }
 
             #[perf]
-            // https://github.com/zed-industries/zed/pull/44407
+            // https://github.com/Fortunehack45/Recode/pull/44407
             pub fn pr_44407_hyperlink_benchmark() {
                 const LINE: &str = "-748, 706, 163, 222, -980, 949, 381, -568, 199, 501, 760, -821, 90, -451, 183, 867, -351, -810, -762, -109, 423, 84, 14, -77, -820, -345, 74, -791, 930, -618, -900, 862, -959, 289, -19, 471, -757, 793, 155, -554, 249, 830, 402, 732, -731, -866, -720, -703, -257, -439, 731, 872, -489, 676, -167, 613, -698, 415, -80, -453, -896, 333, -511, 621, -450, 624, -309, -575, 177, 141, 891, -104, -97, -367, -599, -675, 607, -225, -760, 552, -465, 804, 55, 282, 104, -929, -252,\
 -311, 900, 550, 599, -80, 774, 553, 837, -395, 541, 953, 154, -396, -596, -111, -802, -221, -337, -633, -73, -527, -82, -658, -264, 222, 375, 434, 204, -756, -703, 303, 239, -257, -365, -351, 904, 364, -743, -484, 655, -542, 446, 888, 632, -167, -260, 716, 150, 806, 723, 513, -118, -323, -683, 983, -564, 358, -16, -287, 277, -607, 87, 365, -1, 164, 401, 257, 369, -893, 145, -969, 375, -53, 541, -408, -865, 753, 258, 337, -886, 593, -378, -528, 191, 204, 566, -61, -621, 769, 524, -628, 6,\
@@ -1316,7 +1316,7 @@ mod tests {
             }
 
             #[perf]
-            // https://github.com/zed-industries/zed/issues/44510
+            // https://github.com/Fortunehack45/Recode/issues/44510
             pub fn issue_44510_hyperlink_benchmark() {
                 const LINE: &str = "..............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................\
 ..............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................\
@@ -1432,7 +1432,7 @@ mod tests {
                 }
 
                 // See https://en.wikipedia.org/wiki/File_URI_scheme
-                // https://github.com/zed-industries/zed/issues/39189
+                // https://github.com/Fortunehack45/Recode/issues/39189
                 #[test]
                 fn issue_39189() {
                     test_file_iri!("file:///C:/test/cool/index.rs");

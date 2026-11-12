@@ -44,8 +44,8 @@ use workspace::{
     WorkspaceDb, WorkspaceId,
 };
 
-use zed_actions::agents_sidebar::FocusSidebarFilter;
-use zed_actions::editor::{MoveDown, MoveUp};
+use recode_actions::agents_sidebar::FocusSidebarFilter;
+use recode_actions::editor::{MoveDown, MoveUp};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 enum ThreadFilter {
@@ -635,8 +635,8 @@ impl ThreadsArchiveView {
                     .upgrade()
                     .and_then(|store| store.read(cx).agent_icon(&thread.agent_id));
 
-                let icon = if thread.agent_id.as_ref() == agent::ZED_AGENT_ID.as_ref() {
-                    IconName::ZedAgent
+                let icon = if thread.agent_id.as_ref() == agent::RECODE_AGENT_ID.as_ref() {
+                    IconName::RecodeAgent
                 } else {
                     IconName::Sparkle
                 };
