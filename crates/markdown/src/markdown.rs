@@ -529,7 +529,7 @@ pub struct Markdown {
     active_search_highlight: Option<usize>,
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 pub struct MarkdownOptions {
     pub parse_links_only: bool,
     pub parse_html: bool,
@@ -540,6 +540,20 @@ pub struct MarkdownOptions {
     /// Defers parsing until the first [`MarkdownElement`] layout or [`Markdown::ensure_parsed`].
     /// After parsing starts, source updates parse eagerly even when off-screen.
     pub defer_parsing: bool,
+}
+
+impl Default for MarkdownOptions {
+    fn default() -> Self {
+        Self {
+            parse_links_only: false,
+            parse_html: false,
+            render_mermaid_diagrams: false,
+            render_math: true,
+            parse_heading_slugs: false,
+            render_metadata_blocks: false,
+            defer_parsing: false,
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -3466,11 +3480,18 @@ impl Element for MarkdownElement {
                     }
                 }
                 MarkdownEvent::DisplayMath(math_content) => {
-                    if render_math
-                        && let Some(parsed_math) = parsed_markdown.math_formulas.get(&range.start)
-                    {
+                    if render_math {
+                        let parsed_math = parsed_markdown
+                            .math_formulas
+                            .get(&range.start)
+                            .cloned()
+                            .unwrap_or_else(|| crate::parser::ParsedMarkdownMath {
+                                contents: math_content.clone(),
+                                display: true,
+                                range: range.clone(),
+                            });
                         let el = render_display_math(
-                            parsed_math,
+                            &parsed_math,
                             &math_state,
                             &self.style,
                             self.markdown.clone(),
@@ -4147,6 +4168,7 @@ impl MarkdownElementBuilder {
     }
 
     fn push_inline_math_child(&mut self, child: impl IntoElement) {
+        self.flush_text();
         let text_align = self.text_style().text_align;
         let table_cell_alignment = self
             .table

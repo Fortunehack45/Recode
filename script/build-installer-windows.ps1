@@ -65,6 +65,8 @@ if (Test-Path "$TargetDir/cli.exe") {
 # Copy auto update helper
 if (Test-Path "$TargetDir/auto-update-helper.exe") {
     Copy-Item "$TargetDir/auto-update-helper.exe" "$staging/tools/auto_update_helper.exe" -Force
+} elseif (Test-Path "$TargetDir/auto_update_helper.exe") {
+    Copy-Item "$TargetDir/auto_update_helper.exe" "$staging/tools/auto_update_helper.exe" -Force
 }
 
 # Copy icon and resources

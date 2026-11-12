@@ -25,8 +25,6 @@ use crate::{CopyButtonVisibility, Markdown, MarkdownStyle, parser::ParsedMarkdow
 pub(crate) struct MathCacheKey {
     pub contents: SharedString,
     pub display: bool,
-    pub color_u32: u32,
-    pub font_size_bits: u32,
 }
 
 /// Extracted box metrics in em units.
@@ -129,20 +127,11 @@ impl MathState {
         cx: &mut Context<Markdown>,
     ) {
         let math_theme = build_math_theme(cx);
-        let font_size_bits = math_theme.font_size_pt.to_bits();
-        let rgba = Rgba::from(math_theme.color);
-        let color_u32 = ((rgba.r.clamp(0.0, 1.0) * 255.0).round() as u32) << 24
-            | ((rgba.g.clamp(0.0, 1.0) * 255.0).round() as u32) << 16
-            | ((rgba.b.clamp(0.0, 1.0) * 255.0).round() as u32) << 8
-            | ((rgba.a.clamp(0.0, 1.0) * 255.0).round() as u32);
-
         let mut active_keys = HashSet::default();
         for math in math_formulas.values() {
             let key = MathCacheKey {
                 contents: math.contents.clone(),
                 display: math.display,
-                color_u32,
-                font_size_bits,
             };
             active_keys.insert(key.clone());
             if !self.cache.contains_key(&key) {
@@ -162,21 +151,10 @@ impl MathState {
         &self,
         contents: &SharedString,
         display: bool,
-        color: Hsla,
-        font_size_pt: f32,
     ) -> Option<&Arc<CachedMathFormula>> {
-        let font_size_bits = font_size_pt.to_bits();
-        let rgba = Rgba::from(color);
-        let color_u32 = ((rgba.r.clamp(0.0, 1.0) * 255.0).round() as u32) << 24
-            | ((rgba.g.clamp(0.0, 1.0) * 255.0).round() as u32) << 16
-            | ((rgba.b.clamp(0.0, 1.0) * 255.0).round() as u32) << 8
-            | ((rgba.a.clamp(0.0, 1.0) * 255.0).round() as u32);
-
         let key = MathCacheKey {
             contents: contents.clone(),
             display,
-            color_u32,
-            font_size_bits,
         };
         self.cache.get(&key)
     }
@@ -201,16 +179,7 @@ pub(crate) fn render_display_math(
     _window: &mut Window,
     _cx: &mut App,
 ) -> AnyElement {
-    let math_theme = MathTheme {
-        color: style.base_text_style.color,
-        font_size_pt: 12.0,
-    };
-    let cached = math_state.get(
-        &math.contents,
-        true,
-        math_theme.color,
-        math_theme.font_size_pt,
-    );
+    let cached = math_state.get(&math.contents, true);
     let render_result = cached.and_then(|c| c.render_image.get());
     let code = math.contents.clone();
     let show_interactive = copy_button_visibility != CopyButtonVisibility::Hidden;
@@ -307,11 +276,7 @@ pub(crate) fn render_inline_math_element(
     _cx: &mut App,
 ) -> AnyElement {
     let font_size = style.base_text_style.font_size.to_pixels(window.rem_size());
-    let math_theme = MathTheme {
-        color: style.base_text_style.color,
-        font_size_pt: 12.0,
-    };
-    let cached = math_state.get(contents, false, math_theme.color, math_theme.font_size_pt);
+    let cached = math_state.get(contents, false);
 
     if let Some(cached) = cached
         && let Some(Ok(render_image)) = cached.render_image.get()
