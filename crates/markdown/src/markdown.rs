@@ -1,4 +1,5 @@
 pub mod html;
+mod math;
 mod mermaid;
 pub mod parser;
 mod path_range;
@@ -11,9 +12,11 @@ use gpui::UnderlineStyle;
 use language::LanguageName;
 
 use log::Level;
+use math::{MathState, render_display_math, render_inline_math_element};
 use mermaid::{
     MermaidState, ParsedMarkdownMermaidDiagram, extract_mermaid_diagrams, render_mermaid_diagram,
 };
+pub use parser::ParsedMarkdownMath;
 pub use path_range::{LineCol, PathWithRange};
 use settings::Settings as _;
 use smallvec::SmallVec;
@@ -46,7 +49,7 @@ use language::{
 use parser::CodeBlockMetadata;
 use parser::{
     MarkdownEvent, MarkdownTag, MarkdownTagEnd, ParsedMetadataBlock, parse_links_only,
-    parse_markdown_with_options,
+    parse_markdown_with_all_options, parse_markdown_with_options,
 };
 use pulldown_cmark::{Alignment, BlockQuoteKind};
 use sum_tree::TreeMap;
@@ -515,6 +518,7 @@ pub struct Markdown {
     /// contents. All entries are retained against the parsed diagrams on each
     /// reparse, so a single map keeps that bookkeeping in one place.
     mermaid_views: HashMap<usize, MermaidViewState>,
+    pub(crate) math_state: MathState,
     copied_code_blocks: HashSet<ElementId>,
     wrapped_code_blocks: HashSet<usize>,
     code_block_scroll_handles: BTreeMap<usize, ScrollHandle>,
@@ -530,6 +534,7 @@ pub struct MarkdownOptions {
     pub parse_links_only: bool,
     pub parse_html: bool,
     pub render_mermaid_diagrams: bool,
+    pub render_math: bool,
     pub parse_heading_slugs: bool,
     pub render_metadata_blocks: bool,
     /// Defers parsing until the first [`MarkdownElement`] layout or [`Markdown::ensure_parsed`].
@@ -702,10 +707,11 @@ impl Markdown {
     ) -> Self {
         let focus_handle = cx.focus_handle();
 
-        let theme_subscription = if options.render_mermaid_diagrams {
+        let theme_subscription = if options.render_mermaid_diagrams || options.render_math {
             Some(
                 cx.observe_global::<theme::GlobalTheme>(|this: &mut Self, cx| {
                     this.invalidate_mermaid_cache(cx);
+                    this.invalidate_math_cache(cx);
                 }),
             )
         } else {
@@ -731,6 +737,7 @@ impl Markdown {
             mermaid_state: MermaidState::default(),
             _mermaid_theme_subscription: theme_subscription,
             mermaid_views: HashMap::default(),
+            math_state: MathState::default(),
             copied_code_blocks: HashSet::default(),
             wrapped_code_blocks: HashSet::default(),
             code_block_scroll_handles: BTreeMap::default(),
@@ -798,6 +805,17 @@ impl Markdown {
             },
             cx,
         );
+        cx.notify();
+    }
+
+    pub fn invalidate_math_cache(&mut self, cx: &mut Context<Self>) {
+        if !self.options.render_math || self.parsed_markdown.math_formulas.is_empty() {
+            return;
+        }
+
+        self.math_state.clear(cx);
+        let math_formulas = self.parsed_markdown.math_formulas.clone();
+        self.math_state.update(&math_formulas, cx);
         cx.notify();
     }
 
@@ -1278,6 +1296,7 @@ impl Markdown {
         let should_parse_links_only = self.options.parse_links_only;
         let should_parse_html = self.options.parse_html;
         let should_render_mermaid_diagrams = self.options.render_mermaid_diagrams;
+        let should_render_math = self.options.render_math;
         let should_parse_heading_slugs = self.options.parse_heading_slugs;
         let should_parse_metadata_blocks = self.options.render_metadata_blocks;
         let language_registry = self.language_registry.clone();
@@ -1295,6 +1314,7 @@ impl Markdown {
                         html_blocks: BTreeMap::default(),
                         metadata_blocks: BTreeMap::default(),
                         mermaid_diagrams: BTreeMap::default(),
+                        math_formulas: BTreeMap::default(),
                         heading_slugs: HashMap::default(),
                         footnote_definitions: HashMap::default(),
                         link_definition_spans: Arc::default(),
@@ -1305,11 +1325,12 @@ impl Markdown {
                 );
             }
 
-            let parsed = parse_markdown_with_options(
+            let parsed = parse_markdown_with_all_options(
                 &source,
                 should_parse_html,
                 should_parse_heading_slugs,
                 should_parse_metadata_blocks,
+                should_render_math,
             );
             let events = parsed.events;
             let language_names = parsed.language_names;
@@ -1323,6 +1344,11 @@ impl Markdown {
             let has_untagged_code_block = parsed.has_untagged_code_block;
             let mermaid_diagrams = if should_render_mermaid_diagrams {
                 extract_mermaid_diagrams(&source, &events)
+            } else {
+                BTreeMap::default()
+            };
+            let math_formulas = if should_render_math {
+                parsed.math_expressions
             } else {
                 BTreeMap::default()
             };
@@ -1392,6 +1418,7 @@ impl Markdown {
                 html_blocks,
                 metadata_blocks,
                 mermaid_diagrams,
+                math_formulas,
                 heading_slugs,
                 footnote_definitions,
                 link_definition_spans: Arc::from(link_definition_spans),
@@ -1430,6 +1457,12 @@ impl Markdown {
                 } else {
                     this.mermaid_state.clear(cx);
                     this.mermaid_views.clear();
+                }
+                if this.options.render_math {
+                    let math_formulas = this.parsed_markdown.math_formulas.clone();
+                    this.math_state.update(&math_formulas, cx);
+                } else {
+                    this.math_state.clear(cx);
                 }
                 this.pending_parse.take();
                 if this.should_reparse {
@@ -1541,6 +1574,7 @@ pub struct ParsedMarkdown {
     pub(crate) html_blocks: BTreeMap<usize, html::html_parser::ParsedHtmlBlock>,
     pub(crate) metadata_blocks: BTreeMap<usize, ParsedMetadataBlock>,
     pub(crate) mermaid_diagrams: BTreeMap<usize, ParsedMarkdownMermaidDiagram>,
+    pub(crate) math_formulas: BTreeMap<usize, ParsedMarkdownMath>,
     pub heading_slugs: HashMap<SharedString, usize>,
     pub footnote_definitions: HashMap<SharedString, usize>,
     pub(crate) link_definition_spans: Arc<[Range<usize>]>,
@@ -2671,7 +2705,15 @@ impl Element for MarkdownElement {
             }
         };
 
-        let (parsed_markdown, images, active_root_block, render_mermaid_diagrams, mermaid_state) = {
+        let (
+            parsed_markdown,
+            images,
+            active_root_block,
+            render_mermaid_diagrams,
+            mermaid_state,
+            render_math,
+            math_state,
+        ) = {
             let markdown = self.markdown.read(cx);
             (
                 markdown.parsed_markdown.clone(),
@@ -2679,6 +2721,8 @@ impl Element for MarkdownElement {
                 markdown.active_root_block,
                 markdown.options.render_mermaid_diagrams,
                 markdown.mermaid_state.clone(),
+                markdown.options.render_math,
+                markdown.math_state.clone(),
             )
         };
         let mut builder = MarkdownElementBuilder::new(
@@ -3407,6 +3451,41 @@ impl Element for MarkdownElement {
                 MarkdownEvent::TaskListMarker(_) => {
                     // handled inside the `MarkdownTag::Item` case
                 }
+                MarkdownEvent::InlineMath(math_content) => {
+                    if render_math {
+                        let el = render_inline_math_element(
+                            math_content,
+                            &math_state,
+                            &self.style,
+                            window,
+                            cx,
+                        );
+                        builder.push_inline_math_child(el);
+                    } else {
+                        builder.push_text(&format!("${math_content}$"), range.clone());
+                    }
+                }
+                MarkdownEvent::DisplayMath(math_content) => {
+                    if render_math
+                        && let Some(parsed_math) = parsed_markdown.math_formulas.get(&range.start)
+                    {
+                        let el = render_display_math(
+                            parsed_math,
+                            &math_state,
+                            &self.style,
+                            self.markdown.clone(),
+                            range.start,
+                            CopyButtonVisibility::VisibleOnHover,
+                            window,
+                            cx,
+                        );
+                        builder.flush_text();
+                        builder.push_sourced_element(range.clone(), el);
+                    } else {
+                        builder.flush_text();
+                        builder.push_text(&format!("$${math_content}$$\n"), range.clone());
+                    }
+                }
                 MarkdownEvent::FootnoteReference(label) => {
                     builder.push_footnote_ref(label.clone(), range.clone());
                     builder.push_text_style(self.style.link.clone());
@@ -4055,6 +4134,37 @@ impl MarkdownElementBuilder {
                 }
                 None => {
                     let el = el.items_start();
+                    match text_align {
+                        TextAlign::Left => el.justify_start(),
+                        TextAlign::Center => el.justify_center(),
+                        TextAlign::Right => el.justify_end(),
+                    }
+                }
+            }
+        });
+        self.div_stack.last_mut().unwrap().line_break_mode = LineBreakMode::FlexWrap;
+        self.append_child(child.into_any_element());
+    }
+
+    fn push_inline_math_child(&mut self, child: impl IntoElement) {
+        let text_align = self.text_style().text_align;
+        let table_cell_alignment = self
+            .table
+            .in_cell
+            .then(|| self.table.current_cell_alignment());
+        self.modify_current_div(|el| {
+            let el = el.flex().flex_row().flex_wrap();
+            match table_cell_alignment {
+                Some(alignment) => {
+                    let el = el.items_center().content_center();
+                    match alignment {
+                        Some(Alignment::Center) => el.justify_center(),
+                        Some(Alignment::Right) => el.justify_end(),
+                        _ => el.justify_start(),
+                    }
+                }
+                None => {
+                    let el = el.items_baseline();
                     match text_align {
                         TextAlign::Left => el.justify_start(),
                         TextAlign::Center => el.justify_center(),

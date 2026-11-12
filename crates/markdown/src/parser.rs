@@ -38,6 +38,7 @@ pub(crate) struct ParsedMarkdownData {
     pub root_block_starts: Vec<usize>,
     pub html_blocks: BTreeMap<usize, html::html_parser::ParsedHtmlBlock>,
     pub metadata_blocks: BTreeMap<usize, ParsedMetadataBlock>,
+    pub math_expressions: BTreeMap<usize, ParsedMarkdownMath>,
     pub heading_slugs: HashMap<SharedString, usize>,
     pub footnote_definitions: HashMap<SharedString, usize>,
     /// Source spans of link reference definitions (`[id]: https://example.com`), which are
@@ -50,6 +51,13 @@ pub(crate) struct ParsedMarkdownData {
 pub(crate) struct ParsedMetadataBlock {
     pub content_range: Range<usize>,
     pub rows: Option<Vec<MetadataRow>>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct ParsedMarkdownMath {
+    pub contents: SharedString,
+    pub display: bool,
+    pub range: Range<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -279,12 +287,29 @@ pub(crate) fn parse_markdown_with_options(
     parse_heading_slugs: bool,
     parse_metadata_blocks: bool,
 ) -> ParsedMarkdownData {
+    parse_markdown_with_all_options(
+        text,
+        parse_html,
+        parse_heading_slugs,
+        parse_metadata_blocks,
+        false,
+    )
+}
+
+pub(crate) fn parse_markdown_with_all_options(
+    text: &str,
+    parse_html: bool,
+    parse_heading_slugs: bool,
+    parse_metadata_blocks: bool,
+    parse_math: bool,
+) -> ParsedMarkdownData {
     let mut state = ParseState::default();
     let mut language_names = HashSet::default();
     let mut language_paths = HashSet::default();
     let mut has_untagged_code_block = false;
     let mut html_blocks = BTreeMap::default();
     let mut metadata_blocks = BTreeMap::default();
+    let mut math_expressions = BTreeMap::default();
     let mut within_link = false;
     let mut within_code_block = false;
     let mut within_metadata = false;
@@ -311,7 +336,11 @@ pub(crate) fn parse_markdown_with_options(
         }
     }
     let body_start = frontmatter.last().map_or(0, |(_, range)| range.end);
-    let parser = Parser::new_ext(&text[body_start..], PARSE_OPTIONS);
+    let mut parse_options = PARSE_OPTIONS;
+    if parse_math {
+        parse_options = parse_options.union(Options::ENABLE_MATH);
+    }
+    let parser = Parser::new_ext(&text[body_start..], parse_options);
     let mut link_definition_spans = parser
         .reference_definitions()
         .iter()
@@ -731,7 +760,30 @@ pub(crate) fn parse_markdown_with_options(
             pulldown_cmark::Event::TaskListMarker(checked) => {
                 state.push_event(range, MarkdownEvent::TaskListMarker(checked))
             }
-            pulldown_cmark::Event::InlineMath(_) | pulldown_cmark::Event::DisplayMath(_) => {}
+            pulldown_cmark::Event::InlineMath(math) => {
+                let math_str = SharedString::from(math.to_string());
+                math_expressions.insert(
+                    range.start,
+                    ParsedMarkdownMath {
+                        contents: math_str.clone(),
+                        display: false,
+                        range: range.clone(),
+                    },
+                );
+                state.push_event(range, MarkdownEvent::InlineMath(math_str));
+            }
+            pulldown_cmark::Event::DisplayMath(math) => {
+                let math_str = SharedString::from(math.to_string());
+                math_expressions.insert(
+                    range.start,
+                    ParsedMarkdownMath {
+                        contents: math_str.clone(),
+                        display: true,
+                        range: range.clone(),
+                    },
+                );
+                state.push_event(range, MarkdownEvent::DisplayMath(math_str));
+            }
         }
     }
 
@@ -749,6 +801,7 @@ pub(crate) fn parse_markdown_with_options(
         root_block_starts: state.root_block_starts,
         html_blocks,
         metadata_blocks,
+        math_expressions,
         heading_slugs,
         footnote_definitions,
         link_definition_spans,
@@ -854,6 +907,10 @@ pub enum MarkdownEvent {
     Rule,
     /// A task list marker, rendered as a checkbox in HTML. Contains a true when it is checked.
     TaskListMarker(bool),
+    /// An inline LaTeX math formula.
+    InlineMath(SharedString),
+    /// A display-style LaTeX math formula.
+    DisplayMath(SharedString),
     /// Start of a root-level block (a top-level structural element like a paragraph, heading, list, etc.).
     RootStart,
     /// End of a root-level block. Contains the root block index.
@@ -1044,9 +1101,9 @@ mod tests {
     use super::MarkdownTag::*;
     use super::*;
 
-    const CONDITIONAL_OPTIONS: Options = Options::ENABLE_YAML_STYLE_METADATA_BLOCKS;
-    const UNWANTED_OPTIONS: Options = Options::ENABLE_MATH
-        .union(Options::ENABLE_DEFINITION_LIST)
+    const CONDITIONAL_OPTIONS: Options = Options::ENABLE_YAML_STYLE_METADATA_BLOCKS
+        .union(Options::ENABLE_MATH);
+    const UNWANTED_OPTIONS: Options = Options::ENABLE_DEFINITION_LIST
         .union(Options::ENABLE_WIKILINKS);
 
     #[test]
@@ -2083,5 +2140,45 @@ mod tests {
                 "unrecognized inline HTML \"{input}\" should not emit HardBreak"
             );
         }
+    }
+
+    #[test]
+    fn test_math_parsing_events_and_spans() {
+        let input = "For ODEs $\\frac{d\\vec{y}}{dt} = \\vec{f}(t, \\vec{y})$, error $O(\\Delta t^5)$:\n\n$$\\vec{k}_1 = \\vec{f}(t_n, \\vec{y}_n)$$";
+        let parsed = parse_markdown_with_all_options(input, false, false, false, true);
+
+        let inline_maths: Vec<_> = parsed
+            .events
+            .iter()
+            .filter_map(|(range, event)| match event {
+                MarkdownEvent::InlineMath(content) => Some((range.clone(), content.to_string())),
+                _ => None,
+            })
+            .collect();
+
+        assert_eq!(inline_maths.len(), 2);
+        assert_eq!(inline_maths[0].1, r"\frac{d\vec{y}}{dt} = \vec{f}(t, \vec{y})");
+        assert_eq!(inline_maths[1].1, r"O(\Delta t^5)");
+
+        let display_maths: Vec<_> = parsed
+            .events
+            .iter()
+            .filter_map(|(range, event)| match event {
+                MarkdownEvent::DisplayMath(content) => Some((range.clone(), content.to_string())),
+                _ => None,
+            })
+            .collect();
+
+        assert_eq!(display_maths.len(), 1);
+        assert_eq!(display_maths[0].1, r"\vec{k}_1 = \vec{f}(t_n, \vec{y}_n)");
+        assert_eq!(parsed.math_expressions.len(), 3);
+
+        // When math parsing is disabled, math events are not emitted.
+        let disabled = parse_markdown_with_options(input, false, false, false);
+        assert!(disabled.math_expressions.is_empty());
+        assert!(!disabled
+            .events
+            .iter()
+            .any(|(_, e)| matches!(e, MarkdownEvent::InlineMath(_) | MarkdownEvent::DisplayMath(_))));
     }
 }

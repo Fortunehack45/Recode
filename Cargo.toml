@@ -143,6 +143,7 @@ members = [
     "crates/lsp_locations",
     "crates/markdown",
     "crates/markdown_preview",
+    "crates/math_render",
     "crates/menu",
     "crates/mermaid_render",
     "crates/migrator",
@@ -423,6 +424,7 @@ lsp_command_selector = { path = "crates/lsp_command_selector" }
 lsp_locations = { path = "crates/lsp_locations" }
 markdown = { path = "crates/markdown" }
 markdown_preview = { path = "crates/markdown_preview" }
+math_render = { path = "crates/math_render" }
 menu = { path = "crates/menu" }
 mermaid_render = { path = "crates/mermaid_render" }
 migrator = { path = "crates/migrator" }
@@ -689,6 +691,7 @@ jsonschema = { version = "0.51", default-features = false }
 jsonwebtoken = { version = "10.0", default-features = false }
 jupyter-protocol = "1.4.0"
 jupyter-websocket-client = "1.1.0"
+latex-rust = "2.1.1"
 libc = "0.2"
 libsqlite3-sys = { version = "0.30.1", features = ["bundled"] }
 libwebrtc = "0.3.26"

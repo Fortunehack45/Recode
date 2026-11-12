@@ -28,6 +28,7 @@ language.workspace = true
 linkify.workspace = true
 log.workspace = true
 markup5ever_rcdom.workspace = true
+math_render.workspace = true
 mermaid_render.workspace = true
 pulldown-cmark.workspace = true
 settings.workspace = true

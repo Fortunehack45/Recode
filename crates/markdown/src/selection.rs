@@ -95,6 +95,14 @@ fn collect_inline_spans(source: &str, events: &[(Range<usize>, MarkdownEvent)]) 
                     is_code: true,
                 });
             }
+            MarkdownEvent::InlineMath(_) | MarkdownEvent::DisplayMath(_) => {
+                note_child(&mut stack, event_range);
+                spans.push(InlineSpan {
+                    range: event_range.clone(),
+                    content: event_range.clone(),
+                    is_code: true,
+                });
+            }
             _ => note_child(&mut stack, event_range),
         }
     }
