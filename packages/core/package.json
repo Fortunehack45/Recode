@@ -12,10 +12,9 @@
     "test": "node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
-    "diff": "^7.0.0"
+    "diff": "^8.0.3"
   },
   "devDependencies": {
-    "@types/diff": "^7.0.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   },
