@@ -59,13 +59,16 @@ impl CloudApiClient {
                 .build_url("/client/users/connect");
             let mut connect_url = Url::parse(&url_str)
                 .map_err(|e| anyhow!("failed to parse websocket connect url: {e}"))?;
-            connect_url
-                .set_scheme(match connect_url.scheme() {
-                    "https" | "wss" => "wss",
-                    "http" | "ws" => "ws",
-                    scheme => return Err(anyhow!("invalid URL scheme: {scheme}")),
-                })
-                .map_err(|_| anyhow!("failed to set URL scheme"))?;
+            match connect_url.scheme() {
+                "wss" | "ws" => {}
+                "https" => {
+                    let _ = connect_url.set_scheme("wss");
+                }
+                "http" => {
+                    let _ = connect_url.set_scheme("ws");
+                }
+                scheme => return Err(anyhow!("invalid URL scheme: {scheme}")),
+            }
 
 
             let connect = WebSocket::connect(connect_url).fuse();

@@ -115,7 +115,7 @@ impl CloudApiClient {
             .method(Method::GET)
             .uri(
                 http_client::Url::parse(&format!("{}/client/users/me", cloud_url))
-                    .map_err(ClientApiError::RequestBuildFailed)?
+                    .map_err(|e| ClientApiError::RequestBuildFailed(anyhow::anyhow!(e)))?
                     .as_ref(),
             )
             .when_some(system_id, |builder, system_id| {
