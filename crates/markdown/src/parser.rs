@@ -54,7 +54,7 @@ pub(crate) struct ParsedMetadataBlock {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct ParsedMarkdownMath {
+pub struct ParsedMarkdownMath {
     pub contents: SharedString,
     pub display: bool,
     pub range: Range<usize>,

@@ -3,22 +3,19 @@
 //! Provides rendering and caching for inline (`$...$`) and display (`$$...$$`)
 //! math expressions using `math_render`.
 
-use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
+use collections::{HashMap, HashSet};
 use gpui::{
-    Animation, AnimationExt, AnyElement, App, ClipboardItem, Context, Entity, Hsla, ImageSource,
-    IntoElement, Pixels, RenderImage, Rgba, SMOOTH_SVG_SCALE_FACTOR, SharedString, Task, Window,
-    div, h_flex, img, px, pulsating_between,
+    Animation, AnimationExt, AnyElement, App, ClipboardItem, Context, Entity, ImageSource,
+    IntoElement, RenderImage, SMOOTH_SVG_SCALE_FACTOR, SharedString, Task, Window, div, img, px,
+    pulsating_between,
 };
 use math_render::MathTheme;
-use ui::{
-    Color, CopyButton, ElementId, FluentBuilder, Label, LabelCommon, LabelSize, ParentElement,
-    Styled,
-};
+use ui::{prelude::*, CopyButton, ElementId, Label, LabelCommon, LabelSize};
 
-use crate::{CopyButtonVisibility, Markdown, MarkdownStyle, parser::ParsedMarkdownMath};
+use crate::{parser::ParsedMarkdownMath, CopyButtonVisibility, Markdown, MarkdownStyle};
 
 /// Cache key for rendered math formulas.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -57,7 +54,7 @@ impl CachedMathFormula {
             let render_image = render_image.clone();
             let metrics = metrics.clone();
             let contents = contents.clone();
-            async move |this, cx| {
+            async move |this, mut cx| {
                 let result = cx
                     .background_spawn(async move {
                         let rendered = math_render::render_to_svg(&contents, display, &theme)?;
@@ -89,7 +86,7 @@ impl CachedMathFormula {
                         render_image.set(Err(err)).ok();
                     }
                 }
-                this.update(cx, |_, cx| cx.notify()).ok();
+                this.update(&mut cx, |_, cx| cx.notify()).ok();
             }
         });
 
@@ -127,7 +124,7 @@ impl MathState {
         cx: &mut Context<Markdown>,
     ) {
         let math_theme = build_math_theme(cx);
-        let mut active_keys = HashSet::default();
+        let mut active_keys: HashSet<MathCacheKey> = HashSet::default();
         for math in math_formulas.values() {
             let key = MathCacheKey {
                 contents: math.contents.clone(),
@@ -275,19 +272,19 @@ pub(crate) fn render_inline_math_element(
     window: &mut Window,
     _cx: &mut App,
 ) -> AnyElement {
-    let font_size = style.base_text_style.font_size.to_pixels(window.rem_size());
+    let font_size = f32::from(style.base_text_style.font_size.to_pixels(window.rem_size()));
     let cached = math_state.get(contents, false);
 
     if let Some(cached) = cached
         && let Some(Ok(render_image)) = cached.render_image.get()
         && let Some(Some(metrics)) = cached.metrics.get()
     {
-        let width = px(metrics.width_em * font_size.0);
-        let height = px((metrics.height_em + metrics.depth_em) * font_size.0);
-        let depth = px(metrics.depth_em * font_size.0);
+        let width = px(metrics.width_em * font_size);
+        let height = px((metrics.height_em + metrics.depth_em) * font_size);
+        let depth = px(metrics.depth_em * font_size);
 
         div()
-            .inline_block()
+            .flex_none()
             .h(height)
             .w(width)
             .mb(-depth)
@@ -300,7 +297,7 @@ pub(crate) fn render_inline_math_element(
     } else {
         // Fallback: styled text chip
         div()
-            .inline_block()
+            .flex_none()
             .px_1()
             .rounded_xs()
             .bg(style.base_text_style.color.opacity(0.08))
