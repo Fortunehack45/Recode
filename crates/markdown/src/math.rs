@@ -54,7 +54,7 @@ impl CachedMathFormula {
             let render_image = render_image.clone();
             let metrics = metrics.clone();
             let contents = contents.clone();
-            async move |this, mut cx| {
+            async move |this, cx| {
                 let result = cx
                     .background_spawn(async move {
                         let rendered = math_render::render_to_svg(&contents, display, &theme)?;
@@ -86,7 +86,7 @@ impl CachedMathFormula {
                         render_image.set(Err(err)).ok();
                     }
                 }
-                this.update(&mut cx, |_, cx| cx.notify()).ok();
+                this.update(cx, |_, cx| cx.notify()).ok();
             }
         });
 
@@ -201,6 +201,7 @@ pub(crate) fn render_display_math(
             let display_height = px(device_size.height.0 as f32 / SMOOTH_SVG_SCALE_FACTOR);
 
             let body = div()
+                .id(ElementId::named_usize("display-math", source_offset))
                 .w_full()
                 .flex()
                 .justify_center()

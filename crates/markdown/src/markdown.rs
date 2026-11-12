@@ -49,8 +49,10 @@ use language::{
 use parser::CodeBlockMetadata;
 use parser::{
     MarkdownEvent, MarkdownTag, MarkdownTagEnd, ParsedMetadataBlock, parse_links_only,
-    parse_markdown_with_all_options, parse_markdown_with_options,
+    parse_markdown_with_all_options,
 };
+#[cfg(test)]
+use parser::parse_markdown_with_options;
 use pulldown_cmark::{Alignment, BlockQuoteKind};
 use sum_tree::TreeMap;
 use theme::SyntaxTheme;
