@@ -1085,8 +1085,8 @@ impl ExtensionStore {
                 if let Some(desc) = &ext.manifest.description {
                     toml.push_str(&format!("description = {:?}\n", desc));
                 }
-                if let Some(repo) = &ext.manifest.repository {
-                    toml.push_str(&format!("repository = {:?}\n", repo));
+                if !ext.manifest.repository.is_empty() {
+                    toml.push_str(&format!("repository = {:?}\n", ext.manifest.repository));
                 }
                 if !ext.manifest.authors.is_empty() {
                     let authors_str = ext
