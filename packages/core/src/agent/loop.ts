@@ -14,6 +14,8 @@ export type AgentEventType =
   | "error"
   | "done";
 
+export type AgentMode = "normal" | "plan" | "agent";
+
 export interface AgentEvent {
   type: AgentEventType;
   content?: string;
@@ -27,6 +29,7 @@ export interface AgentOptions {
   model?: string;
   workspaceDir?: string;
   maxTurns?: number;
+  mode?: AgentMode;
   customTools?: Record<string, Tool>;
   systemPrompt?: string;
   initialMessages?: ChatMessage[];
@@ -51,12 +54,14 @@ export class Agent {
   private model?: string;
   private maxTurns: number;
   private systemPrompt: string;
+  private mode: AgentMode = "normal";
 
   constructor(options: AgentOptions = {}) {
     this.llmClient = new LLMClient();
     this.workspaceDir = options.workspaceDir || process.cwd();
     this.model = options.model;
     this.maxTurns = options.maxTurns || 30;
+    this.mode = options.mode || "normal";
     this.systemPrompt = options.systemPrompt || DEFAULT_SYSTEM_PROMPT;
 
     // Register built-in tools
@@ -142,6 +147,14 @@ export class Agent {
     return this.model;
   }
 
+  public getMode(): AgentMode {
+    return this.mode;
+  }
+
+  public setMode(mode: AgentMode): void {
+    this.mode = mode;
+  }
+
   public clearHistory(): void {
     this.messages = [
       {
@@ -155,11 +168,35 @@ export class Agent {
     userPrompt: string,
     options: { signal?: AbortSignal } = {}
   ): AsyncGenerator<AgentEvent, string, unknown> {
-    yield { type: "start", content: userPrompt };
+    const trimmed = userPrompt.trim();
+
+    if (trimmed === "/normal") {
+      this.mode = "normal";
+      const msg = "Switched to Normal Mode (interactive single-agent assistant).";
+      yield { type: "start", content: userPrompt };
+      this.messages.push({ role: "user", content: userPrompt });
+      this.messages.push({ role: "assistant", content: msg });
+      yield { type: "turn_complete", content: msg };
+      yield { type: "done" };
+      return msg;
+    }
+
+    let effectivePrompt = userPrompt;
+    if (trimmed.startsWith("/plan")) {
+      this.mode = "plan";
+      const remainder = trimmed.slice(5).trim();
+      effectivePrompt = `[MODE: PLAN]\nYou are in Plan Mode. Your mandate is to research the codebase and formulate a comprehensive technical implementation plan with Architectural Decision Records (ADRs), Failure-Mode Effects Analysis (FMEA), and Phased Blueprints with verification gates.\n\nIMPORTANT: Present the plan for user review and approval before touching or modifying any code.\n\nUser Initiative: ${remainder || "Formulate technical architecture plan"}`;
+    } else if (trimmed.startsWith("/agent")) {
+      this.mode = "agent";
+      const remainder = trimmed.slice(6).trim();
+      effectivePrompt = `[MODE: AGENT]\nYou are in Agent Mode (Autonomous Multi-Agent Swarm). Decompose the initiative into specialized workstreams (Backend, Frontend, Algorithms, 3D, Media, DevOps, QA) and orchestrate execution via the shared message board and tools.\n\nUser Goal: ${remainder || "Execute autonomous swarm tasks"}`;
+    }
+
+    yield { type: "start", content: effectivePrompt };
 
     this.messages.push({
       role: "user",
-      content: userPrompt,
+      content: effectivePrompt,
     });
 
     const toolContext: ToolContext = {

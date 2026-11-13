@@ -47,4 +47,21 @@ impl McpRegistry {
     pub fn all_servers(&self) -> Vec<&McpServerConfig> {
         self.servers.values().collect()
     }
+
+    /// Returns an MCP registry pre-populated with official cloud integrations
+    /// for Supabase database operations and Vercel production deployments.
+    pub fn with_official_cloud_presets() -> Self {
+        let mut registry = Self::new();
+        registry.register_server(McpServerConfig::new(
+            "supabase",
+            "npx",
+            vec!["-y".into(), "@supabase/mcp-server".into()],
+        ));
+        registry.register_server(McpServerConfig::new(
+            "vercel",
+            "npx",
+            vec!["-y".into(), "@vercel/mcp".into()],
+        ));
+        registry
+    }
 }

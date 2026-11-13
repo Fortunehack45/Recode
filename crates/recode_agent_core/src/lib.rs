@@ -14,7 +14,7 @@ pub mod transcript;
 
 pub use mcp::{McpRegistry, McpServerConfig};
 pub use models::{ModelConfig, ModelProvider, TokenBudget};
-pub use session::{AgentSession, SkillDefinition};
+pub use session::{AgentOperatingMode, AgentSession, SkillDefinition};
 pub use tools::{ToolCall, ToolCallStatus, ToolDefinition, ToolRegistry};
 pub use transcript::{ChatMessage, ConversationThread, MessageRole};
 
@@ -62,18 +62,36 @@ mod tests {
     #[test]
     fn test_slash_command_skill_dispatch() {
         let mut session = AgentSession::default();
+        assert_eq!(session.mode, session::AgentOperatingMode::Normal);
 
         // Dispatch normal prompt
         session.dispatch_prompt("Hello assistant");
+        assert_eq!(session.mode, session::AgentOperatingMode::Normal);
         assert_eq!(session.thread.messages.len(), 1);
         assert_eq!(session.thread.messages[0].content, "Hello assistant");
 
         // Dispatch slash command prompt: /plan
         session.dispatch_prompt("/plan build clean-room architecture");
-        assert_eq!(session.thread.messages.len(), 2);
-        let plan_msg = &session.thread.messages[1].content;
-        assert!(plan_msg.contains("[SKILL: plan]"));
-        assert!(plan_msg.contains("build clean-room architecture"));
+        assert_eq!(session.mode, session::AgentOperatingMode::Plan);
+        assert_eq!(session.thread.messages.len(), 3);
+        let plan_user_msg = &session.thread.messages[1].content;
+        assert!(plan_user_msg.contains("[MODE & SKILL: plan]"));
+        assert!(plan_user_msg.contains("build clean-room architecture"));
+        let plan_assistant_msg = &session.thread.messages[2].content;
+        assert!(plan_assistant_msg.contains("Plan Mode activated"));
+
+        // Dispatch slash command prompt: /agent
+        session.dispatch_prompt("/agent build multiplayer social app");
+        assert_eq!(session.mode, session::AgentOperatingMode::Agent);
+        let agent_user_msg = &session.thread.messages[3].content;
+        assert!(agent_user_msg.contains("[MODE & SKILL: agent]"));
+        let agent_assistant_msg = &session.thread.messages[4].content;
+        assert!(agent_assistant_msg.contains("Agent Mode activated"));
+
+        // Switch back to normal mode
+        session.dispatch_prompt("/normal");
+        assert_eq!(session.mode, session::AgentOperatingMode::Normal);
+        assert_eq!(session.thread.messages.last().unwrap().content, "Switched to Normal Mode (interactive single-agent assistant).");
     }
 
     #[test]
@@ -84,5 +102,17 @@ mod tests {
         tool_call.complete("fn main() {}");
         assert_eq!(tool_call.status, ToolCallStatus::Completed);
         assert_eq!(tool_call.output.as_deref(), Some("fn main() {}"));
+    }
+
+    #[test]
+    fn test_official_cloud_mcp_presets() {
+        let registry = McpRegistry::with_official_cloud_presets();
+        let supabase = registry.get_server("supabase").expect("supabase preset exists");
+        assert_eq!(supabase.command, "npx");
+        assert!(supabase.args.contains(&"@supabase/mcp-server".to_string()));
+
+        let vercel = registry.get_server("vercel").expect("vercel preset exists");
+        assert_eq!(vercel.command, "npx");
+        assert!(vercel.args.contains(&"@vercel/mcp".to_string()));
     }
 }

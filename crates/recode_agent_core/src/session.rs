@@ -6,7 +6,20 @@ use crate::transcript::ConversationThread;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// A registered skill accessible via slash command (e.g. `/plan`, `/rust`).
+/// Operational mode of the Recode agent session.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
+pub enum AgentOperatingMode {
+    /// Normal Mode (Default): Single-agent conversational assistant with precise surgical edits.
+    #[default]
+    Normal,
+    /// Plan Mode: Technical architecture & systems design mode. Generates detailed implementation
+    /// plan artifacts with ADRs and FMEA for user review before any code is modified.
+    Plan,
+    /// Agent Mode: Autonomous hierarchical multi-agent swarm orchestrating parallel subagents.
+    Agent,
+}
+
+/// A registered skill accessible via slash command (e.g. `/plan`, `/rust`, `/agent`).
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct SkillDefinition {
     pub name: String,
@@ -17,6 +30,7 @@ pub struct SkillDefinition {
 /// The runtime agent session managing model communication, threads, and skills.
 #[derive(Clone, Debug)]
 pub struct AgentSession {
+    pub mode: AgentOperatingMode,
     pub model_config: ModelConfig,
     pub thread: ConversationThread,
     pub tools: ToolRegistry,
@@ -34,6 +48,7 @@ impl AgentSession {
     pub fn new(model_config: ModelConfig) -> Self {
         let max_tokens = model_config.max_tokens;
         let mut session = Self {
+            mode: AgentOperatingMode::Normal,
             model_config,
             thread: ConversationThread::new(1, "Main Thread"),
             tools: ToolRegistry::with_core_tools(),
@@ -43,9 +58,34 @@ impl AgentSession {
 
         // Register default skills
         session.register_skill(SkillDefinition {
+            name: "agent".to_string(),
+            description: "Autonomous Multi-Agent Swarm Orchestrator mode".to_string(),
+            instructions: "Switch to Agent Mode: Decompose goal into parallel subagents (Backend, Frontend, Algorithms, 3D, Media, DevOps, QA) with contract-first execution.".to_string(),
+        });
+        session.register_skill(SkillDefinition {
             name: "plan".to_string(),
             description: "Technical planning and systems architecture".to_string(),
             instructions: "Decompose problem into phased blueprints with verification gates.".to_string(),
+        });
+        session.register_skill(SkillDefinition {
+            name: "3d-design".to_string(),
+            description: "Master 3D spatial design, composition, and lighting".to_string(),
+            instructions: "Design 3D scenes with three-point/HDRI lighting, camera optics, and PBR color spaces in Blender/Unreal.".to_string(),
+        });
+        session.register_skill(SkillDefinition {
+            name: "game-development".to_string(),
+            description: "Master game engine architecture, ECS, and mechanics".to_string(),
+            instructions: "Enforce deterministic fixed timesteps, ECS components, Unreal Blueprints, and client-server prediction.".to_string(),
+        });
+        session.register_skill(SkillDefinition {
+            name: "3d-modeling".to_string(),
+            description: "Master 3D mesh modeling, topology, and geometry nodes".to_string(),
+            instructions: "Enforce quad-dominant topology, Catmull-Clark deformation loops, and procedural Blender geometry nodes.".to_string(),
+        });
+        session.register_skill(SkillDefinition {
+            name: "3d-animation".to_string(),
+            description: "Master 3D rigging, FK/IK kinematics, and motion".to_string(),
+            instructions: "Apply 12 principles of animation, FK/IK blending, F-Curve easing, and Higgsfield camera trajectories.".to_string(),
         });
         session.register_skill(SkillDefinition {
             name: "rust".to_string(),
@@ -61,7 +101,7 @@ impl AgentSession {
         self.skills.insert(skill.name.clone(), skill);
     }
 
-    /// Checks if a prompt starts with a registered slash command (e.g. `/plan`).
+    /// Checks if a prompt starts with a registered slash command (e.g. `/plan`, `/agent`).
     pub fn resolve_slash_command<'a>(&'a self, prompt: &'a str) -> Option<(&'a SkillDefinition, &'a str)> {
         let trimmed = prompt.trim_start();
         if !trimmed.starts_with('/') {
@@ -76,15 +116,48 @@ impl AgentSession {
         Some((skill, remainder))
     }
 
-    /// Dispatches a user prompt into the conversation thread, resolving skills if present.
+    /// Dispatches a user prompt into the conversation thread, activating modes and skills.
     pub fn dispatch_prompt(&mut self, prompt: &str) {
-        let final_text = if let Some((skill, remainder)) = self.resolve_slash_command(prompt) {
-            format!("[SKILL: {}]\n{}\n\n{}", skill.name, skill.instructions, remainder)
+        let trimmed = prompt.trim();
+
+        if trimmed == "/normal" {
+            self.mode = AgentOperatingMode::Normal;
+            self.thread.push_user("/normal");
+            self.thread.push_assistant("Switched to Normal Mode (interactive single-agent assistant).");
+            return;
+        }
+
+        let (final_text, mode_activation_msg) = if let Some((skill, remainder)) = self.resolve_slash_command(prompt) {
+            let mode_msg = match skill.name.as_str() {
+                "agent" => {
+                    self.mode = AgentOperatingMode::Agent;
+                    Some("Recode Agent Mode activated! Autonomous Multi-Agent Swarm Orchestrator is online.")
+                }
+                "plan" => {
+                    self.mode = AgentOperatingMode::Plan;
+                    Some("Recode Plan Mode activated! I will formulate a technical implementation plan artifact with ADRs, FMEA, and phased blueprints, and wait for your review and approval before executing.")
+                }
+                _ => None,
+            };
+
+            (
+                format!(
+                    "[{}: {}]\n{}\n\n{}",
+                    if mode_msg.is_some() { "MODE & SKILL" } else { "SKILL" },
+                    skill.name,
+                    skill.instructions,
+                    remainder
+                ),
+                mode_msg,
+            )
         } else {
-            prompt.to_string()
+            (prompt.to_string(), None)
         };
 
         self.thread.push_user(&final_text);
+        if let Some(msg) = mode_activation_msg {
+            self.thread.push_assistant(msg);
+        }
         // Estimate token cost (~4 chars per token)
         self.budget.used_tokens += final_text.len() / 4;
     }

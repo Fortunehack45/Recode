@@ -26,11 +26,41 @@ export {
   fileSearchTool,
   grepSearchTool,
   execTool,
+  blenderExecutePythonTool,
+  blenderCreateMeshTool,
+  blenderExportAssetTool,
+  unrealExecutePythonTool,
+  unrealSpawnActorTool,
+  unrealInspectWorldTool,
+  mediaGenerateVideoTool,
+  supabaseGenerateTypesTool,
+  supabaseApplyMigrationTool,
+  vercelDeployTool,
 } from "./tools/builtin.js";
 
 // Agent & Chat
 export { Agent, AgentEvent, AgentEventType, AgentOptions } from "./agent/loop.js";
 export { ChatStore, SavedChat, ChatMetadata } from "./agent/chat_store.js";
+
+// Swarm
+export { SwarmCoordinator } from "./swarm/coordinator.js";
+export { SwarmWorker } from "./swarm/worker.js";
+export { MessageBoard } from "./swarm/message_board.js";
+export { WorktreeManager } from "./swarm/worktree.js";
+export {
+  SwarmRole,
+  TaskSlice,
+  TaskSliceStatus,
+  SwarmMessage,
+  SwarmMessageType,
+  SwarmEvent,
+  SwarmOptions,
+} from "./swarm/types.js";
+
+// Connectors
+export { HiggsfieldClient, HiggsfieldVideoRequest, HiggsfieldTaskStatus } from "./connectors/media/higgsfield.js";
+export { SupabaseConnector, SupabaseConfig } from "./connectors/cloud/supabase.js";
+export { VercelConnector, VercelDeployOptions } from "./connectors/cloud/vercel.js";
 
 // Collab
 export { CollabClient, CollabMessage } from "./collab/client.js";

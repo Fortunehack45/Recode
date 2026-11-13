@@ -351,6 +351,36 @@ export const execTool: Tool = {
   },
 };
 
+import {
+  blenderExecutePythonTool,
+  blenderCreateMeshTool,
+  blenderExportAssetTool,
+} from "./blender.js";
+import {
+  unrealExecutePythonTool,
+  unrealSpawnActorTool,
+  unrealInspectWorldTool,
+} from "./unreal.js";
+import { mediaGenerateVideoTool } from "./media.js";
+import {
+  supabaseGenerateTypesTool,
+  supabaseApplyMigrationTool,
+  vercelDeployTool,
+} from "./cloud.js";
+
+export {
+  blenderExecutePythonTool,
+  blenderCreateMeshTool,
+  blenderExportAssetTool,
+  unrealExecutePythonTool,
+  unrealSpawnActorTool,
+  unrealInspectWorldTool,
+  mediaGenerateVideoTool,
+  supabaseGenerateTypesTool,
+  supabaseApplyMigrationTool,
+  vercelDeployTool,
+};
+
 export const BUILTIN_TOOLS: Record<string, Tool> = {
   read_file: readFileTool,
   write_file: writeFileTool,
@@ -359,4 +389,14 @@ export const BUILTIN_TOOLS: Record<string, Tool> = {
   file_search: fileSearchTool,
   grep_search: grepSearchTool,
   exec: execTool,
+  blender_execute_python: blenderExecutePythonTool,
+  blender_create_mesh: blenderCreateMeshTool,
+  blender_export_asset: blenderExportAssetTool,
+  unreal_execute_python: unrealExecutePythonTool,
+  unreal_spawn_actor: unrealSpawnActorTool,
+  unreal_inspect_world: unrealInspectWorldTool,
+  media_generate_video: mediaGenerateVideoTool,
+  supabase_generate_types: supabaseGenerateTypesTool,
+  supabase_apply_migration: supabaseApplyMigrationTool,
+  vercel_deploy_project: vercelDeployTool,
 };
