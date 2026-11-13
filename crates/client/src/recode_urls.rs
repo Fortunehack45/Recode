@@ -8,7 +8,7 @@ pub const DEFAULT_RECODE_REPO_URL: &str = "https://github.com/Fortunehack45/Reco
 pub const DEFAULT_RECODE_COLLAB_URL: &str = "wss://recode-collab.fly.dev";
 pub const DEFAULT_RECODE_API_URL: &str = "https://api.github.com/repos/Fortunehack45/Recode";
 pub const DEFAULT_RECODE_UPDATES_URL: &str = "https://github.com/Fortunehack45/Recode/releases/latest/download/latest.json";
-pub const DEFAULT_RECODE_EXTENSIONS_URL: &str = "https://api.github.com/repos/Fortunehack45/Recode/releases";
+pub const DEFAULT_RECODE_EXTENSIONS_URL: &str = "https://open-vsx.org/api";
 pub const DEFAULT_RECODE_DOCS_URL: &str = "https://github.com/Fortunehack45/Recode#readme";
 pub const DEFAULT_RECODE_GITHUB_CLIENT_ID: &str = "178c6fc778ccc68e1d6a";
 

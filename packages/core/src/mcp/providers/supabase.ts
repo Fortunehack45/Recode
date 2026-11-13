@@ -93,83 +93,29 @@ export class SupabaseRemoteMCP {
   }
 
   /**
-   * Returns canonical official tools exposed by Supabase MCP
+   * Dynamically discovers tools by issuing tools/list to the active Supabase MCP session.
+   * If readOnly is set, mutation tools are safely filtered.
+   * Zero hardcoded tool definitions.
    */
-  public getCanonicalTools(): DiscoveredTool[] {
-    const raw = [
-      {
-        name: "list_tables",
-        description: "List all PostgreSQL tables, columns, constraints, and Row-Level Security (RLS) policies in the project schema.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            schema: { type: "string", description: "Database schema name (default: public)" },
-          },
-        },
-      },
-      {
-        name: "execute_sql",
-        description: "Execute read or write SQL statements against the Supabase PostgreSQL database. Destructive operations require confirmation.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: { type: "string", description: "PostgreSQL query or transaction block" },
-          },
-          required: ["query"],
-        },
-      },
-      {
-        name: "list_migrations",
-        description: "List applied and pending database migrations for the active Supabase project.",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-      {
-        name: "apply_migration",
-        description: "Apply a versioned SQL migration to the Supabase database and record it in schema history.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            name: { type: "string", description: "Migration name (e.g. create_users_table)" },
-            sql: { type: "string", description: "SQL migration contents" },
-          },
-          required: ["name", "sql"],
-        },
-      },
-      {
-        name: "generate_typescript_types",
-        description: "Generate strongly typed TypeScript interfaces directly from the Supabase PostgreSQL catalog.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            outputPath: { type: "string", description: "Target file path in workspace" },
-          },
-        },
-      },
-      {
-        name: "get_advisors",
-        description: "Get security and performance recommendations for database tables and RLS configurations.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            type: { type: "string", enum: ["security", "performance"], description: "Advisor category" },
-          },
-        },
-      },
-    ];
+  public async discoverTools(client: {
+    listTools: () => Promise<{
+      tools: Array<{ name: string; description?: string; inputSchema?: Record<string, unknown> }>;
+    }>;
+  }): Promise<DiscoveredTool[]> {
+    const res = await client.listTools();
+    if (!res || !Array.isArray(res.tools)) {
+      throw new Error("Invalid tools/list response received from official Supabase MCP endpoint");
+    }
 
-    // If configured as readOnly, filter out mutation tools
-    const filtered = this.readOnly
-      ? raw.filter((t) => t.name !== "apply_migration" && t.name !== "execute_sql")
-      : raw;
+    const tools = this.readOnly
+      ? res.tools.filter((t) => !["apply_migration", "execute_sql"].includes(t.name.toLowerCase()))
+      : res.tools;
 
-    return filtered.map((t) => ({
+    return tools.map((t) => ({
       name: t.name,
       namespacedName: `${this.manifest.toolNamespace}:${t.name}`,
-      description: t.description,
-      inputSchema: t.inputSchema,
+      description: t.description || `Official Supabase tool: ${t.name}`,
+      inputSchema: t.inputSchema || { type: "object", properties: {} },
       serverName: this.manifest.id,
     }));
   }

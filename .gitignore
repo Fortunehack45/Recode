@@ -42,6 +42,7 @@ DerivedData/
 /Packages/
 !/packages/
 packages/*/dist/
+packages/core/supabase/
 xcuserdata/
 crates/docs_preprocessor/actions.json
 

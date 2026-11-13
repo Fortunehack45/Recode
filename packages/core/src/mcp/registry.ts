@@ -76,28 +76,6 @@ export const FIRST_PARTY_INTEGRATIONS: Record<string, IntegrationManifest> = {
     toolNamespace: "mcp:blender",
   },
 
-  "blender-recode-bridge": {
-    id: "blender-recode-bridge",
-    displayName: "Recode 3D Studio Bridge (Blender)",
-    provider: "Recode",
-    website: "https://recode.dev",
-    documentationUrl: "https://recode.dev/docs/3d/blender",
-    provenance: "recode_native",
-    version: "1.30.12",
-    supportedPlatforms: ["win32", "darwin", "linux"],
-    transport: "local_http",
-    endpoint: "http://127.0.0.1:8128",
-    authType: "local_token",
-    dependencies: {
-      application: {
-        name: "Blender",
-        minVersion: "3.6",
-        downloadUrl: "https://www.blender.org/download/",
-      },
-    },
-    toolNamespace: "mcp:recode:blender",
-  },
-
   "unreal-engine-epic": {
     id: "unreal-engine-epic",
     displayName: "Unreal Engine Embedded MCP",
@@ -122,27 +100,6 @@ export const FIRST_PARTY_INTEGRATIONS: Record<string, IntegrationManifest> = {
     toolNamespace: "mcp:unreal",
   },
 
-  "unreal-recode-remote": {
-    id: "unreal-recode-remote",
-    displayName: "Recode Unreal Web Remote Control",
-    provider: "Recode",
-    website: "https://recode.dev",
-    documentationUrl: "https://recode.dev/docs/3d/unreal",
-    provenance: "recode_native",
-    version: "1.30.12",
-    supportedPlatforms: ["win32", "darwin"],
-    transport: "local_http",
-    endpoint: "http://127.0.0.1:30010",
-    authType: "none",
-    dependencies: {
-      application: {
-        name: "Unreal Engine Editor",
-        minVersion: "5.0",
-      },
-    },
-    toolNamespace: "mcp:recode:unreal",
-  },
-
   github: {
     id: "github",
     displayName: "GitHub Official MCP",
@@ -150,17 +107,63 @@ export const FIRST_PARTY_INTEGRATIONS: Record<string, IntegrationManifest> = {
     website: "https://github.com",
     documentationUrl: "https://github.com/github/github-mcp-server",
     sourceRepository: "https://github.com/github/github-mcp-server",
-    provenance: "first_party_local",
+    provenance: "first_party_remote",
     version: "1.0.0",
     supportedPlatforms: ["win32", "darwin", "linux"],
-    transport: "stdio",
-    command: "gh",
-    args: ["mcp-server"],
-    authType: "api_key",
-    dependencies: {
-      runtime: ["node"],
-    },
+    transport: "streamable_http",
+    endpoint: "https://api.githubcopilot.com/mcp/",
+    authType: "oauth2",
+    dependencies: {},
     toolNamespace: "mcp:github",
+  },
+
+  render: {
+    id: "render",
+    displayName: "Render Cloud MCP",
+    provider: "Render",
+    website: "https://render.com",
+    documentationUrl: "https://render.com/docs/mcp-server",
+    sourceRepository: "https://github.com/render-oss/render-mcp-server",
+    provenance: "first_party_remote",
+    version: "1.0.0",
+    supportedPlatforms: ["win32", "darwin", "linux"],
+    transport: "streamable_http",
+    endpoint: "https://mcp.render.com/mcp",
+    authType: "oauth2",
+    dependencies: {},
+    toolNamespace: "mcp:render",
+  },
+
+  higgsfield: {
+    id: "higgsfield",
+    displayName: "Higgsfield AI Video & Motion MCP",
+    provider: "Higgsfield AI",
+    website: "https://higgsfield.ai",
+    documentationUrl: "https://higgsfield.ai/creator-hub/help-center/integrations/what-is-higgsfield-mcp",
+    provenance: "first_party_remote",
+    version: "1.0.0",
+    supportedPlatforms: ["win32", "darwin", "linux"],
+    transport: "streamable_http",
+    endpoint: "https://mcp.higgsfield.ai/mcp",
+    authType: "oauth2",
+    dependencies: {},
+    toolNamespace: "mcp:higgsfield",
+  },
+
+  stitch: {
+    id: "stitch",
+    displayName: "Google Stitch UI/Design MCP (Beta)",
+    provider: "Google",
+    website: "https://stitch.withgoogle.com",
+    documentationUrl: "https://stitch.withgoogle.com/docs/mcp/",
+    provenance: "first_party_remote",
+    version: "1.0.0-beta",
+    supportedPlatforms: ["win32", "darwin", "linux"],
+    transport: "streamable_http",
+    endpoint: "https://stitch.googleapis.com/mcp",
+    authType: "oauth2",
+    dependencies: {},
+    toolNamespace: "mcp:stitch",
   },
 
   docker: {
@@ -195,6 +198,13 @@ export class IntegrationRegistry {
   }
 
   public get(id: string): IntegrationManifest | undefined {
+    // Non-destructive migration for retired Recode-native bridges
+    if (id === "blender-recode-bridge" || id === "blender") {
+      return this.integrations.get("blender-lab");
+    }
+    if (id === "unreal-recode-remote" || id === "unreal-engine") {
+      return this.integrations.get("unreal-engine-epic");
+    }
     return this.integrations.get(id);
   }
 

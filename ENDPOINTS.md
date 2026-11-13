@@ -33,7 +33,7 @@ Recode never proxies AI requests through intermediate servers. All traffic is di
 
 | Service | Default Endpoint | Environment Variable Override | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Extensions** | `https://api.zed.dev/extensions` | `RECODE_EXTENSIONS_URL` | Fetch list of available community extensions, themes, and language servers. |
+| **Extensions** | `https://open-vsx.org/api` | `RECODE_EXTENSIONS_URL` | Universal Open VSX extension registry for VS Code-compatible VSIX packages, formatters, and themes. |
 | **Auto-Updates** | `https://github.com/Fortunehack45/Recode/releases/latest/download` | `RECODE_UPDATES_URL` | Check for new binary releases via `latest.json`. |
 | **Documentation** | `https://github.com/Fortunehack45/Recode/wiki` | `RECODE_DOCS_URL` | User help and manual documentation links. |
 

@@ -592,7 +592,211 @@ pub(crate) fn render_add_server_popover(
                         }
                     })
                     .separator()
-                    .entry("Install from Extensions", None, {
+                    .entry("Quick-Connect: Vercel (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("vercel")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://mcp.vercel.com".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Supabase (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("supabase")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://mcp.supabase.com/mcp".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Render (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("render")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://mcp.render.com/mcp".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Higgsfield AI (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("higgsfield")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://mcp.higgsfield.ai/mcp".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Google Stitch (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("stitch")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://stitch.googleapis.com/mcp".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Blender Studio (Official Lab)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Stdio,
+                                        Some((
+                                            ContextServerId(Arc::from("blender")),
+                                            ContextServerSettings::Stdio {
+                                                enabled: true,
+                                                remote: false,
+                                                command: ContextServerCommand {
+                                                    path: std::path::PathBuf::from("uvx"),
+                                                    args: vec!["blender-mcp".to_string()],
+                                                    env: None,
+                                                    timeout: None,
+                                                },
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: Unreal Engine 5 (Epic Games)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("unreal-engine")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "http://127.0.0.1:8080".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .entry("Quick-Connect: GitHub Copilot (Official)", None, {
+                        let settings_window = settings_window.clone();
+                        move |window, cx| {
+                            settings_window
+                                .update(cx, |this, cx| {
+                                    open_mcp_server_form(
+                                        this,
+                                        McpTransport::Http,
+                                        Some((
+                                            ContextServerId(Arc::from("github")),
+                                            ContextServerSettings::Http {
+                                                enabled: true,
+                                                url: "https://api.githubcopilot.com/mcp/".to_string(),
+                                                headers: HashMap::default(),
+                                                timeout: None,
+                                                oauth: None,
+                                            },
+                                        )),
+                                        window,
+                                        cx,
+                                    );
+                                })
+                                .log_err();
+                        }
+                    })
+                    .separator()
+                    .entry("Browse Extension Store", None, {
                         move |_window, cx| {
                             if let Some(original_window) = original_window.as_ref() {
                                 cx.activate(true);
@@ -601,9 +805,7 @@ pub(crate) fn render_add_server_popover(
                                         window.activate_window();
                                         window.dispatch_action(
                                             recode_actions::Extensions {
-                                                category_filter: Some(
-                                                    ExtensionCategoryFilter::ContextServers,
-                                                ),
+                                                category_filter: None,
                                                 id: None,
                                             }
                                             .boxed_clone(),

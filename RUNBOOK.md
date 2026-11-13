@@ -99,7 +99,7 @@ To publish a new official cross-platform release:
 
 ### Issue B: Extension Marketplace Fails to Load (Offline or 404)
 - **Cause**: Upstream network outage or custom registry configuration.
-- **Resolution**: Check `RECODE_EXTENSIONS_URL` environment variable. By default, it uses `https://api.zed.dev/extensions` with graceful offline fallback.
+- **Resolution**: Check `RECODE_EXTENSIONS_URL` environment variable. By default, it queries the Eclipse Open VSX registry (`https://open-vsx.org/api`) with built-in catalog fallback.
 
 ### Issue C: GitHub Device Sign-In Token Not Recognized
 - **Resolution**: Verify that the GitHub user code was entered and confirmed at `https://github.com/login/device`. The desktop client polls automatically every 5 seconds until confirmed.

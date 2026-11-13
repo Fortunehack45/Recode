@@ -1,80 +1,21 @@
 {
   "data": [
     {
-      "id": "unreal-engine",
-      "name": "Unreal Engine 5 MCP Bridge & Game Tools",
-      "version": "1.0.0",
-      "description": "Connect Recode to Unreal Engine 5: live scene inspection, Blueprint & C++ reflection, actor spawning, shader compilation, and Python automation.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 28450
-    },
-    {
-      "id": "blender",
-      "name": "Blender 3D MCP Studio Connector",
-      "version": "1.0.0",
-      "description": "Connect Recode to Blender 3D: procedural mesh generation, Catmull-Clark subdivision, PBR materials, FK/IK skeletal rigging, and Python RPC.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 29200
-    },
-    {
-      "id": "supabase",
-      "name": "Supabase Database & Auth Connector",
-      "version": "1.0.0",
-      "description": "Manage Supabase projects: inspect PostgreSQL schemas, enforce Row-Level Security policies, apply database migrations, and generate TypeScript types.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 1250
-    },
-    {
-      "id": "vercel",
-      "name": "Vercel Cloud Deployment Connector",
-      "version": "1.0.0",
-      "description": "Deploy full-stack web applications, manage edge middleware, view build logs, and configure environment variables on Vercel.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 1420
-    },
-    {
-      "id": "higgsfield",
-      "name": "Higgsfield AI Video & Motion Connector",
-      "version": "1.0.0",
-      "description": "AI cinematic video generation, camera trajectory synthesis, and motion transfer for realistic 3D game trailers and cutscenes.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 980
-    },
-    {
       "id": "godot",
       "name": "Godot 4 Game Engine Tools",
       "version": "1.0.0",
       "description": "GDScript language support, Scene tree inspector, node property completion, and Godot 4.x runtime debugger.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers", "debug-adapters"],
+      "provides": [
+        "languages",
+        "language-servers",
+        "debug-adapters"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 21500
     },
@@ -83,63 +24,33 @@
       "name": "HLSL & GLSL Shader Support",
       "version": "1.0.0",
       "description": "Syntax highlighting, linting, and offline compilation for HLSL, GLSL, and SPIR-V game shaders.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages"],
+      "provides": [
+        "languages"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 26800
-    },
-    {
-      "id": "github",
-      "name": "GitHub MCP & Pull Request Tools",
-      "version": "1.0.0",
-      "description": "Manage GitHub repositories, review PR diffs, track issues, and trigger GitHub Actions CI/CD workflows.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 41000
-    },
-    {
-      "id": "postgres",
-      "name": "PostgreSQL Database MCP & Client",
-      "version": "1.0.0",
-      "description": "Direct PostgreSQL database connection, SQL query execution, schema browser, and index optimization advisor.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 32400
-    },
-    {
-      "id": "docker",
-      "name": "Docker & Compose MCP Server",
-      "version": "1.0.0",
-      "description": "Manage Docker containers, inspect container logs, build multi-stage Dockerfiles, and orchestrate Docker Compose stacks.",
-      "authors": ["Recode Team"],
-      "repository": "https://github.com/Fortunehack45/Recode",
-      "schema_version": 1,
-      "wasm_api_version": null,
-      "provides": ["context-servers"],
-      "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 38700
     },
     {
       "id": "python",
       "name": "Python (Pyright & Ruff)",
       "version": "1.0.0",
       "description": "High-performance Python language intelligence with Pyright type checking, Ruff formatting, linting, and pytest integration.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 58200
     },
@@ -148,11 +59,16 @@
       "name": "Rust (rust-analyzer)",
       "version": "1.0.0",
       "description": "Official Rust language support powered by rust-analyzer with inlay hints, macro expansion, and cargo diagnostics.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 55100
     },
@@ -161,11 +77,16 @@
       "name": "TypeScript & JavaScript",
       "version": "1.0.0",
       "description": "Complete TypeScript 5.x intelligence, JSX/TSX React support, automatic imports, and ESLint integration.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 62000
     },
@@ -174,11 +95,16 @@
       "name": "Tailwind CSS & Modern Web",
       "version": "1.0.0",
       "description": "IntelliSense autocomplete for Tailwind CSS classes, color preview decorators, and modern HTML5 validation.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 49400
     },
@@ -187,11 +113,16 @@
       "name": "C / C++ (Clangd)",
       "version": "1.0.0",
       "description": "Advanced C and C++ language server powered by Clangd for game engines, native performance, and CMake projects.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 43100
     },
@@ -200,11 +131,16 @@
       "name": "Go (gopls)",
       "version": "1.0.0",
       "description": "Go language development tooling with gopls, struct tag completion, test execution, and pprof profiling.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["languages", "language-servers"],
+      "provides": [
+        "languages",
+        "language-servers"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 39800
     },
@@ -213,11 +149,15 @@
       "name": "Recode Signature Obsidian Theme",
       "version": "1.0.0",
       "description": "Ultra-clean dark obsidian theme engineered for visual clarity, low eye strain, and vibrant syntax highlighting.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["themes"],
+      "provides": [
+        "themes"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 74000
     },
@@ -226,11 +166,15 @@
       "name": "Recode Cyberpunk Neon Theme",
       "version": "1.0.0",
       "description": "High-contrast neon theme featuring electric violet, cyan accents, and deep obsidian backgrounds.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["themes"],
+      "provides": [
+        "themes"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 52300
     },
@@ -239,11 +183,15 @@
       "name": "Recode File & Game Asset Icons",
       "version": "1.0.0",
       "description": "Comprehensive file icons for code, 3D models (.blend, .uasset, .fbx, .gltf), shaders, and config files.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["icon-themes"],
+      "provides": [
+        "icon-themes"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 59000
     },
@@ -252,11 +200,15 @@
       "name": "LLDB Native Debugger",
       "version": "1.0.0",
       "description": "Native Debug Adapter Protocol (DAP) provider for debugging C++, Rust, and Unreal Engine native binaries.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["debug-adapters"],
+      "provides": [
+        "debug-adapters"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 31800
     },
@@ -265,11 +217,15 @@
       "name": "Python Debugger (debugpy)",
       "version": "1.0.0",
       "description": "Interactive breakpoint and variable inspection debugger for Python applications and scripts.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["debug-adapters"],
+      "provides": [
+        "debug-adapters"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 37400
     },
@@ -278,11 +234,15 @@
       "name": "Node.js & Chrome Debugger",
       "version": "1.0.0",
       "description": "Full breakpoint and call stack debugging for Node.js, Next.js, and web frontends.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["debug-adapters"],
+      "provides": [
+        "debug-adapters"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 41500
     },
@@ -291,11 +251,15 @@
       "name": "Recode Game Dev & Full-Stack Snippets",
       "version": "1.0.0",
       "description": "Curated snippets for Unreal Engine C++, Blender Python, React/Next.js, Supabase RLS, and shaders.",
-      "authors": ["Recode Team"],
+      "authors": [
+        "Recode Team"
+      ],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
-      "provides": ["snippets"],
+      "provides": [
+        "snippets"
+      ],
       "published_at": "2026-11-01T00:00:00Z",
       "download_count": 45600
     }

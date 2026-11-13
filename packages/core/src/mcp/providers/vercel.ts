@@ -79,62 +79,24 @@ export class VercelRemoteMCP {
   }
 
   /**
-   * Returns canonical official tool definitions provided by Vercel MCP
+   * Dynamically discovers tools by issuing tools/list to the active Vercel MCP session.
+   * Zero hardcoded tool definitions.
    */
-  public getCanonicalTools(): DiscoveredTool[] {
-    const raw = [
-      {
-        name: "list_projects",
-        description: "List all projects accessible in the authenticated Vercel account or team.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            limit: { type: "number", description: "Maximum projects to return (1-100)" },
-          },
-        },
-      },
-      {
-        name: "list_deployments",
-        description: "List recent deployments for a specific Vercel project with state and URLs.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            projectId: { type: "string", description: "Project ID or name" },
-            limit: { type: "number", description: "Number of deployments to retrieve" },
-          },
-          required: ["projectId"],
-        },
-      },
-      {
-        name: "get_deployment_logs",
-        description: "Retrieve build, runtime, and serverless function execution logs for a Vercel deployment.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            deploymentId: { type: "string", description: "Unique deployment ID" },
-            follow: { type: "boolean", description: "Stream live logs" },
-          },
-          required: ["deploymentId"],
-        },
-      },
-      {
-        name: "get_project_env",
-        description: "Retrieve project environment variables and their targets (Production, Preview, Development).",
-        inputSchema: {
-          type: "object",
-          properties: {
-            projectId: { type: "string", description: "Project ID or name" },
-          },
-          required: ["projectId"],
-        },
-      },
-    ];
+  public async discoverTools(client: {
+    listTools: () => Promise<{
+      tools: Array<{ name: string; description?: string; inputSchema?: Record<string, unknown> }>;
+    }>;
+  }): Promise<DiscoveredTool[]> {
+    const res = await client.listTools();
+    if (!res || !Array.isArray(res.tools)) {
+      throw new Error("Invalid tools/list response received from official Vercel MCP endpoint");
+    }
 
-    return raw.map((t) => ({
+    return res.tools.map((t) => ({
       name: t.name,
       namespacedName: `${this.manifest.toolNamespace}:${t.name}`,
-      description: t.description,
-      inputSchema: t.inputSchema,
+      description: t.description || `Official Vercel tool: ${t.name}`,
+      inputSchema: t.inputSchema || { type: "object", properties: {} },
       serverName: this.manifest.id,
     }));
   }

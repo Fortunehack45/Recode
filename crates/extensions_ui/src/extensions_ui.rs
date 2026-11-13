@@ -1580,7 +1580,8 @@ impl Render for ExtensionsPage {
                                 ExtensionProvides::AgentServers
                                 | ExtensionProvides::Grammars // grammars do not add anything of value to users currently
                                 | ExtensionProvides::IndexedDocsProviders
-                                | ExtensionProvides::SlashCommands => false,
+                                | ExtensionProvides::SlashCommands
+                                | ExtensionProvides::ContextServers => false,
                                 _ => true,
                             })
                             .map(|provides| {

@@ -1,6 +1,8 @@
 mod capability_granter;
 pub mod extension_settings;
 pub mod headless_host;
+pub mod open_vsx_client;
+pub mod vsix_installer;
 pub mod wasm_host;
 
 #[cfg(test)]
@@ -359,9 +361,13 @@ pub fn init(
 /// Returns the built-in, out-of-the-box extensions catalog for Recode.
 pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
     const BUILTIN_DATA: &str = include_str!("builtin_extensions.json");
-    serde_json::from_str::<GetExtensionsResponse>(BUILTIN_DATA)
-        .map(|resp| resp.data)
-        .unwrap_or_default()
+    match serde_json::from_str::<GetExtensionsResponse>(BUILTIN_DATA) {
+        Ok(resp) => resp.data,
+        Err(err) => {
+            log::error!("failed to parse builtin extensions catalog: {err:#}");
+            Vec::new()
+        }
+    }
 }
 
 impl ExtensionStore {
@@ -696,9 +702,25 @@ impl ExtensionStore {
         let task = self.fetch_extensions_from_api("/extensions", &query, cx);
         let provides_filter = provides_filter.cloned();
         let search = search.map(|s| s.to_lowercase());
+        let http_client = self.http_client.clone();
+        let search_query = search.clone();
 
         cx.spawn(async move |_, _| {
-            let mut extensions = task.await.unwrap_or_default();
+            let (api_extensions, open_vsx_extensions) = futures::join!(
+                task,
+                async {
+                    let client = open_vsx_client::OpenVsxClient::new(http_client);
+                    client.search(search_query.as_deref(), 40).await.unwrap_or_default()
+                }
+            );
+
+            let mut extensions = api_extensions.unwrap_or_default();
+            for ext in open_vsx_extensions {
+                if !extensions.iter().any(|e| e.id == ext.id) {
+                    extensions.push(ext);
+                }
+            }
+
             let builtin = ExtensionStore::builtin_recode_extensions();
 
             for ext in builtin {
@@ -1131,8 +1153,86 @@ impl ExtensionStore {
         })
     }
 
+    pub fn install_open_vsx_extension(
+        &mut self,
+        namespace: String,
+        name: String,
+        cx: &mut Context<Self>,
+    ) -> Task<Result<()>> {
+        let extension_id: Arc<str> = Arc::from(format!("{namespace}.{name}"));
+        let extension_dir = self.installed_dir.join(extension_id.as_ref());
+        let http_client = self.http_client.clone();
+        let extension_id_clone = extension_id.clone();
+
+        match self.outstanding_operations.entry(extension_id.clone()) {
+            btree_map::Entry::Occupied(_) => return Task::ready(Ok(())),
+            btree_map::Entry::Vacant(e) => e.insert(ExtensionOperation::Install),
+        };
+        cx.notify();
+
+        cx.spawn(async move |this, cx| {
+            let _finish = cx.on_drop(&this, {
+                let extension_id = extension_id_clone.clone();
+                move |this, cx| {
+                    this.outstanding_operations.remove(extension_id.as_ref());
+                    cx.notify();
+                }
+            });
+
+            let details_url = format!("https://open-vsx.org/api/{namespace}/{name}");
+            let mut resp = http_client.get(&details_url, AsyncBody::empty(), true).await?;
+            let mut body = Vec::new();
+            futures::AsyncReadExt::read_to_end(resp.body_mut(), &mut body).await?;
+            let details: serde_json::Value = serde_json::from_slice(&body)?;
+
+            let download_url = details["files"]["download"]
+                .as_str()
+                .ok_or_else(|| anyhow::anyhow!("No VSIX download URL found for {extension_id_clone}"))?;
+
+            vsix_installer::VsixInstaller::install_vsix(
+                download_url,
+                &extension_dir,
+                http_client,
+            )
+            .await?;
+
+            this.update(cx, |this, cx| this.reload(Some(extension_id_clone.clone()), cx))?
+                .await;
+
+            this.update(cx, |this, cx| {
+                cx.emit(Event::ExtensionInstalled(extension_id_clone.clone()));
+                if let Some(events) = ExtensionEvents::try_global(cx)
+                    && let Some(manifest) = this.extension_manifest_for_id(&extension_id_clone)
+                {
+                    events.update(cx, |this, cx| {
+                        this.emit(extension::Event::ExtensionInstalled(manifest.clone()), cx)
+                    });
+                }
+            })
+            .ok();
+
+            Ok(())
+        })
+    }
+
     pub fn install_latest_extension(&mut self, extension_id: Arc<str>, cx: &mut Context<Self>) {
         log::info!("installing extension {extension_id} latest version");
+
+        if extension_id.contains('.') {
+            let parts: Vec<&str> = extension_id.splitn(2, '.').collect();
+            if parts.len() == 2 {
+                self.install_open_vsx_extension(parts[0].to_string(), parts[1].to_string(), cx)
+                    .detach_and_log_err(cx);
+                return;
+            }
+        }
+
+        if extension_id.contains('.') {
+            let parts: Vec<&str> = extension_id.splitn(2, '.').collect();
+            if parts.len() == 2 {
+                return self.install_open_vsx_extension(parts[0].to_string(), parts[1].to_string(), cx);
+            }
+        }
 
         if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
             .into_iter()
@@ -1190,6 +1290,13 @@ impl ExtensionStore {
         cx: &mut Context<Self>,
     ) -> Task<Result<()>> {
         log::info!("installing extension {extension_id} {version}");
+
+        if extension_id.contains('.') {
+            let parts: Vec<&str> = extension_id.splitn(2, '.').collect();
+            if parts.len() == 2 {
+                return self.install_open_vsx_extension(parts[0].to_string(), parts[1].to_string(), cx);
+            }
+        }
 
         if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
             .into_iter()
