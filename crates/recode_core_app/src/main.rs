@@ -12,7 +12,7 @@ fn main() {
 
     // Fast flags
     if args.contains(&"--version".to_string()) || args.contains(&"-v".to_string()) {
-        println!("Recode Core v1.30.9 (Clean-Room Commercial Edition)");
+        println!("Recode Core v1.30.10 (Clean-Room Commercial Edition)");
         println!("Copyright (c) 2026 Recode. All rights reserved.");
         return;
     }

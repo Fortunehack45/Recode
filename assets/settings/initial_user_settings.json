@@ -12,6 +12,29 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "One Dark",
+    "dark": "One Dark"
   },
+  // Model Context Protocol (MCP) servers for 3D game engines, cloud backends, and AI media
+  "context_servers": {
+    "unreal-engine": {
+      "command": "npx",
+      "args": ["-y", "unreal-engine-mcp"]
+    },
+    "blender": {
+      "command": "npx",
+      "args": ["-y", "blender-mcp"]
+    },
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"]
+    },
+    "vercel": {
+      "command": "npx",
+      "args": ["-y", "@vercel/mcp-server"]
+    },
+    "higgsfield": {
+      "command": "npx",
+      "args": ["-y", "@higgsfield/mcp-server"]
+    }
+  }
 }

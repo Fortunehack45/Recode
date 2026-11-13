@@ -2,7 +2,7 @@
 description = "The fast, collaborative code editor."
 edition.workspace = true
 name = "recode"
-version = "1.30.9"
+version = "1.30.10"
 publish.workspace = true
 license = "GPL-3.0-or-later"
 authors = ["Recode Contributors <community@recode.dev>"]

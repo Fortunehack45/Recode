@@ -658,6 +658,14 @@ impl ExtensionStore {
         Some((icon_theme_path, icons_root_path))
     }
 
+/// Returns the built-in, out-of-the-box extensions catalog for Recode.
+pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
+    const BUILTIN_DATA: &str = include_str!("builtin_extensions.json");
+    serde_json::from_str::<GetExtensionsResponse>(BUILTIN_DATA)
+        .map(|resp| resp.data)
+        .unwrap_or_default()
+}
+
     pub fn fetch_extensions(
         &self,
         search: Option<&str>,
@@ -670,18 +678,54 @@ impl ExtensionStore {
             query.push(("filter", search));
         }
 
-        let provides_filter = provides_filter.map(|provides_filter| {
-            provides_filter
+        let provides_filter_str = provides_filter.map(|filter| {
+            filter
                 .iter()
                 .map(|provides| provides.to_string())
                 .collect::<Vec<_>>()
                 .join(",")
         });
-        if let Some(provides_filter) = provides_filter.as_deref() {
-            query.push(("provides", provides_filter));
+        if let Some(provides_filter_str) = provides_filter_str.as_deref() {
+            query.push(("provides", provides_filter_str));
         }
 
-        self.fetch_extensions_from_api("/extensions", &query, cx)
+        let task = self.fetch_extensions_from_api("/extensions", &query, cx);
+        let provides_filter = provides_filter.cloned();
+        let search = search.map(|s| s.to_lowercase());
+
+        cx.spawn(async move |_, _| {
+            let mut extensions = task.await.unwrap_or_default();
+            let builtin = builtin_recode_extensions();
+
+            for ext in builtin {
+                if !extensions.iter().any(|e| e.id == ext.id) {
+                    extensions.push(ext);
+                }
+            }
+
+            if let Some(provides_filter) = &provides_filter {
+                extensions.retain(|ext| {
+                    ext.manifest
+                        .provides
+                        .iter()
+                        .any(|p| provides_filter.contains(p))
+                });
+            }
+
+            if let Some(search) = &search {
+                extensions.retain(|ext| {
+                    ext.id.to_lowercase().contains(search)
+                        || ext.manifest.name.to_lowercase().contains(search)
+                        || ext
+                            .manifest
+                            .description
+                            .as_deref()
+                            .is_some_and(|d| d.to_lowercase().contains(search))
+                });
+            }
+
+            Ok(extensions)
+        })
     }
 
     pub fn fetch_extensions_with_update_available(
@@ -736,7 +780,20 @@ impl ExtensionStore {
         extension_id: &str,
         cx: &mut Context<Self>,
     ) -> Task<Result<Vec<ExtensionMetadata>>> {
-        self.fetch_extensions_from_api(&format!("/extensions/{extension_id}"), &[], cx)
+        let task = self.fetch_extensions_from_api(&format!("/extensions/{extension_id}"), &[], cx);
+        let extension_id = extension_id.to_string();
+        cx.spawn(async move |_, _| {
+            let mut versions = task.await.unwrap_or_default();
+            if versions.is_empty() {
+                if let Some(builtin) = builtin_recode_extensions()
+                    .into_iter()
+                    .find(|e| e.id.as_ref() == extension_id)
+                {
+                    versions.push(builtin);
+                }
+            }
+            Ok(versions)
+        })
     }
 
     /// Installs any extensions that should be included with Recode by default.

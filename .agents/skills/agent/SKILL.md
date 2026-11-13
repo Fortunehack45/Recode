@@ -25,14 +25,15 @@ When `/agent <goal>` is invoked (e.g. `"/agent build a multiplayer social media 
 1. **Lead Coordinator Phase**:
    - Decomposes the initiative into a Directed Acyclic Graph (DAG) of non-overlapping `TaskSlice`s.
    - Assigns explicit file-ownership boundaries to avoid write collisions.
-2. **Concurrent Specialized Worker Execution**:
-   - **Backend Architect**: Designs PostgreSQL schemas, REST/gRPC endpoints, and Supabase RLS policies.
-   - **Frontend Engineer**: Constructs reactive, accessible UI components and state machines.
-   - **Algorithm Specialist**: Implements recommendation feeds, search ranking, and O(n) data structures.
-   - **3D & Game Engine Specialist**: Uses Blender and Unreal Engine 5 to generate procedural meshes, materials, and level actors.
-   - **Media Producer**: Prompts Higgsfield AI to generate cinematic video assets and animations.
-   - **DevOps Specialist**: Applies database migrations and executes 1-click Vercel production deployments.
-   - **QA Auditor**: Continuously runs verification gates (`pnpm test`, `cargo check`) to prevent regressions.
+2. **Concurrent Specialized Worker Execution via `spawn_agent`**:
+   The Lead Coordinator dispatches parallel `spawn_agent` tool calls for each role, assigning human-readable `label`s so they render as live interactive subagent cards in the IDE conversation view:
+   - **Backend Architect** (`label: "Backend Architect"`): Designs PostgreSQL schemas, REST/gRPC endpoints, and Supabase RLS policies.
+   - **Frontend Engineer** (`label: "Frontend Engineer"`): Constructs reactive, accessible UI components and state machines.
+   - **Algorithm Specialist** (`label: "Algorithm Specialist"`): Implements recommendation feeds, search ranking, and O(n) data structures.
+   - **3D & Game Engine Specialist** (`label: "3D & Game Engine Specialist"`): Uses Blender and Unreal Engine 5 to generate procedural meshes, materials, and level actors.
+   - **Media Producer** (`label: "Media Producer"`): Prompts Higgsfield AI to generate cinematic video assets and animations.
+   - **DevOps Specialist** (`label: "DevOps Specialist"`): Applies database migrations and executes 1-click Vercel production deployments.
+   - **QA Auditor** (`label: "QA Auditor"`): Continuously runs verification gates (`pnpm test`, `cargo check`) to prevent regressions.
 3. **Contract-First Communication**:
    - All inter-agent dependencies are negotiated via the **Message Board** (`packages/core/src/swarm/message_board.ts`).
    - Shared interfaces (TypeScript types, OpenAPI, Protobuf) are published *before* dependent code generation begins.
