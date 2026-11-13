@@ -52,6 +52,13 @@ mod tests {
         assert!(registry.get("list_directory").is_some());
         assert!(registry.get("run_command").is_some());
 
+        // 3D Studio and Game Development tools
+        assert!(registry.get("blender_setup_lighting").is_some());
+        assert!(registry.get("blender_setup_camera").is_some());
+        assert!(registry.get("blender_assign_material").is_some());
+        assert!(registry.get("unreal_setup_lighting").is_some());
+        assert!(registry.get("unreal_configure_physics").is_some());
+
         // Destructive tools require approval
         assert!(registry.get("write_file").unwrap().requires_approval);
         assert!(registry.get("run_command").unwrap().requires_approval);

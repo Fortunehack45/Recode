@@ -73,3 +73,32 @@ test("Builtin tools execute correctly in workspace", async () => {
     fs.rmSync(tmpWorkspace, { recursive: true, force: true });
   } catch {}
 });
+
+import {
+  BUILTIN_TOOLS,
+  blenderSetupLightingTool,
+  blenderSetupCameraTool,
+  blenderAssignMaterialTool,
+  unrealSetupLightingTool,
+  unrealConfigurePhysicsTool,
+} from "./builtin.js";
+
+test("Studio 3D & Unreal Engine tools are registered with schemas", () => {
+  assert.ok(BUILTIN_TOOLS.blender_setup_lighting);
+  assert.ok(BUILTIN_TOOLS.blender_setup_camera);
+  assert.ok(BUILTIN_TOOLS.blender_assign_material);
+  assert.ok(BUILTIN_TOOLS.blender_apply_modifier);
+  assert.ok(BUILTIN_TOOLS.blender_insert_keyframe);
+  assert.ok(BUILTIN_TOOLS.blender_create_rig);
+  assert.ok(BUILTIN_TOOLS.blender_render_frame);
+  assert.ok(BUILTIN_TOOLS.unreal_setup_lighting);
+  assert.ok(BUILTIN_TOOLS.unreal_setup_cinematic_camera);
+  assert.ok(BUILTIN_TOOLS.unreal_configure_physics);
+  assert.ok(BUILTIN_TOOLS.unreal_trigger_simulation);
+
+  // Verify parameters schema
+  assert.strictEqual(blenderSetupLightingTool.definition.name, "blender_setup_lighting");
+  assert.ok(blenderSetupCameraTool.definition.parameters);
+  assert.strictEqual(unrealSetupLightingTool.definition.name, "unreal_setup_lighting");
+  assert.ok(unrealConfigurePhysicsTool.definition.parameters);
+});

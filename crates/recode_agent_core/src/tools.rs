@@ -152,6 +152,83 @@ impl ToolRegistry {
             true,
         ));
 
+        // 3D Studio & Game Development Tools (Blender & Unreal Engine 5)
+        reg.register(ToolDefinition::new(
+            "blender_setup_lighting",
+            "Configures professional 4-tier studio lighting (Key, Fill, Rim, HDRI) with AgX color management.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "keyEnergy": { "type": "number" },
+                    "fillEnergy": { "type": "number" },
+                    "rimEnergy": { "type": "number" },
+                    "useAgX": { "type": "boolean" }
+                }
+            }),
+            false,
+        ));
+
+        reg.register(ToolDefinition::new(
+            "blender_setup_camera",
+            "Configures cinematic physical camera optics (focal length, aperture f-stop, bokeh depth of field).",
+            json!({
+                "type": "object",
+                "properties": {
+                    "focalLength": { "type": "number" },
+                    "fstop": { "type": "number" },
+                    "targetObject": { "type": "string" }
+                }
+            }),
+            false,
+        ));
+
+        reg.register(ToolDefinition::new(
+            "blender_assign_material",
+            "Assigns physically-based PBR materials (Principled BSDF) with metallic, roughness, and subsurface scattering.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "objectName": { "type": "string" },
+                    "materialName": { "type": "string" },
+                    "metallic": { "type": "number" },
+                    "roughness": { "type": "number" },
+                    "subsurface": { "type": "number" }
+                },
+                "required": ["objectName"]
+            }),
+            false,
+        ));
+
+        reg.register(ToolDefinition::new(
+            "unreal_setup_lighting",
+            "Sets up realistic environment lighting in UE5 with Lumen Dynamic GI, Directional Sunlight (Lux), and Volumetric Fog.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "sunIntensityLux": { "type": "number" },
+                    "sunTemperatureKelvin": { "type": "number" },
+                    "enableVolumetricFog": { "type": "boolean" }
+                }
+            }),
+            false,
+        ));
+
+        reg.register(ToolDefinition::new(
+            "unreal_configure_physics",
+            "Configures realistic rigid-body physics, collision presets, and mass on an Actor in Unreal Engine 5.",
+            json!({
+                "type": "object",
+                "properties": {
+                    "actorName": { "type": "string" },
+                    "simulatePhysics": { "type": "boolean" },
+                    "collisionProfile": { "type": "string" },
+                    "massKg": { "type": "number" }
+                },
+                "required": ["actorName"]
+            }),
+            false,
+        ));
+
         reg
     }
 
