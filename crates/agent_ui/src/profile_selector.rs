@@ -121,6 +121,20 @@ impl ProfileSelector {
         }
     }
 
+    pub fn select_profile(&mut self, profile_id: &AgentProfileId, cx: &mut Context<Self>) {
+        if !self.provider.profiles_supported(cx) {
+            return;
+        }
+
+        self.provider.set_profile(profile_id.clone(), cx);
+        telemetry::event!(
+            "Agent Profile Switched",
+            profile_id = profile_id.as_str(),
+            source = "slash_command"
+        );
+        cx.notify();
+    }
+
     fn ensure_picker(
         &mut self,
         window: &mut Window,

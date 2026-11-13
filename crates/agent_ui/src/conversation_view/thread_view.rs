@@ -2305,9 +2305,14 @@ impl ThreadView {
 
             if command_name == "agent" {
                 this.update(cx, |this, cx| {
-                    this.thread.update(cx, |thread, cx| {
-                        thread.set_profile(agent_settings::AgentProfileId("agent".into()), cx);
-                    });
+                    if let Some(profile_selector) = &this.profile_selector {
+                        profile_selector.update(cx, |selector, cx| {
+                            selector.select_profile(
+                                &agent_settings::AgentProfileId("agent".into()),
+                                cx,
+                            );
+                        });
+                    }
                     cx.notify();
                 })?;
 
