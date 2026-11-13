@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -26,8 +27,7 @@ impl VsixInstaller {
         }
 
         // Create target directory if it doesn't exist
-        smol::fs::create_dir_all(target_dir)
-            .await
+        fs::create_dir_all(target_dir)
             .context("failed to create extension target directory")?;
 
         // Extract zip archive safely (util::archive::extract_zip contains path traversal protection)
@@ -38,9 +38,9 @@ impl VsixInstaller {
         // Inspect extension/package.json if present to generate extension.toml metadata
         let pkg_json_path = target_dir.join("extension").join("package.json");
         if pkg_json_path.exists() {
-            if let Ok(pkg_bytes) = smol::fs::read(&pkg_json_path).await {
+            if let Ok(pkg_bytes) = fs::read(&pkg_json_path) {
                 if let Ok(pkg) = serde_json::from_slice::<Value>(&pkg_bytes) {
-                    Self::generate_extension_toml(target_dir, &pkg).await?;
+                    Self::generate_extension_toml(target_dir, &pkg)?;
                 }
             }
         }
@@ -50,7 +50,7 @@ impl VsixInstaller {
     }
 
     /// Generates a compatible extension.toml from package.json contributions
-    async fn generate_extension_toml(target_dir: &Path, pkg: &Value) -> Result<()> {
+    fn generate_extension_toml(target_dir: &Path, pkg: &Value) -> Result<()> {
         let name = pkg["name"].as_str().unwrap_or("extension");
         let publisher = pkg["publisher"].as_str().unwrap_or("publisher");
         let id = format!("{publisher}.{name}");
@@ -70,8 +70,7 @@ impl VsixInstaller {
         toml.push_str(&format!("authors = [{:?}]\n", publisher));
 
         let manifest_path = target_dir.join("extension.toml");
-        smol::fs::write(&manifest_path, toml.as_bytes())
-            .await
+        fs::write(&manifest_path, toml.as_bytes())
             .context("failed to write extension.toml for VSIX")?;
 
         Ok(())

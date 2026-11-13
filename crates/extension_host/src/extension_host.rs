@@ -1227,13 +1227,6 @@ impl ExtensionStore {
             }
         }
 
-        if extension_id.contains('.') {
-            let parts: Vec<&str> = extension_id.splitn(2, '.').collect();
-            if parts.len() == 2 {
-                return self.install_open_vsx_extension(parts[0].to_string(), parts[1].to_string(), cx);
-            }
-        }
-
         if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
             .into_iter()
             .find(|e| e.id == extension_id)
