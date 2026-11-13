@@ -207,7 +207,7 @@ impl SubagentCardState {
         let label = tool_call.label.read(cx).source();
         Self {
             label: (!label.is_empty()).then(|| label.to_string().into()),
-            label_wins: false,
+            label_wins: true,
             status,
             error: tool_call_error(tool_call, cx),
             can_stop: status == SubagentStatus::Running,
@@ -278,11 +278,7 @@ impl SubagentCardState {
 
     pub(crate) fn title(&self, thread_title: Option<SharedString>) -> SharedString {
         let label = self.label.clone();
-        let title = if self.label_wins {
-            label.or(thread_title)
-        } else {
-            thread_title.or(label)
-        };
+        let title = label.or(thread_title);
         title.unwrap_or_else(|| match self.status {
             SubagentStatus::Canceled => "Subagent Canceled".into(),
             SubagentStatus::Failed => "Subagent Failed".into(),

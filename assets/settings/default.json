@@ -1365,6 +1365,36 @@
         "enable_all_context_servers": false,
         "tools": {},
       },
+      "agent": {
+        "name": "Agent",
+        "enable_all_context_servers": true,
+        "tools": {
+          "apply_code_action": true,
+          "ask_user": true,
+          "copy_path": true,
+          "create_directory": true,
+          "create_thread": true,
+          "delete_path": true,
+          "diagnostics": true,
+          "edit_file": true,
+          "fetch": true,
+          "find_path": true,
+          "find_references": true,
+          "get_code_actions": true,
+          "go_to_definition": true,
+          "grep": true,
+          "list_agents_and_models": true,
+          "list_directory": true,
+          "move_path": true,
+          "read_file": true,
+          "rename_symbol": true,
+          "search_web": true,
+          "skill": true,
+          "spawn_agent": true,
+          "terminal": true,
+          "write_file": true,
+        },
+      },
     },
     // Where to show notifications when the agent has either completed
     // its response, or else needs confirmation before it can run a
@@ -2394,6 +2424,12 @@
   // and change the value to `false`.
   "auto_install_extensions": {
     "html": true,
+    "unreal-engine": true,
+    "blender": true,
+    "supabase": true,
+    "vercel": true,
+    "higgsfield": true,
+    "github": true
   },
   // Whether to suggest installing extensions based on the files you open.
   "suggest_extensions": true,

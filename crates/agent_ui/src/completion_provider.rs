@@ -1574,9 +1574,16 @@ impl<T: PromptCompletionProviderDelegate> CompletionProvider for PromptCompletio
                                 let group = show_section_headers.then(|| command.group());
 
                                 let icon_path = (command.category
-                                    == Some(acp_thread::CommandCategory::Native)
-                                    && command.name.as_ref() == agent::COMPACT_COMMAND_NAME)
-                                    .then(|| IconName::Compact.path().into());
+                                    == Some(acp_thread::CommandCategory::Native))
+                                    .and_then(|| {
+                                        if command.name.as_ref() == agent::COMPACT_COMMAND_NAME {
+                                            Some(IconName::Compact.path().into())
+                                        } else if command.name.as_ref() == agent::AGENT_COMMAND_NAME {
+                                            Some(IconName::RecodeAgent.path().into())
+                                        } else {
+                                            None
+                                        }
+                                    });
 
                                 Completion {
                                     replace_range: source_range.clone(),

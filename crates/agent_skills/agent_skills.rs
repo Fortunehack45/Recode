@@ -693,12 +693,34 @@ pub fn read_skill_body_from_content(
 
 /// Content of the built-in `create-skill` SKILL.md, embedded at compile time.
 const CREATE_SKILL_CONTENT: &str = include_str!("builtin/create-skill/SKILL.md");
+const AGENT_SKILL_CONTENT: &str = include_str!("builtin/agent/SKILL.md");
+const PLAN_SKILL_CONTENT: &str = include_str!("builtin/plan/SKILL.md");
+const PLANNING_SKILL_CONTENT: &str = include_str!("builtin/planning/SKILL.md");
+const THREE_D_DESIGN_SKILL_CONTENT: &str = include_str!("builtin/3d-design/SKILL.md");
+const THREE_D_MODELING_SKILL_CONTENT: &str = include_str!("builtin/3d-modeling/SKILL.md");
+const THREE_D_ANIMATION_SKILL_CONTENT: &str = include_str!("builtin/3d-animation/SKILL.md");
+const GAME_DEV_SKILL_CONTENT: &str = include_str!("builtin/game-development/SKILL.md");
+
+/// All built-in skills as `(name, raw_content)` pairs. Used by
+/// `builtin_skill_content` to serve the full SKILL.md without disk I/O.
+const BUILTIN_SKILL_ENTRIES: &[(&str, &str)] = &[
+    ("create-skill", CREATE_SKILL_CONTENT),
+    ("agent", AGENT_SKILL_CONTENT),
+    ("plan", PLAN_SKILL_CONTENT),
+    ("planning", PLANNING_SKILL_CONTENT),
+    ("3d-design", THREE_D_DESIGN_SKILL_CONTENT),
+    ("3d-modeling", THREE_D_MODELING_SKILL_CONTENT),
+    ("3d-animation", THREE_D_ANIMATION_SKILL_CONTENT),
+    ("game-development", GAME_DEV_SKILL_CONTENT),
+];
 
 /// Returns the set of skills that are compiled into the Recode binary.
 pub fn builtin_skills() -> Vec<Skill> {
     let mut skills = Vec::new();
-    if let Ok(skill) = parse_builtin_skill("create-skill", CREATE_SKILL_CONTENT) {
-        skills.push(skill);
+    for (name, content) in BUILTIN_SKILL_ENTRIES {
+        if let Ok(skill) = parse_builtin_skill(name, content) {
+            skills.push(skill);
+        }
     }
     skills
 }
@@ -724,10 +746,6 @@ fn parse_builtin_skill(name: &str, content: &'static str) -> Result<Skill> {
         embedded_body: Some(body.trim()),
     })
 }
-
-/// All built-in skills as `(name, raw_content)` pairs. Used by
-/// `builtin_skill_content` to serve the full SKILL.md without disk I/O.
-const BUILTIN_SKILL_ENTRIES: &[(&str, &str)] = &[("create-skill", CREATE_SKILL_CONTENT)];
 
 /// Look up the full embedded content of a built-in skill by its
 /// synthetic file path. Returns `None` if the path doesn't match any

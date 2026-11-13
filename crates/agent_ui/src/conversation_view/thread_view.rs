@@ -2303,6 +2303,29 @@ impl ThreadView {
                 content.remove(0);
             }
 
+            if command_name == "agent" {
+                this.update(cx, |this, cx| {
+                    this.thread.update(cx, |thread, cx| {
+                        thread.set_profile(agent_settings::AgentProfileId("agent".into()), cx);
+                    });
+                    cx.notify();
+                })?;
+
+                if content.is_empty() {
+                    return anyhow::Ok(());
+                }
+
+                this.update_in(cx, |this, window, cx| {
+                    this.send_content(
+                        Task::ready(Ok(Some((content, tracked_buffers)))),
+                        false,
+                        window,
+                        cx,
+                    );
+                })?;
+                return anyhow::Ok(());
+            }
+
             let command_block =
                 acp_v2::ContentBlock::Text(acp_v2::TextContent::new(format!("/{command_name}")));
 

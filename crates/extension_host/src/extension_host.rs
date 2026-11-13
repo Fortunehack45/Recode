@@ -708,12 +708,14 @@ impl ExtensionStore {
             }
 
             if let Some(provides_filter) = &provides_filter {
-                extensions.retain(|ext| {
-                    ext.manifest
-                        .provides
-                        .iter()
-                        .any(|p| provides_filter.contains(p))
-                });
+                if !provides_filter.is_empty() {
+                    extensions.retain(|ext| {
+                        ext.manifest
+                            .provides
+                            .iter()
+                            .any(|p| provides_filter.contains(p))
+                    });
+                }
             }
 
             if let Some(search) = &search {
@@ -1050,8 +1052,95 @@ impl ExtensionStore {
         })
     }
 
+    pub fn install_builtin_extension(
+        &mut self,
+        ext: ExtensionMetadata,
+        cx: &mut Context<Self>,
+    ) -> Task<Result<()>> {
+        let extension_dir = self.installed_dir.join(ext.id.as_ref());
+        let fs = self.fs.clone();
+        let extension_id = ext.id.clone();
+
+        match self.outstanding_operations.entry(extension_id.clone()) {
+            btree_map::Entry::Occupied(_) => return Task::ready(Ok(())),
+            btree_map::Entry::Vacant(e) => e.insert(ExtensionOperation::Install),
+        };
+        cx.notify();
+
+        cx.spawn(async move |this, cx| {
+            let _finish = cx.on_drop(&this, {
+                let extension_id = extension_id.clone();
+                move |this, cx| {
+                    this.outstanding_operations.remove(extension_id.as_ref());
+                    cx.notify();
+                }
+            });
+
+            cx.background_spawn(async move {
+                fs.create_dir(&extension_dir).await?;
+                let mut toml = format!(
+                    "id = {:?}\nname = {:?}\nversion = {:?}\nschema_version = 1\n",
+                    ext.id, ext.manifest.name, ext.manifest.version
+                );
+                if let Some(desc) = &ext.manifest.description {
+                    toml.push_str(&format!("description = {:?}\n", desc));
+                }
+                if let Some(repo) = &ext.manifest.repository {
+                    toml.push_str(&format!("repository = {:?}\n", repo));
+                }
+                if !ext.manifest.authors.is_empty() {
+                    let authors_str = ext
+                        .manifest
+                        .authors
+                        .iter()
+                        .map(|a| format!("{:?}", a))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    toml.push_str(&format!("authors = [{}]\n", authors_str));
+                }
+                if ext
+                    .manifest
+                    .provides
+                    .contains(&ExtensionProvides::ContextServers)
+                {
+                    toml.push_str(&format!("\n[context_servers.{}]\n", ext.id));
+                }
+
+                let manifest_path = extension_dir.join("extension.toml");
+                fs.save(&manifest_path, &toml.into(), Default::default()).await?;
+                anyhow::Ok(())
+            })
+            .await?;
+
+            this.update(cx, |this, cx| this.reload(Some(extension_id.clone()), cx))?
+                .await;
+
+            this.update(cx, |this, cx| {
+                cx.emit(Event::ExtensionInstalled(extension_id.clone()));
+                if let Some(events) = ExtensionEvents::try_global(cx)
+                    && let Some(manifest) = this.extension_manifest_for_id(&extension_id)
+                {
+                    events.update(cx, |this, cx| {
+                        this.emit(extension::Event::ExtensionInstalled(manifest.clone()), cx)
+                    });
+                }
+            })
+            .ok();
+
+            Ok(())
+        })
+    }
+
     pub fn install_latest_extension(&mut self, extension_id: Arc<str>, cx: &mut Context<Self>) {
         log::info!("installing extension {extension_id} latest version");
+
+        if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
+            .into_iter()
+            .find(|e| e.id == extension_id)
+        {
+            self.install_builtin_extension(builtin, cx).detach_and_log_err(cx);
+            return;
+        }
 
         let schema_versions = schema_version_range();
         let wasm_api_versions = wasm_api_version_range(ReleaseChannel::global(cx));
@@ -1101,6 +1190,14 @@ impl ExtensionStore {
         cx: &mut Context<Self>,
     ) -> Task<Result<()>> {
         log::info!("installing extension {extension_id} {version}");
+
+        if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
+            .into_iter()
+            .find(|e| e.id == extension_id)
+        {
+            return self.install_builtin_extension(builtin, cx);
+        }
+
         let Some(url) = self
             .http_client
             .build_recode_api_url(

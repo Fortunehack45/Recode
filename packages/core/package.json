@@ -1,6 +1,6 @@
 {
   "name": "@recode-dev/core",
-  "version": "1.30.10",
+  "version": "1.30.11",
   "description": "Core engine, agentic loop, tools, and auth for Recode Terminal and SDK",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

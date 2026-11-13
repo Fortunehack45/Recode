@@ -658,7 +658,7 @@ impl ExtensionsPage {
         cx: &mut Context<Self>,
     ) {
         let search = self.search_query(cx);
-        let provides_filter = BTreeSet::from_iter(self.provides_filter);
+        let provides_filter = self.provides_filter.map(|p| BTreeSet::from_iter([p]));
         self.fetch_state = ExtensionFetchState::Fetching;
         cx.notify();
 
@@ -693,7 +693,7 @@ impl ExtensionsPage {
                     })
                 } else {
                     extension_store.update(cx, |store, cx| {
-                        store.fetch_extensions(search.as_deref(), Some(&provides_filter), cx)
+                        store.fetch_extensions(search.as_deref(), provides_filter.as_ref(), cx)
                     })
                 }
             }) else {

@@ -185,6 +185,7 @@ impl From<&Skill> for NativeAvailableSkill {
 }
 
 pub const COMPACT_COMMAND_NAME: &str = "compact";
+pub const AGENT_COMMAND_NAME: &str = "agent";
 
 /// Returns the set of MCP prompt names that must be server-qualified
 /// (`/<server>.<name>`) to stay unambiguous in the slash-command popup: names
@@ -1731,14 +1732,22 @@ impl NativeAgent {
                 acp_thread::CommandCategory::Native,
             )),
         );
+        let agent_command = acp_v2::AvailableCommand::Command(
+            acp_v2::Command::new(
+                AGENT_COMMAND_NAME,
+                "Switch to Autonomous Agent Mode and run multi-agent swarm orchestration",
+            )
+            .meta(acp_thread::meta_with_command_category(
+                acp_thread::CommandCategory::Native,
+            )),
+        );
 
         let registry = state.context_server_registry.read(cx);
 
-        // Reserve the built-in command name so a same-named MCP prompt is
-        // force-prefixed (`/<server>.compact`) and stays reachable: an
-        // unqualified `/compact` always routes to the native command.
+        // Reserve built-in command names so same-named MCP prompts are
+        // force-prefixed (`/<server>.compact`) and stay reachable.
         let ambiguous_prompt_names = ambiguous_mcp_prompt_names(
-            [COMPACT_COMMAND_NAME],
+            [COMPACT_COMMAND_NAME, AGENT_COMMAND_NAME],
             registry.prompts().map(|p| p.prompt.name.as_str()),
         );
 
@@ -1776,7 +1785,8 @@ impl NativeAgent {
             Some(acp_v2::AvailableCommand::Command(command))
         });
 
-        std::iter::once(compact_command)
+        [compact_command, agent_command]
+            .into_iter()
             .chain(mcp_commands)
             .collect()
     }

@@ -305,7 +305,7 @@ jobs:
             TAG="v${VERSION}"
           else
             BASE_VERSION=$(grep -m1 '^version' crates/recode/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
-            VERSION="${BASE_VERSION:-1.30.10}"
+            VERSION="${BASE_VERSION:-1.30.11}"
             TAG="v${VERSION}"
           fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"

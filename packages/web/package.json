@@ -1,6 +1,6 @@
 {
   "name": "@recode-dev/web",
-  "version": "1.30.10",
+  "version": "1.30.11",
   "description": "Recode Web Terminal — Autonomous AI Coding Agent on the Web",
   "private": true,
   "scripts": {
