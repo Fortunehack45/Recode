@@ -14,13 +14,39 @@ bl_info = {
 import bpy
 import json
 import math
+import os
+import queue
 import socket
+import struct
 import threading
 import traceback
 
 DEFAULT_PORT = 8128
 _server_thread = None
 _running = False
+_command_queue = queue.Queue()
+_AUTH_TOKEN = os.environ.get("RECODE_BLENDER_TOKEN", "")
+
+def _drain_command_queue():
+    """Polls and executes pending Recode commands on Blender's main thread."""
+    while not _command_queue.empty():
+        try:
+            cmd_payload, result_holder, done_event = _command_queue.get_nowait()
+        except queue.Empty:
+            break
+
+        try:
+            result_holder["response"] = execute_recode_command(cmd_payload)
+        except Exception as e:
+            result_holder["response"] = {
+                "status": "error",
+                "message": f"Execution error: {str(e)}",
+                "trace": traceback.format_exc(),
+            }
+        finally:
+            done_event.set()
+
+    return 0.05  # Re-register timer every 50ms
 
 def execute_recode_command(cmd_payload):
     """Executes a command sent from Recode in the Blender main thread."""
@@ -269,16 +295,27 @@ def execute_recode_command(cmd_payload):
 
     return {"status": "error", "message": f"Unknown action: {cmd_type}"}
 
+def _recv_exact(sock, num_bytes):
+    """Reads exactly num_bytes from socket with chunk buffering."""
+    buf = bytearray()
+    while len(buf) < num_bytes:
+        packet = sock.recv(num_bytes - len(buf))
+        if not packet:
+            return None
+        buf.extend(packet)
+    return bytes(buf)
+
 def start_rpc_server(port=DEFAULT_PORT):
     global _running
     _running = True
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Bind exclusively to localhost loopback interface
     server_socket.bind(("127.0.0.1", port))
     server_socket.listen(5)
     server_socket.settimeout(1.0)
 
-    print(f"[Recode Bridge] Listening on 127.0.0.1:{port}")
+    print(f"[Recode Bridge] Listening on 127.0.0.1:{port} (Main Thread Queued, Length-Framed)")
 
     while _running:
         try:
@@ -289,27 +326,81 @@ def start_rpc_server(port=DEFAULT_PORT):
             break
 
         try:
-            data = client.recv(65536)
-            if data:
-                payload = json.loads(data.decode("utf-8"))
-                response = execute_recode_command(payload)
-                client.sendall(json.dumps(response).encode("utf-8"))
+            client.settimeout(10.0)
+            # Read 4-byte big-endian length prefix
+            length_bytes = _recv_exact(client, 4)
+            if not length_bytes:
+                continue
+
+            msg_length = struct.unpack(">I", length_bytes)[0]
+            if msg_length > 10 * 1024 * 1024:  # 10MB limit guard
+                err = {"status": "error", "message": "Payload exceeds maximum allowed size (10MB)"}
+                resp_bytes = json.dumps(err).encode("utf-8")
+                client.sendall(struct.pack(">I", len(resp_bytes)) + resp_bytes)
+                continue
+
+            payload_data = _recv_exact(client, msg_length)
+            if not payload_data:
+                continue
+
+            payload = json.loads(payload_data.decode("utf-8"))
+            req_id = payload.get("id")
+
+            # Check pairing token if configured
+            if _AUTH_TOKEN:
+                provided_token = payload.get("auth_token") or client.recv(0).decode("utf-8", "ignore")
+                if provided_token != _AUTH_TOKEN:
+                    err = {"status": "error", "message": "Unauthorized: invalid pairing token", "id": req_id}
+                    resp_bytes = json.dumps(err).encode("utf-8")
+                    client.sendall(struct.pack(">I", len(resp_bytes)) + resp_bytes)
+                    continue
+
+            # Route execution to Blender main thread via queue
+            result_holder = {}
+            done_event = threading.Event()
+            _command_queue.put((payload, result_holder, done_event))
+
+            # Wait for main thread timer to drain and return result
+            completed = done_event.wait(timeout=30.0)
+            if completed and "response" in result_holder:
+                response = result_holder["response"]
+            else:
+                response = {"status": "error", "message": "Command timed out waiting for Blender main thread"}
+
+            if req_id is not None:
+                response["id"] = req_id
+
+            resp_bytes = json.dumps(response).encode("utf-8")
+            client.sendall(struct.pack(">I", len(resp_bytes)) + resp_bytes)
         except Exception as e:
             err = {"status": "error", "message": str(e), "trace": traceback.format_exc()}
-            client.sendall(json.dumps(err).encode("utf-8"))
+            resp_bytes = json.dumps(err).encode("utf-8")
+            try:
+                client.sendall(struct.pack(">I", len(resp_bytes)) + resp_bytes)
+            except Exception:
+                pass
         finally:
-            client.close()
+            try:
+                client.close()
+            except Exception:
+                pass
 
     server_socket.close()
 
 def register():
     global _server_thread
+    # Register timer on Blender's main thread event loop
+    if not bpy.app.timers.is_registered(_drain_command_queue):
+        bpy.app.timers.register(_drain_command_queue)
+
     _server_thread = threading.Thread(target=start_rpc_server, daemon=True)
     _server_thread.start()
 
 def unregister():
     global _running
     _running = False
+    if bpy.app.timers.is_registered(_drain_command_queue):
+        bpy.app.timers.unregister(_drain_command_queue)
 
 if __name__ == "__main__":
     register()

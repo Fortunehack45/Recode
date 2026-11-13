@@ -24,6 +24,57 @@ Recode also handles the `notifications/tools/list_changed` notification from MCP
 | [External Agents](./external-agents.md)   | Recode can forward configured MCP servers over ACP; agents may also read native MCP config |
 | [Terminal Threads](./terminal-threads.md) | Native CLIs/TUIs read their own MCP configuration                                       |
 
+## Official First-Party Integrations
+
+Recode connects directly to canonical, provider-maintained MCP endpoints without fragile third-party wrapper packages:
+
+| Provider | Type | Transport | Canonical Endpoint / Target | Authentication |
+|---|---|---|---|---|
+| **Vercel** | First-Party Remote | Streamable HTTP | `https://mcp.vercel.com` | OAuth 2.1 (PKCE) or `VERCEL_TOKEN` |
+| **Supabase** | First-Party Remote | Streamable HTTP | `https://mcp.supabase.com/mcp` | OAuth 2.1 (PKCE) or `SUPABASE_ACCESS_TOKEN` |
+| **Blender Lab** | Official Local | `uvx` stdio | `blender-mcp` (Blender 5.1+) | Local socket handshake |
+| **Blender Recode** | Recode Native | Local HTTP / RPC | Port 9876 (Timer-queued RPC) | High-entropy pairing token |
+| **Unreal Engine 5** | Official Embedded | Local HTTP | Epic Games Editor (5.5+) embedded endpoint | Local loopback authentication |
+
+### Vercel Integration Setup
+
+Configure the official Vercel MCP server in your `settings.json`:
+
+```json [settings]
+{
+  "context_servers": {
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    }
+  }
+}
+```
+
+Recode initiates the standard browser-based OAuth 2.1 flow with PKCE, allowing you to select your team and project scope.
+
+### Supabase Integration Setup
+
+Configure the official Supabase MCP server in your `settings.json`:
+
+```json [settings]
+{
+  "context_servers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp"
+    }
+  }
+}
+```
+
+Recode authenticates via OAuth 2.1 and scopes MCP tool actions (SQL queries, schema introspection, migrations) to your chosen project reference.
+
+### 3D Software Integrations (Blender & Unreal Engine)
+
+For creative workflows, Recode provides dual support:
+1. **Blender Lab Official MCP**: Connects to Blender 5.1+ via `uvx blender-mcp`.
+2. **Recode Blender Bridge**: An add-on installed inside Blender running on a background socket dispatched to Blender's main thread via `bpy.app.timers`.
+3. **Unreal Engine 5.5+**: Uses Epic Games' native embedded MCP server inside the running editor process.
+
 ## Installing MCP Servers
 
 ### As Extensions

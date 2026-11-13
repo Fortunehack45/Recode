@@ -631,7 +631,13 @@ impl ExtensionsPage {
                 installed_rows.map(installed_row).collect()
             }
             ExtensionFilter::All => installed_rows
-                .filter(|(_, extension)| extension.dev)
+                .filter(|(_, extension)| {
+                    extension.dev
+                        || !self
+                            .remote_extensions
+                            .iter()
+                            .any(|remote| remote.id == extension.manifest.id)
+                })
                 .map(installed_row)
                 .chain(remote_rows.map(remote_row))
                 .collect(),

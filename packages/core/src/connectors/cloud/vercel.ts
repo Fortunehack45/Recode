@@ -20,12 +20,10 @@ export class VercelConnector {
     const prodFlag = options.prod !== false ? "--prod" : "";
 
     if (!this.token) {
-      // Sandbox fallback URL for offline testing
-      const mockProject = options.projectName || "recode-preview-app";
       return {
-        success: true,
-        url: `https://${mockProject}.vercel.app`,
-        logs: "Mock deployment succeeded. In production, provide VERCEL_TOKEN to stream live deployments.",
+        success: false,
+        url: "",
+        logs: "Vercel authentication required: VERCEL_TOKEN environment variable or access token must be provided. Connect Vercel via Settings -> MCP Servers or export VERCEL_TOKEN.",
       };
     }
 

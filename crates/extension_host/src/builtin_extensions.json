@@ -28,42 +28,42 @@
     },
     {
       "id": "supabase",
-      "name": "Supabase Database & Auth MCP",
+      "name": "Supabase Database & Auth Connector",
       "version": "1.0.0",
       "description": "Manage Supabase projects: inspect PostgreSQL schemas, enforce Row-Level Security policies, apply database migrations, and generate TypeScript types.",
-      "authors": ["Recode Team", "Supabase"],
+      "authors": ["Recode Team"],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
       "provides": ["context-servers"],
       "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 37300
+      "download_count": 1250
     },
     {
       "id": "vercel",
-      "name": "Vercel Cloud Deployment MCP",
+      "name": "Vercel Cloud Deployment Connector",
       "version": "1.0.0",
       "description": "Deploy full-stack web applications, manage edge middleware, view build logs, and configure environment variables on Vercel.",
-      "authors": ["Recode Team", "Vercel"],
+      "authors": ["Recode Team"],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
       "provides": ["context-servers"],
       "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 35100
+      "download_count": 1420
     },
     {
       "id": "higgsfield",
-      "name": "Higgsfield AI Video & Motion MCP",
+      "name": "Higgsfield AI Video & Motion Connector",
       "version": "1.0.0",
       "description": "AI cinematic video generation, camera trajectory synthesis, and motion transfer for realistic 3D game trailers and cutscenes.",
-      "authors": ["Recode Team", "Higgsfield AI"],
+      "authors": ["Recode Team"],
       "repository": "https://github.com/Fortunehack45/Recode",
       "schema_version": 1,
       "wasm_api_version": null,
       "provides": ["context-servers"],
       "published_at": "2026-11-01T00:00:00Z",
-      "download_count": 24800
+      "download_count": 980
     },
     {
       "id": "godot",

@@ -75,3 +75,21 @@ export { VercelConnector, VercelDeployOptions } from "./connectors/cloud/vercel.
 
 // Collab
 export { CollabClient, CollabMessage } from "./collab/client.js";
+
+// First-Party MCP Integration Infrastructure
+export {
+  IntegrationProvenance,
+  TransportType,
+  AuthType,
+  ConnectionState,
+  DependencyRequirements,
+  DiscoveredTool,
+  IntegrationManifest,
+  ConnectionStatus,
+} from "./mcp/types.js";
+export { IntegrationRegistry, FIRST_PARTY_INTEGRATIONS } from "./mcp/registry.js";
+export { IntegrationManager, MCPConnectionOptions } from "./mcp/manager.js";
+export { VercelRemoteMCP, VercelMCPClientOptions } from "./mcp/providers/vercel.js";
+export { SupabaseRemoteMCP, SupabaseMCPClientOptions } from "./mcp/providers/supabase.js";
+export { BlenderDetector, BlenderInstallationInfo } from "./mcp/providers/blender_detector.js";
+export { UnrealDetector, UnrealEditorSession } from "./mcp/providers/unreal_detector.js";

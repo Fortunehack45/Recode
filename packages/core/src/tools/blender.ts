@@ -11,26 +11,63 @@ const BLENDER_RPC_PORT = 8128;
 async function sendBlenderRPC(action: string, params: Record<string, unknown>): Promise<any> {
   return new Promise((resolve, reject) => {
     const client = new net.Socket();
-    client.setTimeout(10000);
+    client.setTimeout(15000);
+
+    const payloadObj = {
+      id: Math.random().toString(36).substring(2, 9),
+      action,
+      params,
+      auth_token: process.env.RECODE_BLENDER_TOKEN,
+    };
+    const jsonStr = JSON.stringify(payloadObj);
+    const jsonBuffer = Buffer.from(jsonStr, "utf-8");
+    const lenBuffer = Buffer.alloc(4);
+    lenBuffer.writeUInt32BE(jsonBuffer.length, 0);
+
+    let incomingBuffer = Buffer.alloc(0);
+    let expectedLength: number | null = null;
 
     client.connect(BLENDER_RPC_PORT, "127.0.0.1", () => {
-      const payload = JSON.stringify({ action, params });
-      client.write(payload);
+      // Send 4-byte length prefix followed by JSON payload
+      client.write(Buffer.concat([lenBuffer, jsonBuffer]));
     });
 
-    client.on("data", (data) => {
-      try {
-        const resp = JSON.parse(data.toString("utf-8"));
-        resolve(resp);
-      } catch (e) {
-        reject(new Error(`Failed to parse Blender response: ${data.toString()}`));
+    client.on("data", (chunk) => {
+      incomingBuffer = Buffer.concat([incomingBuffer, chunk]);
+
+      // Check if we have received the 4-byte length header
+      if (expectedLength === null && incomingBuffer.length >= 4) {
+        // Check if first byte is '{' (legacy unframed JSON)
+        if (incomingBuffer[0] === 0x7b) {
+          try {
+            const resp = JSON.parse(incomingBuffer.toString("utf-8"));
+            client.destroy();
+            resolve(resp);
+            return;
+          } catch {
+            // Wait for more data
+          }
+        } else {
+          expectedLength = incomingBuffer.readUInt32BE(0);
+          incomingBuffer = incomingBuffer.subarray(4);
+        }
       }
-      client.destroy();
+
+      if (expectedLength !== null && incomingBuffer.length >= expectedLength) {
+        const body = incomingBuffer.subarray(0, expectedLength).toString("utf-8");
+        client.destroy();
+        try {
+          const resp = JSON.parse(body);
+          resolve(resp);
+        } catch (e: any) {
+          reject(new Error(`Failed to parse Blender response JSON: ${e.message}`));
+        }
+      }
     });
 
     client.on("timeout", () => {
       client.destroy();
-      reject(new Error("Blender RPC timed out. Ensure Blender is running and the Recode Bridge addon is enabled on port 8128."));
+      reject(new Error("Blender RPC timed out. Ensure Blender is open and the Recode Bridge addon is enabled on port 8128."));
     });
 
     client.on("error", (err) => {

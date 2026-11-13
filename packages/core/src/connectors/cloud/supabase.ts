@@ -24,29 +24,10 @@ export class SupabaseConnector {
     const fullPath = path.resolve(workspaceDir, outputPath);
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
 
-    if (!this.token && !this.projectRef) {
-      // Mock generation for sandbox / offline mode
-      const mockSchema = `export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
-
-export interface Database {
-  public: {
-    Tables: {
-      users: {
-        Row: { id: string; email: string; full_name: string; created_at: string };
-        Insert: { id?: string; email: string; full_name?: string; created_at?: string };
-        Update: { id?: string; email?: string; full_name?: string; created_at?: string };
-      };
-      posts: {
-        Row: { id: string; user_id: string; content: string; media_url?: string; created_at: string };
-        Insert: { id?: string; user_id: string; content: string; media_url?: string };
-        Update: { id?: string; user_id?: string; content?: string; media_url?: string };
-      };
-    };
-  };
-}
-`;
-      fs.writeFileSync(fullPath, mockSchema, "utf-8");
-      return fullPath;
+    if (!this.token || !this.projectRef) {
+      throw new Error(
+        "Supabase credentials missing: both SUPABASE_ACCESS_TOKEN and projectRef (or SUPABASE_PROJECT_ID) are required to generate live TypeScript types from your Supabase project."
+      );
     }
 
     try {
@@ -59,22 +40,42 @@ export interface Database {
       );
       fs.writeFileSync(fullPath, stdout, "utf-8");
       return fullPath;
-    } catch {
-      // Fallback: write basic schema
-      return this.generateTypes(workspaceDir, outputPath);
+    } catch (err: any) {
+      throw new Error(`Failed to generate Supabase TypeScript types: ${err.message}`);
     }
   }
 
-  async applySqlMigration(sql: string, workspaceDir: string): Promise<{ success: boolean; message: string }> {
+  async applySqlMigration(sql: string, workspaceDir: string): Promise<{ success: boolean; message: string; filePath: string }> {
     const migrationDir = path.join(workspaceDir, "supabase", "migrations");
     fs.mkdirSync(migrationDir, { recursive: true });
     const filename = `${Date.now()}_recode_migration.sql`;
     const filePath = path.join(migrationDir, filename);
     fs.writeFileSync(filePath, sql, "utf-8");
 
+    if (this.token && this.projectRef) {
+      try {
+        await execAsync(`npx supabase db push`, {
+          cwd: workspaceDir,
+          env: { ...process.env, SUPABASE_ACCESS_TOKEN: this.token },
+        });
+        return {
+          success: true,
+          message: `Migration saved to ${path.relative(workspaceDir, filePath)} and successfully applied to Supabase project ${this.projectRef}.`,
+          filePath,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          message: `Migration saved to ${path.relative(workspaceDir, filePath)}, but failed to apply to cloud database: ${err.message}.`,
+          filePath,
+        };
+      }
+    }
+
     return {
       success: true,
-      message: `Migration saved to ${path.relative(workspaceDir, filePath)} and queued for Supabase execution.`,
+      message: `Migration saved locally to ${path.relative(workspaceDir, filePath)}. Note: Connect Supabase with access token to automatically push migrations to production.`,
+      filePath,
     };
   }
 }
