@@ -356,6 +356,14 @@ pub fn init(
     .detach();
 }
 
+/// Returns the built-in, out-of-the-box extensions catalog for Recode.
+pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
+    const BUILTIN_DATA: &str = include_str!("builtin_extensions.json");
+    serde_json::from_str::<GetExtensionsResponse>(BUILTIN_DATA)
+        .map(|resp| resp.data)
+        .unwrap_or_default()
+}
+
 impl ExtensionStore {
     pub fn try_global(cx: &App) -> Option<Entity<Self>> {
         cx.try_global::<GlobalExtensionStore>()
@@ -364,6 +372,10 @@ impl ExtensionStore {
 
     pub fn global(cx: &App) -> Entity<Self> {
         cx.global::<GlobalExtensionStore>().0.clone()
+    }
+
+    pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
+        builtin_recode_extensions()
     }
 
     pub fn new(
@@ -658,14 +670,6 @@ impl ExtensionStore {
         Some((icon_theme_path, icons_root_path))
     }
 
-/// Returns the built-in, out-of-the-box extensions catalog for Recode.
-pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
-    const BUILTIN_DATA: &str = include_str!("builtin_extensions.json");
-    serde_json::from_str::<GetExtensionsResponse>(BUILTIN_DATA)
-        .map(|resp| resp.data)
-        .unwrap_or_default()
-}
-
     pub fn fetch_extensions(
         &self,
         search: Option<&str>,
@@ -695,7 +699,7 @@ pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
 
         cx.spawn(async move |_, _| {
             let mut extensions = task.await.unwrap_or_default();
-            let builtin = builtin_recode_extensions();
+            let builtin = ExtensionStore::builtin_recode_extensions();
 
             for ext in builtin {
                 if !extensions.iter().any(|e| e.id == ext.id) {
@@ -785,7 +789,7 @@ pub fn builtin_recode_extensions() -> Vec<ExtensionMetadata> {
         cx.spawn(async move |_, _| {
             let mut versions = task.await.unwrap_or_default();
             if versions.is_empty() {
-                if let Some(builtin) = builtin_recode_extensions()
+                if let Some(builtin) = ExtensionStore::builtin_recode_extensions()
                     .into_iter()
                     .find(|e| e.id.as_ref() == extension_id)
                 {

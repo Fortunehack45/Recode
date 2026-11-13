@@ -7,7 +7,6 @@ use http::{HeaderName, HeaderValue};
 
 use futures::future::BoxFuture;
 use parking_lot::Mutex;
-use serde::Serialize;
 #[cfg(feature = "test-support")]
 use std::{any::type_name, fmt};
 use std::{ops::Deref, sync::Arc, time::Duration};
