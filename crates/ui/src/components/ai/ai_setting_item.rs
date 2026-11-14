@@ -52,17 +52,17 @@ pub enum AiSettingItemSource {
 impl AiSettingItemSource {
     fn icon_name(&self) -> IconName {
         match self {
-            Self::Extension => IconName::RecodeSrcExtension,
-            Self::Custom => IconName::RecodeSrcCustom,
+            Self::Extension => IconName::Blocks,
+            Self::Custom => IconName::Server,
             Self::Registry => IconName::AcpRegistry,
         }
     }
 
     fn tooltip_text(&self, label: &str) -> String {
         match self {
-            Self::Extension => format!("{label} was installed from an extension."),
-            Self::Registry => format!("{label} was installed from the ACP registry."),
-            Self::Custom => format!("{label} was configured manually."),
+            Self::Extension => format!("{label} is provided by an extension."),
+            Self::Registry => format!("{label} is connected from the MCP registry."),
+            Self::Custom => format!("{label} is an official MCP server connection."),
         }
     }
 }

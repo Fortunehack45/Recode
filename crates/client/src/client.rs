@@ -1090,15 +1090,19 @@ impl Client {
                     let is_staff = is_staff_rx.await?;
                     if is_staff {
                         match client.connect_with_credentials(credentials, cx).await {
-                            ConnectionResult::Timeout => Err(anyhow!("connection timed out")),
-                            ConnectionResult::ConnectionReset => Err(anyhow!("connection reset")),
-                            ConnectionResult::Result(result) => {
-                                result.context("client auth and connect")
+                            ConnectionResult::Timeout => {
+                                log::warn!("collab connection timed out, operating in standalone mode");
                             }
+                            ConnectionResult::ConnectionReset => {
+                                log::warn!("collab connection reset, operating in standalone mode");
+                            }
+                            ConnectionResult::Result(Err(err)) => {
+                                log::warn!("collab connection failed ({err:#}), operating in standalone mode");
+                            }
+                            ConnectionResult::Result(Ok(())) => {}
                         }
-                    } else {
-                        Ok(())
                     }
+                    Ok::<(), anyhow::Error>(())
                 }
             })
             .detach_and_log_err(cx);

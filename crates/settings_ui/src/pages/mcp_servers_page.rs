@@ -175,7 +175,28 @@ fn render_context_server(
     let display_name = if provided_by_extension {
         resolve_extension_display_name(context_server_id, cx).unwrap_or_else(|| item_id.clone())
     } else {
-        item_id.clone()
+        match context_server_id.0.as_ref() {
+            "vercel" => SharedString::from("Vercel Remote MCP"),
+            "supabase" => SharedString::from("Supabase Remote MCP"),
+            "render" => SharedString::from("Render Cloud MCP"),
+            "higgsfield" => SharedString::from("Higgsfield AI MCP"),
+            "stitch" => SharedString::from("Google Stitch MCP"),
+            "blender" => SharedString::from("Blender Lab Official MCP"),
+            "unreal" | "unreal-engine" => SharedString::from("Unreal Engine Embedded MCP"),
+            "github" => SharedString::from("GitHub Official MCP"),
+            "docker" => SharedString::from("Docker MCP Server"),
+            _ => item_id.clone(),
+        }
+    };
+
+    let provider_icon = match context_server_id.0.as_ref() {
+        "vercel" => Some(Icon::new(IconName::AiVercel).size(IconSize::Small).color(Color::Muted)),
+        "supabase" => Some(Icon::new(IconName::DatabaseZap).size(IconSize::Small).color(Color::Muted)),
+        "github" => Some(Icon::new(IconName::Github).size(IconSize::Small).color(Color::Muted)),
+        "stitch" => Some(Icon::new(IconName::AiGoogle).size(IconSize::Small).color(Color::Muted)),
+        "blender" => Some(Icon::new(IconName::Terminal).size(IconSize::Small).color(Color::Muted)),
+        "unreal" | "unreal-engine" => Some(Icon::new(IconName::Server).size(IconSize::Small).color(Color::Muted)),
+        _ => None,
     };
 
     let source = if provided_by_extension {
@@ -230,6 +251,7 @@ fn render_context_server(
     };
 
     AiSettingItem::new(item_id, display_name, status, source)
+        .when_some(provider_icon, |this, icon| this.icon(icon))
         .when_some(configure_button, |this, button| this.action(button))
         .action(uninstall_button)
         .action(toggle_switch)

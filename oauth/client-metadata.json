@@ -1,0 +1,24 @@
+{
+  "client_id": "https://github.com/Fortunehack45/Recode/raw/main/oauth/client-metadata.json",
+  "client_name": "Recode",
+  "client_uri": "https://github.com/Fortunehack45/Recode",
+  "logo_uri": "https://raw.githubusercontent.com/Fortunehack45/Recode/main/crates/recode/resources/app-icon.png",
+  "redirect_uris": [
+    "http://127.0.0.1/callback",
+    "http://localhost/callback",
+    "http://127.0.0.1:0/callback",
+    "http://localhost:0/callback"
+  ],
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none",
+  "contacts": [
+    "fortuneema7@gmail.com"
+  ],
+  "application_type": "native"
+}

@@ -19,7 +19,7 @@ export interface BlenderInstallationInfo {
   majorVersion?: number;
   minorVersion?: number;
   supportsBlenderLabMcp: boolean; // Requires 5.1+
-  supportsRecodeBridge: boolean;   // Requires 3.6+
+  supportsAutomationBridge: boolean; // Requires 3.6+
   labExtensionInstalled?: boolean;
 }
 
@@ -52,7 +52,7 @@ export class BlenderDetector {
     return {
       installed: false,
       supportsBlenderLabMcp: false,
-      supportsRecodeBridge: false,
+      supportsAutomationBridge: false,
     };
   }
 
@@ -109,7 +109,7 @@ export class BlenderDetector {
           majorVersion: major,
           minorVersion: minor,
           supportsBlenderLabMcp: supportsLab,
-          supportsRecodeBridge: supportsBridge,
+          supportsAutomationBridge: supportsBridge,
           labExtensionInstalled: false, // Can be checked against Blender addon directory
         };
       }
@@ -121,7 +121,7 @@ export class BlenderDetector {
       installed: true,
       executablePath: binPath,
       supportsBlenderLabMcp: false,
-      supportsRecodeBridge: true,
+      supportsAutomationBridge: true,
     };
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@recode-dev/tui",
-  "version": "1.30.13",
+  "version": "1.30.14",
   "description": "Interactive terminal user interface for Recode coding assistant",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

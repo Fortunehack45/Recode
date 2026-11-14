@@ -1,6 +1,6 @@
 {
   "name": "@recode-dev/cli",
-  "version": "1.30.13",
+  "version": "1.30.14",
   "description": "Terminal coding assistant and CLI for Recode",
   "bin": {
     "recode": "./bin/recode.cjs"
