@@ -69,6 +69,75 @@ impl VsixInstaller {
 
         toml.push_str(&format!("authors = [{:?}]\n", publisher));
 
+        let normalize_rel_path = |raw: &str| -> String {
+            let clean = raw.trim_start_matches('.').trim_start_matches('/').trim_start_matches('\\');
+            if clean.starts_with("extension/") || clean.starts_with("extension\\") {
+                clean.replace('\\', "/")
+            } else {
+                format!("extension/{}", clean.replace('\\', "/"))
+            }
+        };
+
+        // Parse themes: contributes.themes
+        if let Some(themes) = pkg.get("contributes").and_then(|c| c.get("themes")).and_then(|t| t.as_array()) {
+            let mut theme_paths = Vec::new();
+            for theme in themes {
+                if let Some(path_str) = theme.get("path").and_then(|p| p.as_str()) {
+                    let rel = normalize_rel_path(path_str);
+                    if target_dir.join(&rel).exists() {
+                        theme_paths.push(rel);
+                    }
+                }
+            }
+            if !theme_paths.is_empty() {
+                toml.push_str("themes = [\n");
+                for path in theme_paths {
+                    toml.push_str(&format!("    {:?},\n", path));
+                }
+                toml.push_str("]\n");
+            }
+        }
+
+        // Parse iconThemes: contributes.iconThemes
+        if let Some(icons) = pkg.get("contributes").and_then(|c| c.get("iconThemes")).and_then(|t| t.as_array()) {
+            let mut icon_paths = Vec::new();
+            for icon in icons {
+                if let Some(path_str) = icon.get("path").and_then(|p| p.as_str()) {
+                    let rel = normalize_rel_path(path_str);
+                    if target_dir.join(&rel).exists() {
+                        icon_paths.push(rel);
+                    }
+                }
+            }
+            if !icon_paths.is_empty() {
+                toml.push_str("icon_themes = [\n");
+                for path in icon_paths {
+                    toml.push_str(&format!("    {:?},\n", path));
+                }
+                toml.push_str("]\n");
+            }
+        }
+
+        // Parse snippets: contributes.snippets
+        if let Some(snippets) = pkg.get("contributes").and_then(|c| c.get("snippets")).and_then(|t| t.as_array()) {
+            let mut snippet_paths = Vec::new();
+            for snippet in snippets {
+                if let Some(path_str) = snippet.get("path").and_then(|p| p.as_str()) {
+                    let rel = normalize_rel_path(path_str);
+                    if target_dir.join(&rel).exists() {
+                        snippet_paths.push(rel);
+                    }
+                }
+            }
+            if !snippet_paths.is_empty() {
+                toml.push_str("snippets = [\n");
+                for path in snippet_paths {
+                    toml.push_str(&format!("    {:?},\n", path));
+                }
+                toml.push_str("]\n");
+            }
+        }
+
         let manifest_path = target_dir.join("extension.toml");
         fs::write(&manifest_path, toml.as_bytes())
             .context("failed to write extension.toml for VSIX")?;

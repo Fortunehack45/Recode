@@ -82,3 +82,12 @@ export interface ConnectionStatus {
   error?: string;
   activeProject?: string;
 }
+
+export interface JsonRpcClient {
+  request<T = any>(
+    method: string,
+    params?: Record<string, unknown>,
+    options?: { timeoutMs?: number; signal?: AbortSignal }
+  ): Promise<T>;
+  notify(method: string, params?: Record<string, unknown>): Promise<void>;
+}

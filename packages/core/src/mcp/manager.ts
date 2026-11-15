@@ -7,6 +7,7 @@ import {
   ConnectionStatus,
   DiscoveredTool,
   IntegrationManifest,
+  JsonRpcClient,
 } from "./types.js";
 import { IntegrationRegistry } from "./registry.js";
 import { Tool, ToolContext, ToolResult } from "../tools/types.js";
@@ -77,6 +78,103 @@ export class IntegrationManager {
       current.error = undefined;
       current.lastConnected = new Date().toISOString();
       this.retryAttempts.delete(id);
+    }
+  }
+
+  /**
+   * Establishes a live connection to an MCP client, performs the protocol handshake,
+   * discovers available tools, and marks the server as CONNECTED.
+   */
+  public async connectClient(
+    manifest: IntegrationManifest,
+    client: JsonRpcClient,
+    options?: MCPConnectionOptions
+  ): Promise<DiscoveredTool[]> {
+    this.setState(manifest.id, "CONNECTING");
+
+    try {
+      this.setState(manifest.id, "INITIALIZING");
+      // 1. Initialize Handshake (MCP Specification)
+      await client.request(
+        "initialize",
+        {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: {
+            name: "recode",
+            version: "1.30.15",
+          },
+        },
+        { timeoutMs: options?.timeoutMs ?? this.defaultTimeoutMs }
+      );
+
+      // 2. Initialized Notification
+      await client.notify("notifications/initialized", {});
+
+      this.setState(manifest.id, "DISCOVERING_TOOLS");
+      // 3. Live Tool Discovery
+      const toolsResponse = await client.request<{
+        tools?: Array<{ name: string; description?: string; inputSchema?: Record<string, unknown> }>;
+      }>(
+        "tools/list",
+        {},
+        { timeoutMs: options?.timeoutMs ?? this.defaultTimeoutMs }
+      );
+
+      const rawTools = toolsResponse?.tools || [];
+      const discovered = this.registerDiscoveredTools(manifest, rawTools);
+
+      this.setState(manifest.id, "CONNECTED");
+      return discovered;
+    } catch (err: any) {
+      this.setState(manifest.id, "FAILED", err?.message || String(err));
+      throw err;
+    }
+  }
+
+  /**
+   * Dispatches a tool execution request to the upstream MCP client
+   */
+  public async executeTool(
+    namespacedToolName: string,
+    args: Record<string, unknown>,
+    client: JsonRpcClient,
+    options?: { timeoutMs?: number; signal?: AbortSignal }
+  ): Promise<ToolResult> {
+    const tool = this.tools.get(namespacedToolName);
+    if (!tool) {
+      return {
+        success: false,
+        output: "",
+        error: `Tool "${namespacedToolName}" is not registered or its server is not connected.`,
+      };
+    }
+
+    try {
+      const response = await client.request(
+        "tools/call",
+        {
+          name: tool.name,
+          arguments: args,
+        },
+        options
+      );
+
+      const output =
+        typeof response === "string"
+          ? response
+          : JSON.stringify(response);
+
+      return {
+        success: true,
+        output,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        output: "",
+        error: err?.message || String(err),
+      };
     }
   }
 
